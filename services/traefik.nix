@@ -1,8 +1,10 @@
 { pkgs, ... }:
 
 let 
+  # TODO: Pull from secrets
+  project_tld = "test.example";
   project_dir = "/services";
-  config_dir = "${project_directory}/config";
+  config_dir = "${project_dir}/config";
   data_dir = "${project_dir}/data";
 
 in {
@@ -23,7 +25,7 @@ in {
   systemd = {
     tmpfiles.rules = [
       # Allow anyone to access the base directory
-      "d ${project_directory} 777 root root"
+      "d ${project_dir} 777 root root"
       "d ${config_dir} 1750 traefik traefik"
       "d ${data_dir} 1750 traefik traefik"
     ];
@@ -72,7 +74,7 @@ in {
         middlewares = {
           # TODO: Move to authelia
           authentikProxyAuth.forwardAuth = {
-            address = "https://{{ hostvars["auth-01"].ansible_host }}:9443/outpost.goauthentik.io/auth/traefik";
+            address = "https://auth-01.srv:9443/outpost.goauthentik.io/auth/traefik";
             trustForwardHeader = "true";
             authResponseHeaders = [
               "X-authentik-username"
@@ -129,52 +131,76 @@ in {
             };
           };
 
-          {% for service in traefikServices %}
-
-          router-{{ service.name }} = {
-            service = "service-{{ service.name }}";
-            {% if service.rule is defined %}
-            rule = "{{ service.rule }}";
-            {% else %}
-            rule = "Host(`{{service.host}}`)";
-            {% endif%}
+          router-jellyfin = {
+            service = "service-jellyfin";
+            rule = "Host(`media.${project_tld}`)";
             entryPoints = "webHttps";
-            priority = "{{ service.priority | default(10) }}";
-            {# {% if service.proxyAuth is undefined or service.proxyAuth %}
-             middlewares = [
-               "authentikProxyAuth"
-             ];
-             {% endif %} #}
+            priority = "10";
+            middlewares = [ "authentikProxyAuth" ];
             tls = {
               certResolver = "letsEncrypt";
-              domains = [
-                {
-                  main = "{{ project_tld }}";
-                  sans = [
-                    "*.{{ project_tld}}"
-                  ];
-                }
-              ];
+              domains = [ { main = "${project_tld}"; sans = [ "*.${project_tld}" ]; } ];
             };
           };
-          {% endfor %}
-        };
         
-        {% for service in traefikServices %}
-        
-        services = {
-          service-{{ service.name}} = {
-            loadBalancer = {
-              servers = [
-                {
-                  url = "{{ service.destScheme }}://{{ hostvars[service.destHost].ansible_host }}:{{service.destPort}}";
-                }
-              ];
+          router-jellyseer = {
+            service = "service-jellyfin";
+            rule = "Host(`jellyseer.${project_tld}`)";
+            entryPoints = "webHttps";
+            priority = "10";
+            middlewares = [ ];
+            tls = { 
+              certResolver = "letsEncrypt";
+              domains = [ { main = "${project_tld}"; sans = [ "*.${project_tld}" ]; } ];
             };
           };
         };
+        #   {% for service in traefikServices %}
 
-        {% endfor %}
+        #   router-{{ service.name }} = {
+        #     service = "service-{{ service.name }}";
+        #     {% if service.rule is defined %}
+        #     rule = "{{ service.rule }}";
+        #     {% else %}
+        #     rule = "Host(`{{service.host}}`)";
+        #     {% endif%}
+        #     entryPoints = "webHttps";
+        #     priority = "{{ service.priority | default(10) }}";
+        #     {# {% if service.proxyAuth is undefined or service.proxyAuth %}
+        #      middlewares = [
+        #        "authentikProxyAuth"
+        #      ];
+        #      {% endif %} #}
+        #     tls = {
+        #       certResolver = "letsEncrypt";
+        #       domains = [
+        #         {
+        #           main = "{{ project_tld }}";
+        #           sans = [
+        #             "*.{{ project_tld}}"
+        #           ];
+        #         }
+        #       ];
+        #     };
+        #   };
+        #   {% endfor %}
+        # };
+        
+        # {% for service in traefikServices %}
+        
+        # services = {
+        #   service-{{ service.name}} = {
+        #     loadBalancer = {
+        #       servers = [
+        #         {
+        #           url = "{{ service.destScheme }}://{{ hostvars[service.destHost].ansible_host }}:{{service.destPort}}";
+        #         }
+        #       ];
+        #     };
+        #   };
+        # };
+
+        # {% endfor %}
       };
     };
   };

@@ -1,7 +1,6 @@
 { config, lib, pkgs, modulesPath, ... }:
 
 let 
-  project_tld = "";
 
 in {
   time.timeZone = "Australia/Adelaide";
@@ -13,6 +12,7 @@ in {
     zsh
     oh-my-zsh
     btop
+    git
 
     # Is it neccessary to install this just for a nicer MOTD? .. Yes
     figlet
@@ -51,17 +51,15 @@ in {
       theme = "bira";
     };
 
-    promptInit = ''
-      echo "$fg[red]$(figlet ${config.networking.hostname} -f /etc/nixos/lib/figlet-font.flf)"
-      # TODO: Work out why this isn't being properly set in ZSH
-      export HOST=${config.networking.hostname}
-    '';
+    # promptInit = ''
+    #   echo "$fg[red]$(figlet ${config.networking.hostname} -f /etc/nixos/lib/figlet-font.flf)"
+    #   # TODO: Work out why this isn't being properly set in ZSH
+    #   # export HOST=${config.networking.hostname}
+    # '';
   };
-
-  # TODO: Make this only on specific machines - used for VS Code Remote SSH
-  programs.nix-ld.enable = true;
 
   services.openssh.enable = true;
 
   system.stateVersion = "23.11";
+  nixpkgs.hostPlatform = "x86_64-linux";
 }
