@@ -6,7 +6,7 @@
     nix-minecraft.url = "github:Infinidoge/nix-minecraft";
   };
 
-  outputs = { self, nixpkgs, sops-nix, ... }@inputs:
+  outputs = { self, nixpkgs, sops-nix, ... }:
     let 
       system = "x86_64-linux";
       project_tld = "test.example";
@@ -35,8 +35,6 @@
       };
 
       nixosConfigurations."mine-01" = nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = { inherit inputs; };
         modules = [ 
           ./base.nix 
           ./hosts/lxcs

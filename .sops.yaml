@@ -1,0 +1,9 @@
+keys:
+  - &admin_kate age1wuws243ssa0977ndrkeyr9qa9vhgkdyzpkaj6k3p0u8xen3yp45swgle85
+  - &server_build-01 age1l53azw8pm0dlqq37qha5u96m4v9gexdhpt89ukeytawhuc6mjqrq4md28d
+creation_rules:
+  - path_regex: secrets/[^/]+\.(yaml|json|env|ini)$
+    key_groups:
+    - age:
+      - *admin_kate
+      - *server_build-01

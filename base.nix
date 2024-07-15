@@ -3,10 +3,20 @@
 let 
 
 in {
+  sops.defaultSopsFile = ./secrets/test.yaml;
+  sops.age.sshKeyPaths = [];
+  # Unique key placed there by ansible at provisioning time
+  sops.age.keyFile = "/etc/sops-age.txt";
+  sops.age.generateKey = false;
+
+  sops.secrets.some_var = {};
+
+
   time.timeZone = "Australia/Adelaide";
 
 
   environment.systemPackages = with pkgs; [
+    sops
     python3
     ranger
     zsh
