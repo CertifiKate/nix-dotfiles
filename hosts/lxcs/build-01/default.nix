@@ -4,7 +4,4 @@
   imports = [ 
     ../../../services/traefik.nix
   ];
-
-  
-
 }

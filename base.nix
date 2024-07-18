@@ -1,23 +1,47 @@
-{ config, lib, pkgs, modulesPath, ... }:
+{ inputs, config, pkgs, ... }:
 
 let 
-
+  secretsPath = builtins.toString inputs.nix-secrets;
 in {
-  sops.defaultSopsFile = ./secrets/test.yaml;
-  sops.age.sshKeyPaths = [];
-  # Unique key placed there by ansible at provisioning time
-  sops.age.keyFile = "/etc/sops-age.txt";
-  sops.age.generateKey = false;
 
-  sops.secrets.some_var = {};
+  # ==============================
+  # Shared Sop configuration
+  # ==============================
+  sops = {
+    defaultSopsFile = "${secretsPath}/secrets/shared.yaml";
 
+    # Don't use SSH keys
+    age.sshKeyPaths = [];
+    gnupg.sshKeyPaths = [];
 
+    age = {
+      keyFile = "/etc/sops-age.txt";
+      generateKey = false;
+    };
+  };
+
+  sops.secrets.project_tld = {};
+
+  # Read only key for secrets repo - means we don't need the yubikey except for initial setup or if something goes wrong
+  # sops.secrets.sops_secrets_ssh_private_key = {
+  #   path = "/etc/ssh/ssh_git_secrets_key";
+  # };
+
+  # sops.secrets."ssh_keys.kate.public" = {};
+  # ==============================
+  
+  
   time.timeZone = "Australia/Adelaide";
-
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   environment.systemPackages = with pkgs; [
+    # TODO: Move to role
     sops
+    age
+
+    # TODO: Move to server role - for ansible
     python3
+
     ranger
     zsh
     oh-my-zsh
@@ -36,20 +60,31 @@ in {
       extraGroups = [ "wheel" ];
       hashedPassword = "";
     };
+
+    users.kate = {
+      isNormalUser = true;
+      extraGroups = [ "wheel" ];
+      hashedPassword = "";
+      # openssh.authorizedKeys.keys = sops.
+    };
   };
 
-  # Enable passwordless sudo.
-  security.sudo.extraRules = [
-    {
-      users = [ "ansible" ];
-      commands = [
-        { 
-          command = "ALL" ;
-          options= [ "NOPASSWD" ];
-        }
-      ];
-    }
-  ];
+  security.sudo = {
+    # Keep SSH agent in sudo
+    extraConfig = "Defaults env_keep+=SSH_AUTH_SOCK";
+    # Enable passwordless sudo for ansible user
+    extraRules = [
+      {
+        users = [ "ansible" ];
+        commands = [
+          { 
+            command = "ALL" ;
+            options= [ "NOPASSWD" ];
+          }
+        ];
+      }
+    ];
+  };
 
   system.userActivationScripts.zshrc = "touch .zshrc";
 

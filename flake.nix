@@ -3,10 +3,15 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
     sops-nix.url = "github:Mic92/sops-nix";
 
+    nix-secrets = {
+      url = "git+ssh://git@github.com/CertifiKate/nix-secrets.git";
+      flake = false;
+    };
+
     nix-minecraft.url = "github:Infinidoge/nix-minecraft";
   };
 
-  outputs = { self, nixpkgs, sops-nix, ... }:
+  outputs = { self, nixpkgs, sops-nix, ... }@inputs:
     let 
       system = "x86_64-linux";
       project_tld = "test.example";
@@ -26,6 +31,7 @@
       };
       
       nixosConfigurations."build-01" = nixpkgs.lib.nixosSystem {
+        specialArgs.inputs = inputs;
         modules = [ 
           ./base.nix 
           ./hosts/lxcs
