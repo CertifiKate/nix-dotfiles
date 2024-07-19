@@ -41,11 +41,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1721266005,
-        "narHash": "sha256-YTrojAxT4WrTFafLjcR64ajX8W9DV/sUgChWY8hWoTc=",
+        "lastModified": 1721352454,
+        "narHash": "sha256-3NtZu3ecD+JKNVNSPTK8PniUSXEqiQPwJjWJBuy3wMU=",
         "owner": "Infinidoge",
         "repo": "nix-minecraft",
-        "rev": "6a3d0a0af401c6900de72149287690d9b86dddec",
+        "rev": "fc50c568d0414b490573214a2118e79fa2e77895",
         "type": "github"
       },
       "original": {
@@ -57,11 +57,11 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1721311092,
-        "narHash": "sha256-Gslr6NQMw0uNtZElHlzW2nD9913p0prQ+MBI6v98l3g=",
+        "lastModified": 1721393859,
+        "narHash": "sha256-sjSkMDrrm5U8mvO2SxJBLApHTAbyfpQRLoVBbS1mX3E=",
         "ref": "refs/heads/main",
-        "rev": "ce1f514045770a15d03e4a5d80ff1783b488efc2",
-        "revCount": 5,
+        "rev": "fc4e5c5a510d0d1e405a3c81bf79be241e796f95",
+        "revCount": 8,
         "type": "git",
         "url": "ssh://git@github.com/CertifiKate/nix-secrets.git"
       },

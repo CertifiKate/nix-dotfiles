@@ -4,8 +4,13 @@ let
   secretsPath = builtins.toString inputs.nix-secrets;
 in {
 
+  imports = [
+    ./users/kate.nix
+    ./users/ansible.nix
+  ];
+
   # ==============================
-  # Shared Sop configuration
+  # Shared Sops configuration
   # ==============================
   sops = {
     defaultSopsFile = "${secretsPath}/secrets/shared.yaml";
@@ -19,23 +24,19 @@ in {
       generateKey = false;
     };
   };
-
-  sops.secrets.project_tld = {};
+  sops.secrets."project_tld" = {};
 
   # Read only key for secrets repo - means we don't need the yubikey except for initial setup or if something goes wrong
-  # sops.secrets.sops_secrets_ssh_private_key = {
-  #   path = "/etc/ssh/ssh_git_secrets_key";
-  # };
-
-  # sops.secrets."ssh_keys.kate.public" = {};
+  sops.secrets."sops_secrets_ssh_private_key" = {
+    path = "/etc/ssh/ssh_git_secrets_key";
+  };
   # ==============================
-  
-  
+
   time.timeZone = "Australia/Adelaide";
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   environment.systemPackages = with pkgs; [
-    # TODO: Move to role
+    # TODO: Move to end-device role
     sops
     age
 
@@ -55,35 +56,11 @@ in {
   users = {
     mutableUsers = false;
     defaultUserShell = pkgs.zsh;
-    users.ansible = {
-      isNormalUser = true;
-      extraGroups = [ "wheel" ];
-      hashedPassword = "";
-    };
-
-    users.kate = {
-      isNormalUser = true;
-      extraGroups = [ "wheel" ];
-      hashedPassword = "";
-      # openssh.authorizedKeys.keys = sops.
-    };
   };
 
   security.sudo = {
     # Keep SSH agent in sudo
     extraConfig = "Defaults env_keep+=SSH_AUTH_SOCK";
-    # Enable passwordless sudo for ansible user
-    extraRules = [
-      {
-        users = [ "ansible" ];
-        commands = [
-          { 
-            command = "ALL" ;
-            options= [ "NOPASSWD" ];
-          }
-        ];
-      }
-    ];
   };
 
   system.userActivationScripts.zshrc = "touch .zshrc";
@@ -103,6 +80,7 @@ in {
     # '';
   };
 
+  # TODO: Move to servers role
   services.openssh.enable = true;
 
   system.stateVersion = "23.11";
