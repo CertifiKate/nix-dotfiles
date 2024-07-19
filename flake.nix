@@ -24,8 +24,7 @@
       nixosConfigurations."auth-01" = nixpkgs.lib.nixosSystem {
         modules = [ 
           ./base.nix
-          ./hosts/lxcs
-          ./hosts/lxcs/auth-01
+          ./hosts/servers/auth-01
           sops-nix.nixosModules.sops
         ];
       };
@@ -34,8 +33,7 @@
         specialArgs.inputs = inputs;
         modules = [ 
           ./base.nix 
-          ./hosts/lxcs
-          ./hosts/lxcs/build-01
+          ./hosts/servers/build-01
           sops-nix.nixosModules.sops
         ];
       };
@@ -43,8 +41,7 @@
       nixosConfigurations."mine-01" = nixpkgs.lib.nixosSystem {
         modules = [ 
           ./base.nix 
-          ./hosts/lxcs
-          ./hosts/lxcs/mine-01
+          ./hosts/servers/mine-01
           sops-nix.nixosModules.sops
         ];
       };
