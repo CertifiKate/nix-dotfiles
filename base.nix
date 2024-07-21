@@ -6,6 +6,8 @@ in {
 
   imports = [
     ./users/kate.nix
+
+    # TODO: Move this to servers role
     ./users/ansible.nix
   ];
 
@@ -41,7 +43,7 @@ in {
     age
 
     # TODO: Move to server role - for ansible
-    python3
+    # python3
 
     ranger
     zsh
@@ -53,17 +55,13 @@ in {
     figlet
   ];
 
-  users = {
-    mutableUsers = false;
-    defaultUserShell = pkgs.zsh;
-  };
 
-  security.sudo = {
-    # Keep SSH agent in sudo
-    extraConfig = "Defaults env_keep+=SSH_AUTH_SOCK";
-  };
 
   system.userActivationScripts.zshrc = "touch .zshrc";
+
+  environment.etc = {
+    "bulbhead.flf".source = ./lib/bulbhead.flf;
+  };
 
   programs.zsh = {
     enable = true;
@@ -73,16 +71,33 @@ in {
       theme = "bira";
     };
 
-    # promptInit = ''
-    #   echo "$fg[red]$(figlet ${config.networking.hostname} -f /etc/nixos/lib/figlet-font.flf)"
-    #   # TODO: Work out why this isn't being properly set in ZSH
-    #   # export HOST=${config.networking.hostname}
-    # '';
+    promptInit = ''
+      echo "$fg[red]$(figlet $(cat /etc/hostname) -f /etc/bulbhead.flf)"
+      # TODO: Work out why this isn't being properly set in ZSH
+      export HOST=$(cat /etc/hostname)
+    '';
   };
 
   # TODO: Move to servers role
   services.openssh.enable = true;
 
+
+
+  users = {
+    mutableUsers = false;
+    defaultUserShell = pkgs.zsh;
+  };
+
+  # Keep SSH agent in sudo
+  security.sudo = {
+    extraConfig = "Defaults env_keep+=SSH_AUTH_SOCK";
+  };
+
+
+
+  # If we change this things will be sad
   system.stateVersion = "23.11";
+
+  # TODO: Move to host config generation
   nixpkgs.hostPlatform = "x86_64-linux";
 }
