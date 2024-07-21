@@ -11,40 +11,78 @@
     nix-minecraft.url = "github:Infinidoge/nix-minecraft";
   };
 
+  # Based on https://www.reddit.com/r/NixOS/comments/yk4n8d/comment/iurkkxv
   outputs = { self, nixpkgs, sops-nix, ... }@inputs:
-    let 
-      system = "x86_64-linux";
-      project_tld = "test.example";
-    in {
+    let
 
-      nixpkgs.system = "${system}";
+      # Basic configuration modules
+      commonModules = name: cfg: [
+        # Set common config options
+        {
+          nix.settings.experimental-features = [ "nix-command" "flakes" ];
+          networking.hostName = name;
 
-      # TODO: I think there is a simpler way to do this
-      #       is there a way to set defaults? A generator function?
-      nixosConfigurations."auth-01" = nixpkgs.lib.nixosSystem {
-        modules = [ 
-          ./base.nix
-          ./hosts/servers/auth-01
-          sops-nix.nixosModules.sops
-        ];
-      };
-      
-      nixosConfigurations."build-01" = nixpkgs.lib.nixosSystem {
+          # nixpkgs.hostPlatform = "${cfg.system or "x86_64-linux"}";
+        }
+        
+        # Include our host config
+        ./hosts/${(cfg.hostType or "servers" )}/${name}
+
+        # Optionally import the generic server role
+        (if (cfg.hostType == "servers") then ./roles/server else "" )
+
+        # Optionally import the specific server role - substitutes the hardware config
+        (if (cfg.hostType == "servers") then ./roles/server/${cfg.serverType or "lxc"} else "" )
+
+        # Include our shared configuration
+        ./base.nix
+
+        sops-nix.nixosModules.sops
+      ];
+
+      # Generates the relevant system configuration based on inputs
+      mkSystem = name: cfg: nixpkgs.lib.nixosSystem {
+        system = cfg.system or "x86_64-linux";
+
+        # Include our common modules, plus any host specified roles
+        modules = (commonModules name cfg) ++ (cfg.roles or []);
+
         specialArgs.inputs = inputs;
-        modules = [ 
-          ./base.nix 
-          ./hosts/servers/build-01
-          sops-nix.nixosModules.sops
-        ];
       };
 
-      nixosConfigurations."mine-01" = nixpkgs.lib.nixosSystem {
-        modules = [ 
-          ./base.nix 
-          ./hosts/servers/mine-01
-          sops-nix.nixosModules.sops
-        ];
-      };
+      # System definitions
+      systems = {
 
+        # ==============================
+        # Servers
+        # ==============================
+
+        # ==== LXCs ====================
+        build-01 = {
+          hostType = "servers";
+          serverType = "lxc";
+        };
+
+        auth-01 = {
+          hostType = "servers";
+          serverType = "lxc";
+          roles = [
+            ./roles/auth
+          ];
+        };
+
+        # ==== VMs =====================
+        mine-01 = {
+          hostType = "servers";
+          serverType = "vm";
+          roles = [
+            ./roles/minecraft
+          ];
+        };
+
+        # ==============================
+      };
+    in {
+      nixosConfigurations = nixpkgs.lib.mapAttrs mkSystem systems;
     };
 }

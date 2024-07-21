@@ -3,6 +3,10 @@
 # Essentially we just want to de-dupe roles/lxcs and roles/vms
 { pkgs, ...}:
 {
+  imports = [
+    ../../users/ansible.nix
+    ./vs-code-server.nix
+  ];
 
   # For ansible support
   #TODO Do we even really need this anymore? Just for provisioning? Can it be moved to the golden image config and removed later?

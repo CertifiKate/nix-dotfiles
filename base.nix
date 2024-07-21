@@ -6,9 +6,6 @@ in {
 
   imports = [
     ./users/kate.nix
-
-    # TODO: Move this to servers role
-    ./users/ansible.nix
   ];
 
   # ==============================
@@ -41,9 +38,6 @@ in {
     # TODO: Move to end-device role
     sops
     age
-
-    # TODO: Move to server role - for ansible
-    # python3
 
     ranger
     zsh
@@ -78,11 +72,6 @@ in {
     '';
   };
 
-  # TODO: Move to servers role
-  services.openssh.enable = true;
-
-
-
   users = {
     mutableUsers = false;
     defaultUserShell = pkgs.zsh;
@@ -97,7 +86,4 @@ in {
 
   # If we change this things will be sad
   system.stateVersion = "23.11";
-
-  # TODO: Move to host config generation
-  nixpkgs.hostPlatform = "x86_64-linux";
 }
