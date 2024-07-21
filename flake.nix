@@ -12,7 +12,7 @@
   };
 
   # Based on https://www.reddit.com/r/NixOS/comments/yk4n8d/comment/iurkkxv
-  outputs = { self, nixpkgs, sops-nix, ... }@inputs:
+  outputs = { self, nixpkgs, sops-nix, ... } @inputs:
     let
 
       # Basic configuration modules
@@ -47,7 +47,7 @@
         # Include our common modules, plus any host specified roles
         modules = (commonModules name cfg) ++ (cfg.roles or []);
 
-        specialArgs.inputs = inputs;
+        specialArgs = {inherit inputs; };
       };
 
       # System definitions
@@ -82,7 +82,7 @@
 
         # ==============================
       };
-    in {
+    in rec {
       nixosConfigurations = nixpkgs.lib.mapAttrs mkSystem systems;
     };
 }
