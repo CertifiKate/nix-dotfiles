@@ -38,6 +38,7 @@ in {
     # TODO: Move to end-device role
     sops
     age
+    git-crypt
 
     ranger
     zsh

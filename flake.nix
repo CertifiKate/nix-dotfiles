@@ -47,7 +47,10 @@
         # Include our common modules, plus any host specified roles
         modules = (commonModules name cfg) ++ (cfg.roles or []);
 
-        specialArgs = {inherit inputs; };
+        specialArgs = {
+          inherit inputs; 
+          secrets = builtins.fromJSON (builtins.readFile "${self}/secrets/secrets.json");
+        };
       };
 
       # System definitions

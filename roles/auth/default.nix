@@ -1,10 +1,10 @@
-{ pkgs, inputs, config, lib, ... }:
+{ pkgs, inputs, config, lib, secrets, ... }:
 
 let
   secretsPath = builtins.toString inputs.nix-secrets;
 
   # TODO: Work out this
-  project_tld = "test.example";
+  project_tld = "${secrets.project_tld}";
 
   project_dir = "/services/authelia";
   config_dir = "${project_dir}/config";
@@ -28,7 +28,7 @@ in
     ];
   };
 
-  sops.secrets."project_tld" = {};
+  # sops.secrets."project_tld" = {};
   sops.secrets."authelia_jwt_secret" = { 
     owner = "authelia";
     sopsFile = "${secretsPath}/secrets/authelia.yaml"; 
