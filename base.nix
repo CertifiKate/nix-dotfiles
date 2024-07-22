@@ -23,22 +23,12 @@ in {
       generateKey = false;
     };
   };
-  
-  # Read only key for secrets repo - means we don't need the yubikey except for initial setup or if something goes wrong
-  sops.secrets."sops_secrets_ssh_private_key" = {
-    path = "/etc/ssh/ssh_git_secrets_key";
-  };
   # ==============================
 
   time.timeZone = "Australia/Adelaide";
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   environment.systemPackages = with pkgs; [
-    # TODO: Move to end-device role
-    sops
-    age
-    git-crypt
-
     ranger
     zsh
     oh-my-zsh
@@ -80,6 +70,14 @@ in {
     extraConfig = "Defaults env_keep+=SSH_AUTH_SOCK";
   };
 
+  # TODO: Find a way to add this into users/kate.nix without breaking golden image
+  sops.secrets."users_kate_password_hash".neededForUsers = true;
+  users.users.kate = {
+    isNormalUser = true;
+    hashedPasswordFile = config.sops.secrets."users_kate_password_hash".path;
+  };
+
+  # TODO: Add auto garbage-collect
 
 
   # If we change this things will be sad

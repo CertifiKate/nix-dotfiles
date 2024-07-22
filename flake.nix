@@ -67,6 +67,9 @@
         build-01 = {
           hostType = "servers";
           serverType = "lxc";
+          roles = [
+            ./roles/end-device
+          ];
         };
 
         auth-01 = {
