@@ -15,12 +15,10 @@
     btop
     git
     python3
-    zsh
   ];
 
   users = {
     mutableUsers = false;
-    defaultUserShell = pkgs.zsh;
   };
 
   services.openssh.enable = true;
