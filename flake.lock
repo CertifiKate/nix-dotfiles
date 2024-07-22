@@ -57,11 +57,11 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1721551588,
-        "narHash": "sha256-Lxdvyo8h8UWE3eLOvdpFoidEAyZOpj+wt72WPcrRLoo=",
+        "lastModified": 1721563511,
+        "narHash": "sha256-F+apkcu4iDM6P43mRoTtt7SOjp0D+KbfVv9O4c0O7g4=",
         "ref": "refs/heads/main",
-        "rev": "76a43f4d7fc4fc819a6f3a3e99d744117d825145",
-        "revCount": 9,
+        "rev": "49faf0f61ae8657b67f6270dab3a072a8b012bb6",
+        "revCount": 10,
         "type": "git",
         "url": "ssh://git@github.com/CertifiKate/nix-secrets.git"
       },

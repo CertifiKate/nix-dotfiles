@@ -49,6 +49,7 @@
 
         specialArgs = {
           inherit inputs; 
+          # Add git-crypt secrets for our un-importantish secrets (i.e project_tld)
           secrets = builtins.fromJSON (builtins.readFile "${self}/secrets/secrets.json");
         };
       };

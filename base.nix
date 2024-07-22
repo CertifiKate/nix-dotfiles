@@ -50,8 +50,6 @@ in {
     figlet
   ];
 
-
-
   system.userActivationScripts.zshrc = "touch .zshrc";
 
   environment.etc = {

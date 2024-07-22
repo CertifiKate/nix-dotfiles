@@ -3,9 +3,9 @@
 let
   secretsPath = builtins.toString inputs.nix-secrets;
 
-  # TODO: Work out this
   project_tld = "${secrets.project_tld}";
 
+  # TODO: Add a global config option for the storage directory
   project_dir = "/services/authelia";
   config_dir = "${project_dir}/config";
   data_dir = "${project_dir}/data";
@@ -21,14 +21,11 @@ in
   # Allow traefik to access config data dir
   systemd = {
     tmpfiles.rules = [
-      # Allow anyone to access the base directory
-      # "d ${project_dir} 777 root root"
-      "d ${config_dir} 750 authelia authelia"
-      "d ${data_dir} 750 authelia authelia"
+      "d ${config_dir} 700 authelia authelia"
+      "d ${data_dir} 700 authelia authelia"
     ];
   };
 
-  # sops.secrets."project_tld" = {};
   sops.secrets."authelia_jwt_secret" = { 
     owner = "authelia";
     sopsFile = "${secretsPath}/secrets/authelia.yaml"; 
@@ -41,12 +38,16 @@ in
     owner = "authelia";
     sopsFile = "${secretsPath}/secrets/authelia.yaml"; 
   };
+  sops.secrets."authelia_users_database" = { 
+    owner = "authelia";
+    sopsFile = "${secretsPath}/secrets/authelia.yaml"; 
+    path = "${config_dir}/user-database.yml";
+  };
 
   users = {
     groups.authelia = {};
     users.authelia = {
-      # isSystemUser = true;
-      isNormalUser = true;
+      isSystemUser = true;
       group = "authelia";
     };
   };
@@ -65,16 +66,16 @@ in
     };
 
     settings =  {
+      server = {
+        host = "0.0.0.0";
+      };
+
       session.domain = "${project_tld}";
 
       authentication_backend.file.path = "${config_dir}/user-database.yml";
+      # TODO: Move this to an actual db - add full-blown db server?
       storage.local.path = "${config_dir}/db.sqlite3";
       notifier.filesystem.filename = "${data_dir}/notifier.txt";
-
-
-      # authentication_backend.file.path = "/var/lib/authelia-main/users_database.yml";
-      # notifier.filesystem.filename = "/var/lib/authelia-main/notification.txt";
-      # storage.local.path = "/var/lib/authelia-main/db.sqlite3";
 
       access_control = {
         default_policy = "bypass";
@@ -89,8 +90,6 @@ in
           }
         ];
       };
-
-
     };
   };
 }

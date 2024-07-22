@@ -1,8 +1,7 @@
-{ pkgs, ... }:
+{ pkgs, secrets, ... }:
 
 let 
-  # TODO: Pull from secrets
-  project_tld = "test.example";
+  project_tld = "${secrets.project_tld}";
   project_dir = "/services";
   config_dir = "${project_dir}/config";
   data_dir = "${project_dir}/data";
