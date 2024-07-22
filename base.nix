@@ -2,10 +2,14 @@
 
 let 
   secretsPath = builtins.toString inputs.nix-secrets;
+
+  timezone = "Australia/Adelaide";
+
 in {
 
   imports = [
     ./users/kate.nix
+    ./modules/zsh
   ];
 
   # ==============================
@@ -25,61 +29,35 @@ in {
   };
   # ==============================
 
-  time.timeZone = "Australia/Adelaide";
+  # ==============================
+  # General System Config
+  # ==============================
+  time.timeZone = timezone;
+
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   environment.systemPackages = with pkgs; [
     ranger
-    zsh
-    oh-my-zsh
     btop
     git
-
-    # Is it neccessary to install this just for a nicer MOTD? .. Yes
-    figlet
   ];
-
-  system.userActivationScripts.zshrc = "touch .zshrc";
-
-  environment.etc = {
-    "bulbhead.flf".source = ./lib/bulbhead.flf;
-  };
-
-  # TODO: Split this into it's own module with custom theming based on host vars (ie. change hostname prompt colour based on if end-device or server)
-  programs.zsh = {
-    enable = true;
-    enableBashCompletion = true;
-    syntaxHighlighting.enable = true;
-    ohMyZsh = {
-      enable = true;
-      theme = "bira";
-    };
-    shellAliases = {
-      nr = "nixos-rebuild switch --flake /etc/nixos/flake.nix ";
-    };
-
-    # TODO: Cache the figlet -f to a motd file
-    promptInit = ''
-      # Nix remote rebuild
-      nrr() {
-        nixos-rebuild --target-host $USER@$1 --use-remote-sudo switch --flake .
-      }
-
-      echo "$fg[red]$(figlet $(cat /etc/hostname) -f /etc/bulbhead.flf)"
-      # TODO: Work out why this isn't being properly set in ZSH
-      export HOST=$(cat /etc/hostname)
-    '';
-  };
 
   users = {
     mutableUsers = false;
-    defaultUserShell = pkgs.zsh;
   };
 
   # Keep SSH agent in sudo
   security.sudo = {
     extraConfig = "Defaults env_keep+=SSH_AUTH_SOCK";
   };
+
+  # Auto clean old store files
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+  };
+
+  # ==============================
 
   # TODO: Find a way to add this into users/kate.nix without breaking golden image
   sops.secrets."users_kate_password_hash".neededForUsers = true;
@@ -88,11 +66,15 @@ in {
     hashedPasswordFile = config.sops.secrets."users_kate_password_hash".path;
   };
 
-  # TODO: Add auto garbage-collect
+  # TODO: Move this to home manager
+  programs.git.config = {
+    user.name = "CertifiKate";
+    user.email = "131977850+CertifiKate@users.noreply.github.com";
+  };
 
+  # TODO: Look into adding a different remote deployment user
   nix.settings.trusted-users = [
     "ansible"
-    # "kate"
   ];
 
   # If we change this things will be sad
