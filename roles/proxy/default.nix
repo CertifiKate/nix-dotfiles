@@ -1,7 +1,7 @@
-{ pkgs, secrets, ... }:
+{ pkgs, private, ... }:
 
 let 
-  project_tld = "${secrets.project_tld}";
+  project_tld = "${private.project_tld}";
   project_dir = "/services";
   config_dir = "${project_dir}/config";
   data_dir = "${project_dir}/data";

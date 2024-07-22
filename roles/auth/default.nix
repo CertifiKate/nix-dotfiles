@@ -1,9 +1,9 @@
-{ pkgs, inputs, config, lib, secrets, ... }:
+{ pkgs, inputs, config, lib, private, ... }:
 
 let
   secretsPath = builtins.toString inputs.nix-secrets;
 
-  project_tld = "${secrets.project_tld}";
+  project_tld = "${private.project_tld}";
 
   # TODO: Add a global config option for the storage directory
   project_dir = "/services/authelia";

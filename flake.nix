@@ -49,8 +49,10 @@
 
         specialArgs = {
           inherit inputs; 
-          # Add git-crypt secrets for our un-importantish secrets (i.e project_tld)
-          secrets = builtins.fromJSON (builtins.readFile "${self}/secrets/secrets.json");
+          
+          # A .json file from the nix-secrets repo with non-important info. 
+          # Stuff we just don't want public (ie. project_tld) but don't care if it's in the nix store
+          private = builtins.fromJSON (builtins.readFile ("${builtins.toString inputs.nix-secrets}/private.json"));
         };
       };
 

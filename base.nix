@@ -23,8 +23,7 @@ in {
       generateKey = false;
     };
   };
-  sops.secrets."project_tld" = {};
-
+  
   # Read only key for secrets repo - means we don't need the yubikey except for initial setup or if something goes wrong
   sops.secrets."sops_secrets_ssh_private_key" = {
     path = "/etc/ssh/ssh_git_secrets_key";
