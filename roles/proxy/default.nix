@@ -1,24 +1,27 @@
-{ pkgs, private, ... }:
+{ pkgs, inputs, private, ... }:
 
-let 
+let
+  secretsPath = builtins.toString inputs.nix-secrets;
+
   project_tld = "${private.project_tld}";
-  project_dir = "/services";
+  project_dir = "/config/proxy";
   config_dir = "${project_dir}/config";
   data_dir = "${project_dir}/data";
 
+  
 in {
   environment.systemPackages = with pkgs; [
     traefik
   ];
 
+  sops.secrets."proxy_traefik_env" = { 
+    owner = "traefik";
+    sopsFile = "${secretsPath}/secrets/proxy.yaml"; 
+  };
+
+
   networking.firewall.allowedTCPPorts = [ 80 443 ];
 
-  # TODO: Use something more secure. Like. Anything else
-  systemd.services.traefik = {
-    environment = {
-      CLOUDFLARE_DNS_API_TOKEN = "{{ vault_cloudflare_api_token }}";
-    };
-  };
 
   # Allow traefik to access config data dir
   systemd = {
@@ -30,11 +33,12 @@ in {
     ];
   };
 
-  # TODO: Look into the Nix way of generating this config rather than ansible templating
-
   services.traefik = {
     enable = true;
     dataDir = "${data_dir}";
+    environmentFiles = [
+      "/run/secrets/proxy_traefik_env"
+    ];
     staticConfigOptions = {
       entryPoints = {
         web = {
@@ -55,7 +59,6 @@ in {
       };
 
       certificatesResolvers.letsEncrypt.acme = {
-        email = "{{ vault_cloudflare_email }}";
         storage = "${config_dir}/acme.json";
         dnsChallenge = {
           provider = "cloudflare";
@@ -101,9 +104,9 @@ in {
               certResolver = "letsEncrypt";
               domains = [
                 {
-                  main = "{{ project_tld }}";
+                  main = "${project_tld}";
                   sans = [
-                    "*.{{ project_tld}}"
+                    "*.${project_tld}"
                   ];
                 }
               ];
@@ -111,7 +114,7 @@ in {
           };
 
           traefik = {
-            rule = "Host(`{{ project_tld }}`)";
+            rule = "Host(`${project_tld}`)";
             entryPoints = "webHttps";
             service = "api@internal";
             middlewares = [
@@ -121,9 +124,9 @@ in {
               certResolver = "letsEncrypt";
               domains = [
                 {
-                  main = "{{ project_tld }}";
+                  main = "${project_tld}";
                   sans = [
-                    "*.{{ project_tld}}"
+                    "*.${project_tld}"
                   ];
                 }
               ];
@@ -174,9 +177,9 @@ in {
         #       certResolver = "letsEncrypt";
         #       domains = [
         #         {
-        #           main = "{{ project_tld }}";
+        #           main = "${project_tld}";
         #           sans = [
-        #             "*.{{ project_tld}}"
+        #             "*.${project_tld}"
         #           ];
         #         }
         #       ];
