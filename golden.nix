@@ -15,6 +15,7 @@
     btop
     git
     python3
+    zsh
   ];
 
   users = {
