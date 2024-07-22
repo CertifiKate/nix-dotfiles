@@ -1,4 +1,4 @@
-{ pkgs, inputs, private, ... }:
+{ pkgs, inputs, lib, private, ... }:
 
 let
   secretsPath = builtins.toString inputs.nix-secrets;
@@ -8,7 +8,6 @@ let
   config_dir = "${project_dir}/config";
   data_dir = "${project_dir}/data";
 
-  
 in {
   environment.systemPackages = with pkgs; [
     traefik
@@ -33,7 +32,104 @@ in {
     ];
   };
 
-  services.traefik = {
+  services.traefik = let
+    # TODO: Handle static service/routers (traefik dashboard, authelia?)
+    defaultServices = {
+
+    };
+
+    # TODO: These will be moved to dns entries after they've been migrated
+    services = {
+      # Core
+      authelia = {
+        host = "auth";
+        dest = "http://auth-01.srv:9091";
+        auth = false;
+      };
+      
+      gotify = {
+        host = "gotify";
+        dest = "http://192.168.10.30:3300";
+        auth = false;
+      };
+
+      # Util
+      tandoor = {
+        host = "recipes";
+        dest = "http://192.168.10.30:4001";
+      };
+      
+      # Media
+      sonarr = {
+        host = "sonarr";
+        dest = "http://192.168.10.51:8989";
+      };
+
+      radarr = {
+        host = "radarr";
+        dest = "http://192.168.10.51:7878";
+      };
+
+      prowlarr = {
+        host = "prowlarr";
+        dest = "http://192.168.10.51:9696";
+      };
+
+      qbittorrent = {
+        host = "torrent";
+        dest = "http://192.168.10.51:8080";
+      };
+
+      library = {
+        host = "library";
+        dest = "http://192.168.10.51:8083";
+        auth = false;
+      };
+
+      jellyseer = {
+        host = "jellyseer";
+        dest = "http://192.168.10.51:5055";
+        auth = false;
+      };
+
+      jellyfin = {
+        host = "media";
+        dest = "http://192.168.10.50:8096";
+        auth = false;
+      };
+
+      # Home Automation
+      home = {
+        host = "radarr";
+        dest = "http://192.168.10.41:7878";
+        auth = false;
+      };
+    };
+
+
+    # TODO: Can we add back the router-x service-x prefix?
+    mkRouters = name: cfg: {
+      service = "${name}";
+      rule = "${ cfg.rule or ("Host(`${cfg.host}.${project_tld}`)") }";
+      entryPoints = "webHttps";
+      priority = "10";
+      
+      # TODO: Add authelia middleware
+
+      tls = { certResolver = "letsEncrypt";
+        domains = [ { main = "${project_tld}"; sans = [ "*.${project_tld}" ]; } ];
+      };
+    };
+
+    mkServices = name: cfg: {
+      loadBalancer = { servers = [ { url = "${cfg.dest}"; } ]; };
+    };
+
+ 
+    allRouters = lib.mapAttrs mkRouters services;
+    allServices = lib.mapAttrs mkServices services;
+
+  in rec {
     enable = true;
     dataDir = "${data_dir}";
     environmentFiles = [
@@ -56,6 +152,7 @@ in {
 
       api = {
         dashboard = true;
+        insecure = true;
       };
 
       certificatesResolvers.letsEncrypt.acme = {
@@ -94,115 +191,9 @@ in {
 
           };
         };
-        routers = {
-          authentik = {
-            rule = "PathPrefix(`/outpost.goauthentik.io/`)";
-            priority = "50";
-            entryPoints = "webHttps";
-            service = "service-authentik";
-            tls = {
-              certResolver = "letsEncrypt";
-              domains = [
-                {
-                  main = "${project_tld}";
-                  sans = [
-                    "*.${project_tld}"
-                  ];
-                }
-              ];
-            };
-          };
-
-          traefik = {
-            rule = "Host(`${project_tld}`)";
-            entryPoints = "webHttps";
-            service = "api@internal";
-            middlewares = [
-              "authentikProxyAuth"
-            ];
-            tls = {
-              certResolver = "letsEncrypt";
-              domains = [
-                {
-                  main = "${project_tld}";
-                  sans = [
-                    "*.${project_tld}"
-                  ];
-                }
-              ];
-            };
-          };
-
-          router-jellyfin = {
-            service = "service-jellyfin";
-            rule = "Host(`media.${project_tld}`)";
-            entryPoints = "webHttps";
-            priority = "10";
-            middlewares = [ "authentikProxyAuth" ];
-            tls = {
-              certResolver = "letsEncrypt";
-              domains = [ { main = "${project_tld}"; sans = [ "*.${project_tld}" ]; } ];
-            };
-          };
         
-          router-jellyseer = {
-            service = "service-jellyfin";
-            rule = "Host(`jellyseer.${project_tld}`)";
-            entryPoints = "webHttps";
-            priority = "10";
-            middlewares = [ ];
-            tls = { 
-              certResolver = "letsEncrypt";
-              domains = [ { main = "${project_tld}"; sans = [ "*.${project_tld}" ]; } ];
-            };
-          };
-        };
-        #   {% for service in traefikServices %}
-
-        #   router-{{ service.name }} = {
-        #     service = "service-{{ service.name }}";
-        #     {% if service.rule is defined %}
-        #     rule = "{{ service.rule }}";
-        #     {% else %}
-        #     rule = "Host(`{{service.host}}`)";
-        #     {% endif%}
-        #     entryPoints = "webHttps";
-        #     priority = "{{ service.priority | default(10) }}";
-        #     {# {% if service.proxyAuth is undefined or service.proxyAuth %}
-        #      middlewares = [
-        #        "authentikProxyAuth"
-        #      ];
-        #      {% endif %} #}
-        #     tls = {
-        #       certResolver = "letsEncrypt";
-        #       domains = [
-        #         {
-        #           main = "${project_tld}";
-        #           sans = [
-        #             "*.${project_tld}"
-        #           ];
-        #         }
-        #       ];
-        #     };
-        #   };
-        #   {% endfor %}
-        # };
-        
-        # {% for service in traefikServices %}
-        
-        # services = {
-        #   service-{{ service.name}} = {
-        #     loadBalancer = {
-        #       servers = [
-        #         {
-        #           url = "{{ service.destScheme }}://{{ hostvars[service.destHost].ansible_host }}:{{service.destPort}}";
-        #         }
-        #       ];
-        #     };
-        #   };
-        # };
-
-        # {% endfor %}
+        routers = allRouters;
+        services = allServices;
       };
     };
   };

@@ -45,15 +45,26 @@ in {
     "bulbhead.flf".source = ./lib/bulbhead.flf;
   };
 
+  # TODO: Split this into it's own module with custom theming based on host vars (ie. change hostname prompt colour based on if end-device or server)
   programs.zsh = {
     enable = true;
     enableBashCompletion = true;
+    syntaxHighlighting.enable = true;
     ohMyZsh = {
       enable = true;
       theme = "bira";
     };
+    shellAliases = {
+      nr = "nixos-rebuild switch --flake /etc/nixos/flake.nix ";
+    };
 
+    # TODO: Cache the figlet -f to a motd file
     promptInit = ''
+      # Nix remote rebuild
+      nrr() {
+        nixos-rebuild --target-host $USER@$1 --use-remote-sudo switch --flake .
+      }
+
       echo "$fg[red]$(figlet $(cat /etc/hostname) -f /etc/bulbhead.flf)"
       # TODO: Work out why this isn't being properly set in ZSH
       export HOST=$(cat /etc/hostname)
@@ -79,6 +90,10 @@ in {
 
   # TODO: Add auto garbage-collect
 
+  nix.settings.trusted-users = [
+    "ansible"
+    # "kate"
+  ];
 
   # If we change this things will be sad
   system.stateVersion = "23.11";
