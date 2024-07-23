@@ -28,19 +28,19 @@ in
 
   sops.secrets."authelia_jwt_secret" = { 
     owner = "authelia";
-    sopsFile = "${secretsPath}/secrets/authelia.yaml"; 
+    sopsFile = "${secretsPath}/secrets/authentication.yaml"; 
   };
   sops.secrets."authelia_session_secret" = { 
     owner = "authelia";
-    sopsFile = "${secretsPath}/secrets/authelia.yaml"; 
+    sopsFile = "${secretsPath}/secrets/authentication.yaml"; 
   };
   sops.secrets."authelia_storage_key" = { 
     owner = "authelia";
-    sopsFile = "${secretsPath}/secrets/authelia.yaml"; 
+    sopsFile = "${secretsPath}/secrets/authentication.yaml"; 
   };
   sops.secrets."authelia_users_database" = { 
     owner = "authelia";
-    sopsFile = "${secretsPath}/secrets/authelia.yaml"; 
+    sopsFile = "${secretsPath}/secrets/authentication.yaml"; 
     path = "${config_dir}/user-database.yml";
   };
 
