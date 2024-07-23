@@ -59,11 +59,6 @@ in {
 
   # ==============================
 
-  # TODO: Look into adding a different remote deployment user
-  nix.settings.trusted-users = [
-    "ansible"
-  ];
-
   # If we change this things will be sad
   system.stateVersion = "23.11";
 }
