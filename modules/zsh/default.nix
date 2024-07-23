@@ -1,4 +1,7 @@
 {pkgs, ...}:
+let
+  remote_rebuild_user = "server_admin";
+in
 {
 
   environment.systemPackages = with pkgs; [
@@ -26,6 +29,9 @@
     ohMyZsh = {
       enable = true;
       theme = "bira";
+      plugins = [
+        "sudo"
+      ];
     };
 
     shellAliases = {
@@ -36,7 +42,7 @@
     promptInit = ''
       # Nix remote rebuild
       nrr() {
-        nixos-rebuild --target-host $USER@$1 --use-remote-sudo switch --flake $NIX_FLAKE_PATH
+        nixos-rebuild --target-host ${remote_rebuild_user}@$1 --use-remote-sudo switch --flake $NIX_FLAKE_PATH
       }
 
       echo "$fg[red]$(figlet $(cat /etc/hostname) -f /etc/bulbhead.flf)"

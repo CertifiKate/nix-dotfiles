@@ -8,6 +8,7 @@ in
   # TODO: Move this all to home manager?
 
   # TODO: Add all private keys?
+  # TODO: Add ssh-agent forwarding
 
   programs.git.config = {
     user.name = "CertifiKate";
