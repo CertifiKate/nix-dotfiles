@@ -66,6 +66,8 @@ in
     };
 
     settings =  {
+      theme = "dark";
+
       server = {
         endpoints.authz.forward-auth.implementation = "ForwardAuth";
       };
