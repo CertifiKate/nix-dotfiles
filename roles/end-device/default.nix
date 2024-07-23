@@ -4,11 +4,15 @@ let
   secretsPath = builtins.toString inputs.nix-secrets;
 in
 {
-  # TODO: Add git read/write private key
   # TODO: Add sops age admin key
-  # TODO: Move this to home manager?
+  # TODO: Move this all to home manager?
 
   # TODO: Add all private keys?
+
+  programs.git.config = {
+    user.name = "CertifiKate";
+    user.email = "131977850+CertifiKate@users.noreply.github.com";
+  };
 
   # Github private keys
   sops.secrets."kate_github_key" = {

@@ -3,7 +3,7 @@
 
 {
   imports = [
-    ./users/kate.nix
+    # Ansible user is used to login and install full flake, as well as install needed keys
     ./users/ansible.nix
   ];
 

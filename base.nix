@@ -59,19 +59,6 @@ in {
 
   # ==============================
 
-  # TODO: Find a way to add this into users/kate.nix without breaking golden image
-  sops.secrets."users_kate_password_hash".neededForUsers = true;
-  users.users.kate = {
-    isNormalUser = true;
-    hashedPasswordFile = config.sops.secrets."users_kate_password_hash".path;
-  };
-
-  # TODO: Move this to home manager
-  programs.git.config = {
-    user.name = "CertifiKate";
-    user.email = "131977850+CertifiKate@users.noreply.github.com";
-  };
-
   # TODO: Look into adding a different remote deployment user
   nix.settings.trusted-users = [
     "ansible"
