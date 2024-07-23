@@ -13,7 +13,7 @@
   security.sudo = {
     extraRules = [
       {
-        users = [ "ansible" ];
+        users = [ "server_admin" ];
         commands = [
           { 
             command = "ALL" ;

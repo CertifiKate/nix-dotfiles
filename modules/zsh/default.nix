@@ -8,7 +8,7 @@
   ];
 
   environment.variables = {
-    NIX_FLAKE_PATH = "/etc/nixos/flake.nix";
+    NIX_FLAKE_PATH = "/etc/nixos/";
   };
 
   system.userActivationScripts.zshrc = "touch .zshrc";
