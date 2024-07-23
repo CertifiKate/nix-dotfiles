@@ -48,9 +48,12 @@ in {
 
   # Keep SSH agent in sudo
   security.sudo = {
-    extraConfig = "Defaults env_keep+=SSH_AUTH_SOCK";
+    extraConfig = ''
+    Defaults env_keep+=SSH_AUTH_SOCK
+    Defaults timestamp_timeout=30
+    '';
   };
-
+  
   # Auto clean old store files
   nix.gc = {
     automatic = true;
