@@ -100,7 +100,7 @@ in {
 
       # Home Automation
       home = {
-        host = "radarr";
+        host = "home";
         dest = "http://192.168.10.41:7878";
         auth = false;
       };
@@ -114,7 +114,9 @@ in {
       entryPoints = "webHttps";
       priority = "10";
       
-      # TODO: Add authelia middleware
+      middlewares = lib.mkIf(cfg.auth or true) [
+        "authelia@file"
+      ];
 
       tls = { certResolver = "letsEncrypt";
         domains = [ { main = "${project_tld}"; sans = [ "*.${project_tld}" ]; } ];
@@ -139,6 +141,8 @@ in {
       entryPoints = {
         web = {
           address = ":80";
+          proxyProtocol.trustedIPs = [ "192.168.10.15/32" ];
+          forwardedHeaders.trustedIPs = [ "192.168.10.15/32" ];
           http.redirections = {
             entryPoint = {
               to = "webHttps";
@@ -147,7 +151,11 @@ in {
             };
           };
         };
-        webHttps.address = ":443";
+        webHttps = {
+          address = ":443";
+          proxyProtocol.trustedIPs = [ "192.168.10.15/32" ];
+          forwardedHeaders.trustedIPs = [ "192.168.10.15/32" ];
+        };
       };
 
       api = {
@@ -171,29 +179,20 @@ in {
     dynamicConfigOptions = {
       http = {
         middlewares = {
-          # TODO: Move to authelia
-          authentikProxyAuth.forwardAuth = {
-            address = "https://auth-01.srv:9443/outpost.goauthentik.io/auth/traefik";
-            trustForwardHeader = "true";
+          authelia.forwardAuth = {
+            address = "http://auth-01.srv:9091/api/authz/forward-auth";
+            trustForwardHeader = true;
             authResponseHeaders = [
-              "X-authentik-username"
-              "X-authentik-groups"
-              "X-authentik-email"
-              "X-authentik-name"
-              "X-authentik-uid"
-              "X-authentik-jwt"
-              "X-authentik-meta-jwks"
-              "X-authentik-meta-outpost"
-              "X-authentik-meta-provider"
-              "X-authentik-meta-app"
-              "X-authentik-meta-version"
+              "Remote-User"
+              "Remote-Groups"
+              "Remote-Email"
+              "Remote-Name"
             ];
-
           };
         };
-        
-        routers = allRouters;
-        services = allServices;
+
+      routers = allRouters;
+      services = allServices;
       };
     };
   };

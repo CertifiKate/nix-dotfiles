@@ -67,10 +67,20 @@ in
 
     settings =  {
       server = {
-        host = "0.0.0.0";
+        endpoints.authz.forward-auth.implementation = "ForwardAuth";
       };
 
-      session.domain = "${project_tld}";
+      session = {
+        name = "authelia_session";
+        cookies = [
+          {
+            domain = "${project_tld}";
+            authelia_url = "https://auth.${project_tld}";
+            # TODO: Add custom dashboard?
+            default_redirection_url = "https://media.${project_tld}";
+          }
+        ];
+      };
 
       authentication_backend.file.path = "${config_dir}/user-database.yml";
       # TODO: Move this to an actual db - add full-blown db server?
@@ -78,14 +88,47 @@ in
       notifier.filesystem.filename = "${data_dir}/notifier.txt";
 
       access_control = {
-        default_policy = "bypass";
+        default_policy = "deny";
         rules = [
+          # Bypass APIs
+          # TODO: See if we can bring more into authelia and bypass their apis?
+          {
+            domain = [
+              "${project_tld}"
+              "*.${project_tld}"
+            ];
+            policy = "bypass";
+            resources = [
+              "^/api$"
+              "^/api/"
+            ];
+          }
           {
             domain = "auth.${project_tld}";
             policy = "bypass";
           }
           {
             domain = "traefik.${project_tld}";
+            subject = "group:admins";
+            policy = "one_factor";
+          }
+          {
+            domain = [
+              "sonarr"
+              "radarr"
+              "prowlarr"
+              "torrent"
+            ];
+            # Allow dev OR admin to access media servers
+            subject = [
+              "group:dev"
+              "group:admin"
+            ];
+            policy = "one_factor";
+          }
+          # Catch all policy
+          {
+            domain = "*.${project_tld}";
             policy = "one_factor";
           }
         ];
