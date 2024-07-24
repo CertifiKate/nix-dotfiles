@@ -34,8 +34,10 @@
         # Optionally import the specific server role - substitutes the hardware config
         (if (cfg.hostType == "servers") then ./roles/server/${cfg.serverType or "lxc"} else "" )
 
-        # Include our shared configuration
+        # Absolute minimum config required
         ./base.nix
+        # Include our shared configuration
+        ./roles/common
 
         sops-nix.nixosModules.sops
       ];

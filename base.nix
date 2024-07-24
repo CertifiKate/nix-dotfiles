@@ -1,34 +1,13 @@
 { inputs, config, pkgs, ... }:
+#
+# The absolute minimum system config required for my nix setup
+# Shouldn't be required to use flakes to run this, nor any secrets
+# Should be compatible with ALL hosts, including golden images
+#
 
 let 
-  secretsPath = builtins.toString inputs.nix-secrets;
-
   timezone = "Australia/Adelaide";
-
 in {
-
-  imports = [
-    ./users/kate.nix
-    ./modules/zsh
-  ];
-
-  # ==============================
-  # Shared Sops configuration
-  # ==============================
-  sops = {
-    defaultSopsFile = "${secretsPath}/secrets/shared.yaml";
-
-    # Don't use SSH keys
-    age.sshKeyPaths = [];
-    gnupg.sshKeyPaths = [];
-
-    age = {
-      keyFile = "/etc/sops-age.txt";
-      generateKey = false;
-    };
-  };
-  # ==============================
-
   # ==============================
   # General System Config
   # ==============================
@@ -37,23 +16,13 @@ in {
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   environment.systemPackages = with pkgs; [
-    ranger
-    btop
     git
   ];
 
   users = {
     mutableUsers = false;
   };
-
-  # Keep SSH agent in sudo
-  security.sudo = {
-    extraConfig = ''
-    Defaults env_keep+=SSH_AUTH_SOCK
-    Defaults timestamp_timeout=30
-    '';
-  };
-  
+ 
   # Auto clean old store files
   nix.gc = {
     automatic = true;
@@ -63,5 +32,5 @@ in {
   # ==============================
 
   # If we change this things will be sad
-  system.stateVersion = "23.11";
+  system.stateVersion = "24.05";
 }
