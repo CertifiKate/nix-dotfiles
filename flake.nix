@@ -90,6 +90,13 @@
           ];
         };
 
+        avahi-01 = {
+          hostType = "servers";
+          serverType = "lxc";
+          roles = [
+            ./roles/server/mdns-repeater
+          ];
+        };
 
         # ==== VMs =====================
         mine-01 = {
