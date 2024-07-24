@@ -76,7 +76,7 @@
           hostType = "servers";
           serverType = "lxc";
           roles = [
-            ./roles/auth
+            ./roles/server/auth
           ];
         };
 
@@ -84,7 +84,7 @@
           hostType = "servers";
           serverType = "lxc";
           roles = [
-            ./roles/proxy
+            ./roles/server/proxy
           ];
         };
 
@@ -94,7 +94,7 @@
           hostType = "servers";
           serverType = "vm";
           roles = [
-            ./roles/minecraft
+            ./roles/server/minecraft
           ];
         };
 
