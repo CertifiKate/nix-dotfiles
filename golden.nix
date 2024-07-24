@@ -9,7 +9,14 @@
     ./base.nix
     # Ansible user is used to login and install full flake, as well as install needed keys
     ./users/ansible.nix
+    ./users/server_admin.nix
   ];
+
+  nix.settings.trusted-users = [
+    "ansible"
+    "server_admin"
+  ];
+
 
   environment.systemPackages = with pkgs; [
     ranger
