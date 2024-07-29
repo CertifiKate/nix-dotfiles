@@ -34,6 +34,10 @@
         # Optionally import the specific server role - substitutes the hardware config
         (if (cfg.hostType == "servers") then ./roles/server/${cfg.serverType or "lxc"} else "" )
 
+        # Include the backup module for servers by default
+        (if (cfg.hostType == "servers" && (cfg.noBackup or false) != true) then ./modules/backup else "" )
+
+
         # Absolute minimum config required
         ./base.nix
         # Include our shared configuration
@@ -99,6 +103,16 @@
         };
 
         # ==== VMs =====================
+        backup-01 = {
+          hostType = "servers";
+          serverType = "vm";
+          # Shouldn't have any files /itself/ that need to be backed up
+          noBackup = true;
+          roles = [
+            ./modules/backup/server
+          ];
+        };
+
         mine-01 = {
           hostType = "servers";
           serverType = "vm";
