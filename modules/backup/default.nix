@@ -4,10 +4,6 @@ let
 
 in
 {
-  # Add write-only backup key
-  sops.secrets."backup_service_write_only_key" = {
-    path = "/etc/ssh/backup_key";
-  };
 
   # TODO: Setup backup service
   # TODO: Setup timer that runs service on [interval]
@@ -23,6 +19,11 @@ in
 
 
   config = {
+    # Add write-only backup key
+    sops.secrets."backup_service_write_only_key" = {
+      path = "/etc/ssh/backup_key";
+    };
+
     # Install rsync to handle our copying of files
     environment.systemPackages = with pkgs; [
       rsync
