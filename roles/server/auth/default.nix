@@ -12,6 +12,16 @@ let
 
 in
 {
+
+  # Setup backup service
+  CertifiKate.backup_service = {
+    paths = [
+      "${config_dir}"
+      "${data_dir}"
+    ];
+  };
+
+
   environment.systemPackages = with pkgs; [
     authelia
   ];

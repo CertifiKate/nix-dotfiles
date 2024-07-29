@@ -2,6 +2,8 @@
 let
   cfg = config.CertifiKate.backup_service;
 
+  backup_user = "backup";
+  backup_host = "backup-01.srv";
 in
 {
 
@@ -39,7 +41,7 @@ in
       # TODO: Add post-stop options (i.e start service, etc.)
 
       script = ''
-        rsync "${paths}" > /tmp/backup_files
+        ${pkgs.rsync}/bin/rsync -aR --delete ${paths} ${backup_user}@${backup_host}:$(cat /etc/hostname) -e "${pkgs.openssh}/bin/ssh -o StrictHostKeyChecking=no -i /etc/ssh/backup_key"
       '';
 
       serviceConfig = {
@@ -47,6 +49,15 @@ in
         # TODO: Set user?
       };
     };
+    
+    systemd.timers."backup" = {
+      wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnBootSec = "5m";
+          OnUnitActiveSec = "5m";
+          OnCalendar = "*-*-* 4:00:00";
+          Unit = "backup_service.service";
+        };
+    };
   };
-
 }
