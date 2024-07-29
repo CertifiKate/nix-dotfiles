@@ -1,4 +1,4 @@
-{...}:
+{pkgs, ...}:
 {
   # Add rrsync to allow write-only backups to destination folders
   environment.systemPackages = with pkgs; [
