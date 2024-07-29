@@ -101,7 +101,7 @@ in {
       # Home Automation
       home = {
         host = "home";
-        dest = "http://192.168.10.41:7878";
+        dest = "http://192.168.10.41:8123";
         auth = false;
       };
     };
