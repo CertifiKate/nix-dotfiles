@@ -28,22 +28,24 @@
         # Include our host config
         ./hosts/${(cfg.hostType or "servers" )}/${name}
 
-        # Optionally import the generic server role
-        (if (cfg.hostType == "servers") then ./roles/server else "" )
-
-        # Optionally import the specific server role - substitutes the hardware config
-        (if (cfg.hostType == "servers") then ./roles/server/${cfg.serverType or "lxc"} else "" )
-
-        # Include the backup module for servers by default
-        (if (cfg.hostType == "servers" && (cfg.noBackup or false) != true) then ./modules/backup else "" )
-
-
         # Absolute minimum config required
         ./base.nix
         # Include our shared configuration
         ./roles/common
 
         sops-nix.nixosModules.sops
+      ]
+      # Server specific modules
+      ++ nixpkgs.lib.optionals (cfg.hostType == "servers") [
+        # Optionally import the generic server role
+        ./roles/server
+
+        # Optionally import the specific server role - substitutes the hardware config
+        ./roles/server/${cfg.serverType or "lxc"}
+      ]
+      # Include backup module for servers by default
+      ++ nixpkgs.lib.optionals (cfg.hostType == "servers" && (cfg.noBackup or false) != true)[
+        ./modules/backup
       ];
 
       # Generates the relevant system configuration based on inputs
