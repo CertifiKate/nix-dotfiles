@@ -34,6 +34,26 @@
         "type": "github"
       }
     },
+    "home-manager": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-stable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1722321190,
+        "narHash": "sha256-WeVWVRqkgrbLzmk6FfJoloJ7Xe7HWD27Pv950IUG2kI=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "4fcd54df7cbb1d79cbe81209909ee8514d6b17a4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
     "nix-minecraft": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -41,11 +61,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1721612235,
-        "narHash": "sha256-OL8aIZiJyv0CebJIbXakOTjWOTUtLMbTZikJjNRVmMs=",
+        "lastModified": 1722303290,
+        "narHash": "sha256-xyKGDHa1BcNaOaMnuTND5UQ1SLP5WtwWQgdAmvPF9XE=",
         "owner": "Infinidoge",
         "repo": "nix-minecraft",
-        "rev": "933930a440701b925e2917ff47a09ffe3064046b",
+        "rev": "ab2e879bd3f76dfd1c436196d9bc7c9fb260b11c",
         "type": "github"
       },
       "original": {
@@ -88,6 +108,22 @@
     },
     "nixpkgs-stable": {
       "locked": {
+        "lastModified": 1722087241,
+        "narHash": "sha256-2ShmEaFi0kJVOEEu5gmlykN5dwjWYWYUJmlRTvZQRpU=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "8c50662509100d53229d4be607f1a3a31157fa12",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-24.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-stable_2": {
+      "locked": {
         "lastModified": 1721524707,
         "narHash": "sha256-5NctRsoE54N86nWd0psae70YSLfrOek3Kv1e8KoXe/0=",
         "owner": "NixOS",
@@ -104,11 +140,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1721562059,
-        "narHash": "sha256-Tybxt65eyOARf285hMHIJ2uul8SULjFZbT9ZaEeUnP8=",
+        "lastModified": 1722185531,
+        "narHash": "sha256-veKR07psFoJjINLC8RK4DiLniGGMgF3QMlS4tb74S6k=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "68c9ed8bbed9dfce253cc91560bf9043297ef2fe",
+        "rev": "52ec9ac3b12395ad677e8b62106f0b98c1f8569d",
         "type": "github"
       },
       "original": {
@@ -136,23 +172,25 @@
     },
     "root": {
       "inputs": {
+        "home-manager": "home-manager",
         "nix-minecraft": "nix-minecraft",
         "nix-secrets": "nix-secrets",
         "nixpkgs": "nixpkgs_2",
+        "nixpkgs-stable": "nixpkgs-stable",
         "sops-nix": "sops-nix"
       }
     },
     "sops-nix": {
       "inputs": {
         "nixpkgs": "nixpkgs_3",
-        "nixpkgs-stable": "nixpkgs-stable"
+        "nixpkgs-stable": "nixpkgs-stable_2"
       },
       "locked": {
-        "lastModified": 1721531171,
-        "narHash": "sha256-AsvPw7T0tBLb53xZGcUC3YPqlIpdxoSx56u8vPCr6gU=",
+        "lastModified": 1722114803,
+        "narHash": "sha256-s6YhI8UHwQvO4cIFLwl1wZ1eS5Cuuw7ld2VzUchdFP0=",
         "owner": "Mic92",
         "repo": "sops-nix",
-        "rev": "909e8cfb60d83321d85c8d17209d733658a21c95",
+        "rev": "eb34eb588132d653e4c4925d862f1e5a227cc2ab",
         "type": "github"
       },
       "original": {

@@ -1,6 +1,10 @@
 {
   inputs = {
+    
+    # I want to use unstable by default but for some things use stable
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.05";
+
     sops-nix.url = "github:Mic92/sops-nix";
 
     nix-secrets = {
@@ -8,124 +12,154 @@
       flake = false;
     };
 
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs-stable";
+
     nix-minecraft.url = "github:Infinidoge/nix-minecraft";
   };
 
   # Based on https://www.reddit.com/r/NixOS/comments/yk4n8d/comment/iurkkxv
-  outputs = { self, nixpkgs, sops-nix, ... } @inputs:
-    let
+  outputs = { 
+    self, 
+    nixpkgs, 
+    nixpkgs-stable,
+    sops-nix, 
+    home-manager, 
+    ... 
+  } @inputs: let
+    inherit (self) outputs;
 
-      # Basic configuration modules
-      commonModules = name: cfg: [
-        # Set common config options
-        {
-          nix.settings.experimental-features = [ "nix-command" "flakes" ];
-          networking.hostName = name;
+    # ==============================
+    # NixOs Configuration
+    # ==============================
 
-          # nixpkgs.hostPlatform = "${cfg.system or "x86_64-linux"}";
-        }
-        
-        # Include our host config
-        ./hosts/${(cfg.hostType or "servers" )}/${name}
+    # Basic configuration modules
+    commonModules = name: cfg: [
+      # Set common config options
+      {
+        nix.settings.experimental-features = [ "nix-command" "flakes" ];
+        networking.hostName = name;
+      }
+      
+      # Include our host config
+      ./hosts/${(cfg.hostType or "servers" )}/${name}
 
-        # Absolute minimum config required
-        ./base.nix
-        # Include our shared configuration
-        ./roles/common
+      # Absolute minimum config required
+      ./base.nix
+      # Include our shared configuration
+      ./roles/common
 
-        sops-nix.nixosModules.sops
-      ]
-      # Server specific modules
-      ++ nixpkgs.lib.optionals (cfg.hostType == "servers") [
-        # Optionally import the generic server role
-        ./roles/server
+      sops-nix.nixosModules.sops
+    ];
 
-        # Optionally import the specific server role - substitutes the hardware config
-        ./roles/server/${cfg.serverType or "lxc"}
-      ]
-      # Include backup module for servers by default
-      ++ nixpkgs.lib.optionals (cfg.hostType == "servers" && (cfg.noBackup or false) != true)[
-        ./modules/backup
-      ];
+    # Common Home Manager Modules
+    homeManagerModules = cfg: [
+      inputs.home-manager.nixosModules.home-manager
+      {
+        home-manager.users.kate.imports = [
+          ./home.nix
+          ./home-manager/roles/common
+        ] ++ (cfg.hmRoles or []);
+      }
+    ];
 
-      # Generates the relevant system configuration based on inputs
-      mkSystem = name: cfg: nixpkgs.lib.nixosSystem {
-        system = cfg.system or "x86_64-linux";
+    # Server Modules
+    serverModules = name: cfg: [
+      ./roles/server
+      ./roles/server/${cfg.serverType or "lxc"}
+      ./modules/backup
+    ];
 
-        # Include our common modules, plus any host specified roles
-        modules = (commonModules name cfg) ++ (cfg.roles or []);
+    # Generates the relevant system configuration based on inputs
+    mkNixosSystem = name: cfg: nixpkgs.lib.nixosSystem {
+      system = cfg.system or "x86_64-linux";
 
-        specialArgs = {
-          inherit inputs; 
+      # Include our common modules, plus any host specified roles
+      modules = 
+        (commonModules name cfg) ++
+        (cfg.roles or []) ++ 
+        # If the hostType is server then add in our serverModules
+        nixpkgs.lib.optionals (cfg.hostType == "servers") (serverModules name cfg) ++
+        # Include HomeManager (opt in for servers, opt out otherwise)
+        nixpkgs.lib.optionals ((cfg.hostType == "server" && (cfg.usesHomeManager or false)) || (cfg.usesHomeManager or true)) (homeManagerModules cfg)
+      ;
 
-          # A .json file from the nix-secrets repo with non-important info. 
-          # Stuff we just don't want public (ie. project_tld) but don't care if it's in the nix store
-          private = builtins.fromJSON (builtins.readFile ("${builtins.toString inputs.nix-secrets}/private.json"));
-        };
+      specialArgs = {
+        inherit inputs; 
+
+        # A .json file from the nix-secrets repo with non-important info. 
+        # Stuff we just don't want public (ie. project_tld) but don't care if it's in the nix store
+        private = builtins.fromJSON (builtins.readFile ("${builtins.toString inputs.nix-secrets}/private.json"));
       };
-
-      # System definitions
-      systems = {
-
-        # ==============================
-        # Servers
-        # ==============================
-
-        # ==== LXCs ====================
-        build-01 = {
-          hostType = "servers";
-          serverType = "lxc";
-          roles = [
-            ./roles/end-device
-          ];
-        };
-
-        auth-01 = {
-          hostType = "servers";
-          serverType = "lxc";
-          roles = [
-            ./roles/server/auth
-          ];
-        };
-
-        prox-01 = {
-          hostType = "servers";
-          serverType = "lxc";
-          roles = [
-            ./roles/server/proxy
-          ];
-        };
-
-        avahi-01 = {
-          hostType = "servers";
-          serverType = "lxc";
-          roles = [
-            ./roles/server/mdns-repeater
-          ];
-        };
-
-        # ==== VMs =====================
-        backup-01 = {
-          hostType = "servers";
-          serverType = "vm";
-          # Shouldn't have any files /itself/ that need to be backed up
-          noBackup = true;
-          roles = [
-            ./modules/backup/server
-          ];
-        };
-
-        mine-01 = {
-          hostType = "servers";
-          serverType = "vm";
-          roles = [
-            ./roles/server/minecraft
-          ];
-        };
-
-        # ==============================
-      };
-    in rec {
-      nixosConfigurations = nixpkgs.lib.mapAttrs mkSystem systems;
     };
+
+    # NixOS System definitions
+    # If hostType = server then home-manager is opt-in, otherwise opt-out
+    systems = {
+
+      # ==============================
+      # Servers
+      # ==============================
+
+      # ==== LXCs ====================
+      build-01 = {
+        hostType = "servers";
+        serverType = "lxc";
+        roles = [
+          ./roles/end-device
+        ];
+        usesHomeManager = true;
+        hmRoles =[
+          ./home-manager/roles/sops-management
+        ];
+      };
+
+      auth-01 = {
+        hostType = "servers";
+        serverType = "lxc";
+        roles = [
+          ./roles/server/auth
+        ];
+      };
+
+      prox-01 = {
+        hostType = "servers";
+        serverType = "lxc";
+        roles = [
+          ./roles/server/proxy
+        ];
+      };
+
+      avahi-01 = {
+        hostType = "servers";
+        serverType = "lxc";
+        roles = [
+          ./roles/server/mdns-repeater
+        ];
+      };
+
+      # ==== VMs =====================
+      backup-01 = {
+        hostType = "servers";
+        serverType = "vm";
+        # Shouldn't have any files /itself/ that need to be backed up
+        noBackup = true;
+        roles = [
+          ./modules/backup/server
+        ];
+      };
+
+      mine-01 = {
+        hostType = "servers";
+        serverType = "vm";
+        roles = [
+          ./roles/server/minecraft
+        ];
+      };
+
+      # ==============================
+    };
+  in rec {
+    nixosConfigurations = nixpkgs.lib.mapAttrs mkNixosSystem systems;
+  };
 }
