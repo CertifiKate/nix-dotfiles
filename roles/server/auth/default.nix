@@ -5,7 +5,6 @@ let
 
   project_tld = "${private.project_tld}";
 
-  # TODO: Add a global config option for the storage directory
   project_dir = "/services/authelia";
   config_dir = "${project_dir}/config";
   data_dir = "${project_dir}/data";
@@ -16,8 +15,7 @@ in
   # Setup backup service
   CertifiKate.backup_service = {
     paths = [
-      "${config_dir}"
-      "${data_dir}"
+      "${project_dir}"
     ];
   };
 

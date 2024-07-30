@@ -20,7 +20,9 @@ in
   };
 
 
-  config = {
+  # Only configure if we have actually defined some paths
+  config = lib.mkIf (cfg.paths != []) {
+
     # Add write-only backup key
     sops.secrets."backup_service_write_only_key" = {
       path = "/etc/ssh/backup_key";
@@ -41,7 +43,7 @@ in
       # TODO: Add post-stop options (i.e start service, etc.)
 
       script = ''
-        ${pkgs.rsync}/bin/rsync -aR --delete ${paths} ${backup_user}@${backup_host}:$(cat /etc/hostname) -e "${pkgs.openssh}/bin/ssh -o StrictHostKeyChecking=no -i /etc/ssh/backup_key"
+        ${pkgs.rsync}/bin/rsync -rptgoRL --delete ${paths} ${backup_user}@${backup_host}:$(cat /etc/hostname) -e "${pkgs.openssh}/bin/ssh -o StrictHostKeyChecking=no -i /etc/ssh/backup_key"
       '';
 
       serviceConfig = {
@@ -49,7 +51,7 @@ in
         # TODO: Set user?
       };
     };
-    
+
     systemd.timers."backup" = {
       wantedBy = [ "timers.target" ];
         timerConfig = {

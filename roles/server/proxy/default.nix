@@ -13,6 +13,13 @@ in {
     traefik
   ];
 
+  # Setup backup service
+  CertifiKate.backup_service = {
+    paths = [
+      "${project_dir}"
+    ];
+  };
+
   sops.secrets."proxy_traefik_env" = { 
     owner = "traefik";
     sopsFile = "${secretsPath}/secrets/proxy.yaml"; 
