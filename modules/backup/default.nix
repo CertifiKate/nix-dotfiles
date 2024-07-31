@@ -6,10 +6,6 @@ let
   backup_host = "backup-01.srv";
 in
 {
-
-  # TODO: Setup backup service
-  # TODO: Setup timer that runs service on [interval]
-
   # TODO: Add scoping of paths?
   options.CertifiKate.backup_service = {
     paths = lib.mkOption {

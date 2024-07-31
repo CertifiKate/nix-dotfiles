@@ -1,5 +1,3 @@
-# TODO: Enable ssh? Or do this in a role?
-
 # Essentially we just want to de-dupe roles/lxcs and roles/vms
 { pkgs, ...}:
 {
