@@ -54,12 +54,27 @@
 
     # Common Home Manager Modules
     homeManagerModules = cfg: [
-      inputs.home-manager.nixosModules.home-manager
+      home-manager.nixosModules.home-manager
       {
+        # TOOD: Add user into this inherit -let it be used by home-manager
+        home-manager.extraSpecialArgs = { inherit inputs; };
+        home-manager.useGlobalPkgs = true;
+        home-manager.useUserPackages = true;
         home-manager.users.kate.imports = [
+          inputs.sops-nix.homeManagerModules.sops
+          
           ./home.nix
           ./home-manager/roles/common
         ] ++ (cfg.hmRoles or []);
+      }
+      # Add sops age-key to use for home-manager to decrypt sops secrets (without needing to add it ourselves)
+      {
+        # TODO: Vars for user
+        sops.secrets."home_manager_user_key" = {
+          sopsFile = "${builtins.toString inputs.nix-secrets}/secrets/home-manager-init.yaml";
+          path = "/home/kate/.config/sops-age.txt";
+          owner = "kate";
+        };
       }
     ];
 
