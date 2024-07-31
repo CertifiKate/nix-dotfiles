@@ -3,13 +3,18 @@ let
   secretsPath = builtins.toString inputs.nix-secrets;
 in
 {
+  imports = [
+    ./ssh-client
+  ];
+
   # Github private keys
+  # TODO: Persist the passphrase? Add to keyring?
   sops.secrets."kate_github_key" = {
     sopsFile = "${secretsPath}/secrets/home-manager.yaml";
     path = "/home/kate/.ssh/id_ed25519-github";
   };
 
-  programs.home-manager.enable = true;
+  # Configure our git config
   programs.git = {
     enable = true;
     userName = "CertifiKate";
