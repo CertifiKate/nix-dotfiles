@@ -52,17 +52,22 @@
       sops-nix.nixosModules.sops
     ];
 
-    # Common Home Manager Modules
-    homeManagerModules = cfg: [
-      home-manager.nixosModules.home-manager
+    # Server Modules
+    serverModules = name: cfg: [
+      ./roles/server
+      ./roles/server/${cfg.serverType or "lxc"}
+      ./modules/backup
+    ];
+
+
+    # ==============================
+    # Home-Manager Configuration
+    # ==============================
+
+    # Common home-manager options (I /think/ this should be nixos neutral, but I only use nixos)
+    mkHomeManagerModules = cfg: [
       {
-        # TOOD: Add user into this inherit -let it be used by home-manager
-        home-manager.extraSpecialArgs = { inherit inputs; };
-        home-manager.useGlobalPkgs = true;
-        home-manager.useUserPackages = true;
         home-manager.users.kate.imports = [
-          inputs.sops-nix.homeManagerModules.sops
-          
           ./home.nix
           ./home-manager/roles/common
         ] ++ (cfg.hmRoles or []);
@@ -78,12 +83,27 @@
       }
     ];
 
-    # Server Modules
-    serverModules = name: cfg: [
-      ./roles/server
-      ./roles/server/${cfg.serverType or "lxc"}
-      ./modules/backup
-    ];
+    # NixOs specific home-manager modules
+    mkNixOsHomeManagerModules = cfg: [
+      home-manager.nixosModules.home-manager
+      {
+        # TOOD: Add user into this inherit -let it be used by home-manager
+        home-manager.extraSpecialArgs = { inherit inputs; };
+        home-manager.useGlobalPkgs = true;
+        home-manager.useUserPackages = true;
+        home-manager.users.kate.imports = [
+          inputs.sops-nix.homeManagerModules.sops
+        ];
+      }      
+    ] ++ mkHomeManagerModules cfg;
+
+
+    # ==============================
+    # NixOs Config Generation
+    #
+    # Uses above configs to generate the nixos systems
+    # Uses systems var to populate
+    # ==============================
 
     # Generates the relevant system configuration based on inputs
     mkNixosSystem = name: cfg: nixpkgs.lib.nixosSystem {
@@ -96,7 +116,7 @@
         # If the hostType is server then add in our serverModules
         nixpkgs.lib.optionals (cfg.hostType == "servers") (serverModules name cfg) ++
         # Include HomeManager (opt in for servers, opt out otherwise)
-        nixpkgs.lib.optionals ((cfg.hostType == "server" && (cfg.usesHomeManager or false)) || (cfg.usesHomeManager or true)) (homeManagerModules cfg)
+        nixpkgs.lib.optionals ((cfg.hostType == "server" && (cfg.usesHomeManager or false)) || (cfg.usesHomeManager or true)) (mkNixOsHomeManagerModules cfg)
       ;
 
       specialArgs = {
@@ -120,9 +140,6 @@
       build-01 = {
         hostType = "servers";
         serverType = "lxc";
-        roles = [
-          ./roles/end-device
-        ];
         usesHomeManager = true;
         hmRoles =[
           ./home-manager/roles/sops-management
