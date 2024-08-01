@@ -146,6 +146,9 @@
         roles = [
           ./nixos/roles/physical/desktop/gnome
         ];
+        hmRoles = [
+          ./home-manager/roles/sops-management
+        ];
       };
 
       # ==============================
