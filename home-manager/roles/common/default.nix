@@ -13,13 +13,6 @@ in {
     ../../modules/vscode
   ];
 
-  # Github private keys
-  # TODO: Persist the passphrase? Add to keyring?
-  sops.secrets."kate_github_key" = {
-    sopsFile = "${secretsPath}/secrets/home-manager.yaml";
-    path = "/home/kate/.ssh/id_ed25519-github";
-  };
-
   # Configure our git config
   programs.git = {
     enable = true;
