@@ -59,6 +59,10 @@
       ./modules/backup
     ];
 
+    physicalDeviceModules = name: cfg: [
+      ./roles/physical
+    ];
+
 
     # ==============================
     # Home-Manager Configuration
@@ -113,10 +117,16 @@
       modules = 
         (commonModules name cfg) ++
         (cfg.roles or []) ++ 
-        # If the hostType is server then add in our serverModules
+
+        # If the hostType is servers then add in our serverModules
         nixpkgs.lib.optionals (cfg.hostType == "servers") (serverModules name cfg) ++
+
+        # If the hostType is physical then add in our physicalDeviceModules
+        nixpkgs.lib.optionals (cfg.hostType == "physical") (physicalDeviceModules name cfg) ++
+
+
         # Include HomeManager (opt in for servers, opt out otherwise)
-        nixpkgs.lib.optionals ((cfg.hostType == "server" && (cfg.usesHomeManager or false)) || (cfg.usesHomeManager or true)) (mkNixOsHomeManagerModules cfg)
+        nixpkgs.lib.optionals ((cfg.hostType == "servers" && (cfg.usesHomeManager or false)) || (cfg.usesHomeManager or true)) (mkNixOsHomeManagerModules cfg)
       ;
 
       specialArgs = {
@@ -131,6 +141,10 @@
     # NixOS System definitions
     # If hostType = server then home-manager is opt-in, otherwise opt-out
     systems = {
+
+      swift3 = {
+        hostType = "physical";
+      };
 
       # ==============================
       # Servers
@@ -174,8 +188,6 @@
       backup-01 = {
         hostType = "servers";
         serverType = "vm";
-        # Shouldn't have any files /itself/ that need to be backed up
-        noBackup = true;
         roles = [
           ./modules/backup/server
         ];
