@@ -1,6 +1,5 @@
 # Essentially we just want to de-dupe roles/lxcs and roles/vms
-{ pkgs, ...}:
-{
+{pkgs, ...}: {
   imports = [
     ../../../users/ansible.nix
     ../../../users/server_admin.nix
@@ -12,7 +11,6 @@
   environment.systemPackages = with pkgs; [
     python3
   ];
-
 
   # TODO: Consider removing ansible once we've finished migration
   # TODO: One central build/deploy server? Pushes out to all hosts on regular basis..?

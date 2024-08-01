@@ -1,9 +1,13 @@
-{ inputs, config, pkgs, ... }:
+{
+  inputs,
+  config,
+  pkgs,
+  ...
+}:
 #
 # Minimal config for golden images. Must be entirely independent
 # ie. not require any secrets, flake inputs, etc.
 #
-
 {
   imports = [
     ./base.nix
@@ -16,7 +20,6 @@
     "ansible"
     "server_admin"
   ];
-
 
   environment.systemPackages = with pkgs; [
     ranger

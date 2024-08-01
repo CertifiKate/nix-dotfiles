@@ -1,6 +1,5 @@
 {
   inputs = {
-    
     # I want to use unstable by default but for some things use stable
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.05";
@@ -19,14 +18,14 @@
   };
 
   # Based on https://www.reddit.com/r/NixOS/comments/yk4n8d/comment/iurkkxv
-  outputs = { 
-    self, 
-    nixpkgs, 
+  outputs = {
+    self,
+    nixpkgs,
     nixpkgs-stable,
-    sops-nix, 
-    home-manager, 
-    ... 
-  } @inputs: let
+    sops-nix,
+    home-manager,
+    ...
+  } @ inputs: let
     inherit (self) outputs;
 
     # ==============================
@@ -37,12 +36,12 @@
     commonModules = name: cfg: [
       # Set common config options
       {
-        nix.settings.experimental-features = [ "nix-command" "flakes" ];
+        nix.settings.experimental-features = ["nix-command" "flakes"];
         networking.hostName = name;
       }
-      
+
       # Include our host config
-      ./hosts/${(cfg.hostType or "servers" )}/${name}
+      ./hosts/${(cfg.hostType or "servers")}/${name}
 
       # Absolute minimum config required
       ./base.nix
@@ -63,7 +62,6 @@
       ./nixos/roles/physical
     ];
 
-
     # ==============================
     # Home-Manager Configuration
     # ==============================
@@ -71,10 +69,12 @@
     # Common home-manager options (I /think/ this should be nixos neutral, but I currently only use nixos)
     mkHomeManagerModules = cfg: [
       {
-        home-manager.users.kate.imports = [
-          ./home.nix
-          ./home-manager/roles/common
-        ] ++ (cfg.hmRoles or []);
+        home-manager.users.kate.imports =
+          [
+            ./home.nix
+            ./home-manager/roles/common
+          ]
+          ++ (cfg.hmRoles or []);
       }
       # Add sops age-key to use for home-manager to decrypt sops secrets (without needing to add it ourselves)
       {
@@ -88,19 +88,20 @@
     ];
 
     # NixOs specific home-manager modules
-    mkNixOsHomeManagerModules = cfg: [
-      home-manager.nixosModules.home-manager
-      {
-        # TOOD: Add user into this inherit -let it be used by home-manager
-        home-manager.extraSpecialArgs = { inherit inputs; };
-        home-manager.useGlobalPkgs = true;
-        home-manager.useUserPackages = true;
-        home-manager.users.kate.imports = [
-          inputs.sops-nix.homeManagerModules.sops
-        ];
-      }      
-    ] ++ mkHomeManagerModules cfg;
-
+    mkNixOsHomeManagerModules = cfg:
+      [
+        home-manager.nixosModules.home-manager
+        {
+          # TOOD: Add user into this inherit -let it be used by home-manager
+          home-manager.extraSpecialArgs = {inherit inputs;};
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.users.kate.imports = [
+            inputs.sops-nix.homeManagerModules.sops
+          ];
+        }
+      ]
+      ++ mkHomeManagerModules cfg;
 
     # ==============================
     # NixOs Config Generation
@@ -110,38 +111,36 @@
     # ==============================
 
     # Generates the relevant system configuration based on inputs
-    mkNixosSystem = name: cfg: nixpkgs.lib.nixosSystem {
-      system = cfg.system or "x86_64-linux";
+    mkNixosSystem = name: cfg:
+      nixpkgs.lib.nixosSystem {
+        system = cfg.system or "x86_64-linux";
 
-      # Include our common modules, plus any host specified roles
-      modules = 
-        (commonModules name cfg) ++
-        (cfg.roles or []) ++ 
+        # Include our common modules, plus any host specified roles
+        modules =
+          (commonModules name cfg)
+          ++ (cfg.roles or [])
+          ++
+          # If the hostType is servers then add in our serverModules
+          nixpkgs.lib.optionals (cfg.hostType == "servers") (serverModules name cfg)
+          ++
+          # If the hostType is physical then add in our physicalDeviceModules
+          nixpkgs.lib.optionals (cfg.hostType == "physical") (physicalDeviceModules name cfg)
+          ++
+          # Include HomeManager (opt in for servers, opt out otherwise)
+          nixpkgs.lib.optionals ((cfg.hostType == "servers" && (cfg.usesHomeManager or false)) || (cfg.usesHomeManager or true)) (mkNixOsHomeManagerModules cfg);
 
-        # If the hostType is servers then add in our serverModules
-        nixpkgs.lib.optionals (cfg.hostType == "servers") (serverModules name cfg) ++
+        specialArgs = {
+          inherit inputs;
 
-        # If the hostType is physical then add in our physicalDeviceModules
-        nixpkgs.lib.optionals (cfg.hostType == "physical") (physicalDeviceModules name cfg) ++
-
-
-        # Include HomeManager (opt in for servers, opt out otherwise)
-        nixpkgs.lib.optionals ((cfg.hostType == "servers" && (cfg.usesHomeManager or false)) || (cfg.usesHomeManager or true)) (mkNixOsHomeManagerModules cfg)
-      ;
-
-      specialArgs = {
-        inherit inputs; 
-
-        # A .json file from the nix-secrets repo with non-important info. 
-        # Stuff we just don't want public (ie. project_tld) but don't care if it's in the nix store
-        private = builtins.fromJSON (builtins.readFile ("${builtins.toString inputs.nix-secrets}/private.json"));
+          # A .json file from the nix-secrets repo with non-important info.
+          # Stuff we just don't want public (ie. project_tld) but don't care if it's in the nix store
+          private = builtins.fromJSON (builtins.readFile "${builtins.toString inputs.nix-secrets}/private.json");
+        };
       };
-    };
 
     # NixOS System definitions
     # If hostType = server then home-manager is opt-in, otherwise opt-out
     systems = {
-
       swift3 = {
         hostType = "physical";
       };
@@ -155,7 +154,7 @@
         hostType = "servers";
         serverType = "lxc";
         usesHomeManager = true;
-        hmRoles =[
+        hmRoles = [
           ./home-manager/roles/sops-management
         ];
       };

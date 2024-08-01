@@ -1,17 +1,20 @@
-{inputs, pkgs, ...}:
+{
+  inputs,
+  pkgs,
+  ...
+}:
 #
 # Role used for every host
 # Can use secrets, flake inputs, etc.
 #
-let 
+let
   secretsPath = builtins.toString inputs.nix-secrets;
-in
-{
-   imports = [
+in {
+  imports = [
     ../../../users/kate.nix
     ../../modules/zsh
   ];
- 
+
   # ==============================
   # Shared Sops configuration
   # ==============================
@@ -37,11 +40,11 @@ in
   # Keep SSH agent in sudo
   security.sudo = {
     extraConfig = ''
-    Defaults env_keep+=SSH_AUTH_SOCK
-    Defaults timestamp_timeout=30
+      Defaults env_keep+=SSH_AUTH_SOCK
+      Defaults timestamp_timeout=30
     '';
   };
-  
+
   # Auto clean old store files
   nix.gc = {
     automatic = true;

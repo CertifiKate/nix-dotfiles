@@ -1,9 +1,6 @@
-{pkgs, ...}:
-let
+{pkgs, ...}: let
   remote_rebuild_user = "server_admin";
-in
-{
-
+in {
   environment.systemPackages = with pkgs; [
     zsh
     oh-my-zsh

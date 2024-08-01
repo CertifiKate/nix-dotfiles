@@ -1,7 +1,7 @@
 {
   users.users.ansible = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ];
+    extraGroups = ["wheel"];
     hashedPassword = "";
     openssh.authorizedKeys.keys = [
       "ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBAAVuLf+Dc1JkDNX3+STIL9W5kasHu09YVW1vI/S5z5g4HbGiKbGTtvkKCYjk5hHabRIALxhsx4N0lCxeOrCmSwWQABA/EQGSEccl1er+XP+9o/SrB8/do/emIg6zEzu5XhL4RT3Y2I6Rf5RewkISlcXD1mxgkbVo+qemzSYMdBD81nWJg== ansible key"
@@ -13,14 +13,14 @@
   security.sudo = {
     extraRules = [
       {
-        users = [ "ansible" ];
+        users = ["ansible"];
         commands = [
-          { 
-            command = "ALL" ;
-            options= [ "NOPASSWD" ];
+          {
+            command = "ALL";
+            options = ["NOPASSWD"];
           }
         ];
       }
-    ]; 
+    ];
   };
 }

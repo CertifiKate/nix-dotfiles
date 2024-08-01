@@ -1,6 +1,10 @@
-{ config, lib, pkgs, modulesPath, ... }:
-
 {
+  config,
+  lib,
+  pkgs,
+  modulesPath,
+  ...
+}: {
   services.avahi = {
     enable = true;
     reflector = true;

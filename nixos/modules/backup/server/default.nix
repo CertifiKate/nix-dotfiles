@@ -1,14 +1,16 @@
-{pkgs, inputs, private, ...}:
-let 
+{
+  pkgs,
+  inputs,
+  private,
+  ...
+}: let
   secretsPath = builtins.toString inputs.nix-secrets;
 
   remote_borg_repo = "${private.remote_borg_repo}";
 
   # The location where backups are dumped to then be sent off to actual backup solutions (i.e borg)
   backup_dump_path = "/var/backups/";
-in
-{
-
+in {
   sops.secrets."backup_append_key" = {
     sopsFile = "${secretsPath}/secrets/backup.yaml";
   };
@@ -16,12 +18,10 @@ in
     sopsFile = "${secretsPath}/secrets/backup.yaml";
   };
 
-
   # Add rrsync to allow write-only backups to destination folders
   environment.systemPackages = with pkgs; [
     rrsync
   ];
-
 
   systemd = {
     tmpfiles.rules = [

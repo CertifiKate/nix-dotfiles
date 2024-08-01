@@ -1,11 +1,15 @@
-{ inputs, config, pkgs, ... }:
+{
+  inputs,
+  config,
+  pkgs,
+  ...
+}:
 #
 # The absolute minimum system config required for my nix setup
 # Shouldn't be required to use flakes to run this, nor any secrets
 # Should be compatible with ALL hosts, including golden images
 #
-
-let 
+let
   timezone = "Australia/Adelaide";
 in {
   # ==============================
@@ -13,7 +17,7 @@ in {
   # ==============================
   time.timeZone = timezone;
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = ["nix-command" "flakes"];
 
   environment.systemPackages = with pkgs; [
     git
@@ -22,7 +26,7 @@ in {
   users = {
     mutableUsers = false;
   };
- 
+
   # Auto clean old store files
   nix.gc = {
     automatic = true;

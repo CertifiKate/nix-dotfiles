@@ -1,11 +1,12 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
-
-{ config, pkgs, ... }:
-
 {
-  imports = [ 
+  config,
+  pkgs,
+  ...
+}: {
+  imports = [
     ./hardware-configuration.nix
   ];
 
@@ -27,9 +28,4 @@
   # TODO: Move to home-manager role
   # Install firefox.
   programs.firefox.enable = true;
-
-  # TODO: Editor
-  environment.systemPackages = with pkgs; [
-    vscode
-  ];
 }

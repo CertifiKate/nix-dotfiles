@@ -1,11 +1,9 @@
 {
   # Yubikey
   services.pcscd.enable = true;
-  
 
   # Enable networking
   networking.networkmanager.enable = true;
-
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_AU.UTF-8";
@@ -49,6 +47,4 @@
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
-
-
 }

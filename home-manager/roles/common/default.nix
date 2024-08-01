@@ -1,10 +1,16 @@
-{inputs, outputs, lib, config, pkgs, ...}:
-let
-  secretsPath = builtins.toString inputs.nix-secrets;
-in
 {
+  inputs,
+  outputs,
+  lib,
+  config,
+  pkgs,
+  ...
+}: let
+  secretsPath = builtins.toString inputs.nix-secrets;
+in {
   imports = [
     ./ssh-client
+    ../../modules/vscode
   ];
 
   # Github private keys

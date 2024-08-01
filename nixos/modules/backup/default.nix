@@ -1,11 +1,14 @@
-{config, pkgs, lib, ...}:
-let
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}: let
   cfg = config.CertifiKate.backup_service;
 
   backup_user = "backup";
   backup_host = "backup-01.srv";
-in
-{
+in {
   # TODO: Add scoping of paths?
   options.CertifiKate.backup_service = {
     paths = lib.mkOption {
@@ -15,10 +18,8 @@ in
     };
   };
 
-
   # Only configure if we have actually defined some paths
   config = lib.mkIf (cfg.paths != []) {
-
     # Add write-only backup key
     sops.secrets."backup_service_write_only_key" = {
       path = "/etc/ssh/backup_key";
@@ -32,9 +33,7 @@ in
     # Create our backup service
     systemd.services."backup_service" = let
       paths = "${lib.concatStringsSep " " cfg.paths}";
-
-    in
-    {
+    in {
       # TODO: Add pre-start option (i.e dump db, stop service, etc)
       # TODO: Add post-stop options (i.e start service, etc.)
 
@@ -49,13 +48,13 @@ in
     };
 
     systemd.timers."backup" = {
-      wantedBy = [ "timers.target" ];
-        timerConfig = {
-          OnBootSec = "5m";
-          OnUnitActiveSec = "5m";
-          OnCalendar = "*-*-* 4:00:00";
-          Unit = "backup_service.service";
-        };
+      wantedBy = ["timers.target"];
+      timerConfig = {
+        OnBootSec = "5m";
+        OnUnitActiveSec = "5m";
+        OnCalendar = "*-*-* 4:00:00";
+        Unit = "backup_service.service";
+      };
     };
   };
 }

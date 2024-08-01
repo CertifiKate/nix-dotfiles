@@ -1,13 +1,16 @@
-{ pkgs, inputs, lib, private, ... }:
-
-let
+{
+  pkgs,
+  inputs,
+  lib,
+  private,
+  ...
+}: let
   secretsPath = builtins.toString inputs.nix-secrets;
 
   project_tld = "${private.project_tld}";
   project_dir = "/config/proxy";
   config_dir = "${project_dir}/config";
   data_dir = "${project_dir}/data";
-
 in {
   environment.systemPackages = with pkgs; [
     traefik
@@ -20,14 +23,12 @@ in {
     ];
   };
 
-  sops.secrets."proxy_traefik_env" = { 
+  sops.secrets."proxy_traefik_env" = {
     owner = "traefik";
-    sopsFile = "${secretsPath}/secrets/proxy.yaml"; 
+    sopsFile = "${secretsPath}/secrets/proxy.yaml";
   };
 
-
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
-
+  networking.firewall.allowedTCPPorts = [80 443];
 
   # Allow traefik to access config data dir
   systemd = {
@@ -42,7 +43,6 @@ in {
   services.traefik = let
     # TODO: Handle static service/routers (traefik dashboard, authelia?)
     defaultServices = {
-
     };
 
     # TODO: These will be moved to dns entries after they've been migrated
@@ -53,7 +53,7 @@ in {
         dest = "http://auth-01.srv:9091";
         auth = false;
       };
-      
+
       gotify = {
         host = "gotify";
         dest = "http://192.168.10.30:3300";
@@ -65,7 +65,7 @@ in {
         host = "recipes";
         dest = "http://192.168.10.30:4001";
       };
-      
+
       # Media
       sonarr = {
         host = "sonarr";
@@ -113,31 +113,34 @@ in {
       };
     };
 
-
     # TODO: Can we add back the router-x service-x prefix?
     mkRouters = name: cfg: {
       service = "${name}";
-      rule = "${ cfg.rule or ("Host(`${cfg.host}.${project_tld}`)") }";
+      rule = "${cfg.rule or "Host(`${cfg.host}.${project_tld}`)"}";
       entryPoints = "webHttps";
       priority = "10";
-      
-      middlewares = lib.mkIf(cfg.auth or true) [
+
+      middlewares = lib.mkIf (cfg.auth or true) [
         "authelia@file"
       ];
 
-      tls = { certResolver = "letsEncrypt";
-        domains = [ { main = "${project_tld}"; sans = [ "*.${project_tld}" ]; } ];
+      tls = {
+        certResolver = "letsEncrypt";
+        domains = [
+          {
+            main = "${project_tld}";
+            sans = ["*.${project_tld}"];
+          }
+        ];
       };
     };
 
     mkServices = name: cfg: {
-      loadBalancer = { servers = [ { url = "${cfg.dest}"; } ]; };
+      loadBalancer = {servers = [{url = "${cfg.dest}";}];};
     };
 
- 
     allRouters = lib.mapAttrs mkRouters services;
     allServices = lib.mapAttrs mkServices services;
-
   in rec {
     enable = true;
     dataDir = "${data_dir}";
@@ -148,8 +151,8 @@ in {
       entryPoints = {
         web = {
           address = ":80";
-          proxyProtocol.trustedIPs = [ "192.168.10.15/32" ];
-          forwardedHeaders.trustedIPs = [ "192.168.10.15/32" ];
+          proxyProtocol.trustedIPs = ["192.168.10.15/32"];
+          forwardedHeaders.trustedIPs = ["192.168.10.15/32"];
           http.redirections = {
             entryPoint = {
               to = "webHttps";
@@ -160,8 +163,8 @@ in {
         };
         webHttps = {
           address = ":443";
-          proxyProtocol.trustedIPs = [ "192.168.10.15/32" ];
-          forwardedHeaders.trustedIPs = [ "192.168.10.15/32" ];
+          proxyProtocol.trustedIPs = ["192.168.10.15/32"];
+          forwardedHeaders.trustedIPs = ["192.168.10.15/32"];
         };
       };
 
@@ -198,8 +201,8 @@ in {
           };
         };
 
-      routers = allRouters;
-      services = allServices;
+        routers = allRouters;
+        services = allServices;
       };
     };
   };

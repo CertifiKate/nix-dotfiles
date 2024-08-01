@@ -1,6 +1,11 @@
-{ pkgs, inputs, config, lib, private, ... }:
-
-let
+{
+  pkgs,
+  inputs,
+  config,
+  lib,
+  private,
+  ...
+}: let
   secretsPath = builtins.toString inputs.nix-secrets;
 
   project_tld = "${private.project_tld}";
@@ -8,10 +13,7 @@ let
   project_dir = "/services/authelia";
   config_dir = "${project_dir}/config";
   data_dir = "${project_dir}/data";
-
-in
-{
-
+in {
   # Setup backup service
   CertifiKate.backup_service = {
     paths = [
@@ -19,12 +21,11 @@ in
     ];
   };
 
-
   environment.systemPackages = with pkgs; [
     authelia
   ];
 
-  networking.firewall.allowedTCPPorts = [ 9091 ];
+  networking.firewall.allowedTCPPorts = [9091];
 
   # Allow traefik to access config data dir
   systemd = {
@@ -34,21 +35,21 @@ in
     ];
   };
 
-  sops.secrets."authelia_jwt_secret" = { 
+  sops.secrets."authelia_jwt_secret" = {
     owner = "authelia";
-    sopsFile = "${secretsPath}/secrets/authentication.yaml"; 
+    sopsFile = "${secretsPath}/secrets/authentication.yaml";
   };
-  sops.secrets."authelia_session_secret" = { 
+  sops.secrets."authelia_session_secret" = {
     owner = "authelia";
-    sopsFile = "${secretsPath}/secrets/authentication.yaml"; 
+    sopsFile = "${secretsPath}/secrets/authentication.yaml";
   };
-  sops.secrets."authelia_storage_key" = { 
+  sops.secrets."authelia_storage_key" = {
     owner = "authelia";
-    sopsFile = "${secretsPath}/secrets/authentication.yaml"; 
+    sopsFile = "${secretsPath}/secrets/authentication.yaml";
   };
-  sops.secrets."authelia_users_database" = { 
+  sops.secrets."authelia_users_database" = {
     owner = "authelia";
-    sopsFile = "${secretsPath}/secrets/authentication.yaml"; 
+    sopsFile = "${secretsPath}/secrets/authentication.yaml";
     path = "${config_dir}/user-database.yml";
   };
 
@@ -62,7 +63,7 @@ in
 
   # This was super fun to find buried in the service config after two hours debugging.
   systemd.services."authelia-main".serviceConfig.ProtectSystem = lib.mkForce false;
-  
+
   services.authelia.instances.main = {
     user = "authelia";
     group = "authelia";
@@ -73,7 +74,7 @@ in
       storageEncryptionKeyFile = config.sops.secrets."authelia_storage_key".path;
     };
 
-    settings =  {
+    settings = {
       theme = "dark";
 
       server = {
