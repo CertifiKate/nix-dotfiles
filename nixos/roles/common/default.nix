@@ -8,7 +8,7 @@ let
 in
 {
    imports = [
-    ../../users/kate.nix
+    ../../../users/kate.nix
     ../../modules/zsh
   ];
  

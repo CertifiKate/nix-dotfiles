@@ -1,5 +1,7 @@
 {
+  # Yubikey
   services.pcscd.enable = true;
+  
 
   # Enable networking
   networking.networkmanager.enable = true;

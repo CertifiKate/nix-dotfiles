@@ -47,20 +47,20 @@
       # Absolute minimum config required
       ./base.nix
       # Include our shared configuration
-      ./roles/common
+      ./nixos/roles/common
 
       sops-nix.nixosModules.sops
     ];
 
     # Server Modules
     serverModules = name: cfg: [
-      ./roles/server
-      ./roles/server/${cfg.serverType or "lxc"}
-      ./modules/backup
+      ./nixos/roles/server
+      ./nixos/roles/server/${cfg.serverType or "lxc"}
+      ./nixos/modules/backup
     ];
 
     physicalDeviceModules = name: cfg: [
-      ./roles/physical
+      ./nixos/roles/physical
     ];
 
 
@@ -68,7 +68,7 @@
     # Home-Manager Configuration
     # ==============================
 
-    # Common home-manager options (I /think/ this should be nixos neutral, but I only use nixos)
+    # Common home-manager options (I /think/ this should be nixos neutral, but I currently only use nixos)
     mkHomeManagerModules = cfg: [
       {
         home-manager.users.kate.imports = [
@@ -164,7 +164,7 @@
         hostType = "servers";
         serverType = "lxc";
         roles = [
-          ./roles/server/auth
+          ./nixos/roles/server/auth
         ];
       };
 
@@ -172,7 +172,7 @@
         hostType = "servers";
         serverType = "lxc";
         roles = [
-          ./roles/server/proxy
+          ./nixos/roles/server/proxy
         ];
       };
 
@@ -180,7 +180,7 @@
         hostType = "servers";
         serverType = "lxc";
         roles = [
-          ./roles/server/mdns-repeater
+          ./nixos/roles/server/mdns-repeater
         ];
       };
 
@@ -189,7 +189,7 @@
         hostType = "servers";
         serverType = "vm";
         roles = [
-          ./modules/backup/server
+          ./nixos/modules/backup/server
         ];
       };
 
@@ -197,7 +197,7 @@
         hostType = "servers";
         serverType = "vm";
         roles = [
-          ./roles/server/minecraft
+          ./nixos/roles/server/minecraft
         ];
       };
 

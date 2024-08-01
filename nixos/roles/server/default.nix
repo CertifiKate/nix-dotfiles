@@ -2,8 +2,8 @@
 { pkgs, ...}:
 {
   imports = [
-    ../../users/ansible.nix
-    ../../users/server_admin.nix
+    ../../../users/ansible.nix
+    ../../../users/server_admin.nix
     ./vs-code-server.nix
   ];
 

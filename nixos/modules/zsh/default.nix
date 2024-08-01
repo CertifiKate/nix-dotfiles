@@ -18,7 +18,7 @@ in
 
   # Font used for figlet MOTD
   environment.etc = {
-    "bulbhead.flf".source = ../../lib/bulbhead.flf;
+    "bulbhead.flf".source = ../../../lib/bulbhead.flf;
   };
 
   programs.zsh = {
