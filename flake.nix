@@ -143,6 +143,9 @@
     systems = {
       swift3 = {
         hostType = "physical";
+        roles = [
+          ./nixos/roles/physical/desktop/gnome
+        ];
       };
 
       # ==============================
