@@ -10,7 +10,6 @@
 in {
   imports = [
     ./ssh-client
-    ../../modules/vscode
   ];
 
   # Configure our git config

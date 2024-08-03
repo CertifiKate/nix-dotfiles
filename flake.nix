@@ -6,6 +6,8 @@
 
     sops-nix.url = "github:Mic92/sops-nix";
 
+    nix-colors.url = "github:Misterio77/nix-colors";
+
     nix-secrets = {
       url = "git+ssh://git@github.com/CertifiKate/nix-secrets.git";
       flake = false;
@@ -23,6 +25,7 @@
     nixpkgs,
     nixpkgs-stable,
     sops-nix,
+    nix-colors,
     home-manager,
     ...
   } @ inputs: let
@@ -93,7 +96,9 @@
         home-manager.nixosModules.home-manager
         {
           # TOOD: Add user into this inherit -let it be used by home-manager
-          home-manager.extraSpecialArgs = {inherit inputs;};
+          home-manager.extraSpecialArgs = {
+            inherit inputs nix-colors;
+          };
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.users.kate.imports = [
@@ -145,9 +150,11 @@
         hostType = "physical";
         roles = [
           ./nixos/roles/physical/desktop/gnome
+          ./nixos/roles/physical/desktop/sway
         ];
         hmRoles = [
           ./home-manager/roles/sops-management
+          ./home-manager/roles/desktop/sway
         ];
       };
 

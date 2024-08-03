@@ -6,6 +6,7 @@
   sops.secrets."users_kate_password_hash".neededForUsers = true;
 
   users.users.kate = {
+    description = "Kate";
     isNormalUser = true;
     extraGroups = ["wheel"];
     openssh.authorizedKeys.keys = [
