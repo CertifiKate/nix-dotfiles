@@ -132,7 +132,7 @@
           nixpkgs.lib.optionals (cfg.hostType == "physical") (physicalDeviceModules name cfg)
           ++
           # Include HomeManager (opt in for servers, opt out otherwise)
-          nixpkgs.lib.optionals ((cfg.hostType == "servers" && (cfg.usesHomeManager or false)) || (cfg.usesHomeManager or true)) (mkNixOsHomeManagerModules cfg);
+          nixpkgs.lib.optionals ((cfg.hostType == "servers" && (cfg.usesHomeManager or false)) || (cfg.hostType != "servers" && cfg.usesHomeManager or true)) (mkNixOsHomeManagerModules cfg);
 
         specialArgs = {
           inherit inputs;
