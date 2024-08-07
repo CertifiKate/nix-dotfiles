@@ -38,7 +38,4 @@
     alsa.support32Bit = true;
     pulse.enable = true;
   };
-
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
 }

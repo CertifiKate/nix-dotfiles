@@ -49,6 +49,18 @@ in {
         "/home/kate/.ssh/id_ed25519_kate"
       ];
     };
+    "*.dmz" = lib.hm.dag.entryBefore ["*"] {
+      identityFile = [
+        "/home/kate/.ssh/id_ed25519_sk_rk_yubikey5c"
+        "/home/kate/.ssh/id_ed25519_sk_rk_yubikey5"
+      ];
+    };
+    "*.infra" = lib.hm.dag.entryBefore ["*"] {
+      identityFile = [
+        "/home/kate/.ssh/id_ed25519_sk_rk_yubikey5c"
+        "/home/kate/.ssh/id_ed25519_sk_rk_yubikey5"
+      ];
+    };
     "*" = {
       identityFile = [
         "/home/kate/.ssh/id_ed25519_kate"

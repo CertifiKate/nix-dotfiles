@@ -35,6 +35,9 @@ in {
 
   # ==============================
 
+  # Allow unfree packages
+  nixpkgs.config.allowUnfree = true;
+
   # If we change this things will be sad
   system.stateVersion = "24.05";
 }
