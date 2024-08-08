@@ -154,6 +154,7 @@
         ];
         hmRoles = [
           ./home-manager/roles/sops-management
+          ./home-manager/roles/ansible-controller
           ./home-manager/roles/desktop/sway
         ];
       };

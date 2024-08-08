@@ -1,5 +1,6 @@
 {pkgs, ...}: let
   remote_rebuild_user = "server_admin";
+  remote_build_srv = "build-01.srv";
 in {
   environment.systemPackages = with pkgs; [
     zsh
@@ -10,8 +11,6 @@ in {
   environment.variables = {
     NIX_FLAKE_PATH = "/etc/nixos/";
   };
-
-  system.userActivationScripts.zshrc = "touch .zshrc";
 
   # Font used for figlet MOTD
   environment.etc = {
@@ -36,10 +35,16 @@ in {
     };
 
     # TODO: Cache the figlet -f to a motd file
+    # TODO: Split this out
+    # TODO: Add better rebuilding - caching to build-01 regardless of options??
     promptInit = ''
       # Nix remote rebuild
       nrr() {
         nixos-rebuild --target-host ${remote_rebuild_user}@$1 --use-remote-sudo switch --flake $NIX_FLAKE_PATH
+      }
+      # Testing remote rebuild with build host
+      nrb(){
+        nixos-rebuild --build-host ${remote_rebuild_user}@${remote_build_srv} --target-host ${remote_rebuild_user}@$1 --use-remote-sudo switch --flake $NIX_FLAKE_PATH
       }
 
       echo "$fg[red]$(figlet $(cat /etc/hostname) -f /etc/bulbhead.flf)"
