@@ -1,6 +1,5 @@
 {pkgs, ...}: {
   imports = [
-    ../apps
   ];
 
   # Enable the X11 windowing system.
@@ -24,6 +23,7 @@
     gnome-tour
 
     gnome-calendar
+    gnome-connections
     gnome.gnome-characters
     gnome.gnome-clocks
     gnome.gnome-contacts
@@ -31,6 +31,5 @@
     gnome.gnome-maps
     gnome.gnome-music
     gnome.gnome-weather
-    gnome-connections
   ];
 }

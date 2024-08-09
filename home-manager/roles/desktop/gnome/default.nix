@@ -45,6 +45,7 @@ in {
       move-to-workspace-2 = ["<Shift><Super>2"];
       move-to-workspace-3 = ["<Shift><Super>3"];
       move-to-workspace-4 = ["<Shift><Super>4"];
+      switch-windows = ["<Alt>Tab"];
       close = ["<Super>q"];
     };
 

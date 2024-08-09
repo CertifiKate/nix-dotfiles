@@ -1,6 +1,8 @@
 {
   imports = [
-    ./vscode
     ./alacritty
+    ./bitwarden
+    ./firefox
+    ./vscode
   ];
 }
