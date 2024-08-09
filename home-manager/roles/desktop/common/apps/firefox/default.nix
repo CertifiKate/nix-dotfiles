@@ -11,6 +11,7 @@
         };
       };
       OfferToSaveLogins = false;
+      PasswordManagerEnabled = false;
       DisplayBookmarksToolbar = true;
       NoDefaultBookmarks = true;
     };

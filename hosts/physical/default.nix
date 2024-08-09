@@ -34,6 +34,7 @@
 
   environment.systemPackages = with pkgs; [
     alsa-utils
+    lm_sensors
   ];
 
   hardware.pulseaudio.enable = false;
