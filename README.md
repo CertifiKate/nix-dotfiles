@@ -77,7 +77,65 @@ This allows me to
 
 To me, this is a much more reasonable and fluid workflow than spinning up the lxc/vm, getting the host key, putting that in sops... agony. Especially if you're doing that a lot!!
 
+#### Home-Manager
+For home-manager, I'm using a slightly odd setup.
+The main secrets file `secrets/home-manager.yaml` is decrypted by a key file that is provided in `secrets/home-manager-init.yaml`.
+This means that any machine that needs home-manager can just be added to the `home-manager-init` file, and then magically the user sops key is provided and used for decryption.
 
+I like this setup because it allows us to decouple our home-manager secrets from our nixos secrets, without requiring me to manage yet another key to install on a machine I'm provisioning.
+Of course, if I add in a home-manager only (ie. non-nixos) setup, then I would need to manually add that key (or better, generate a specific machine key for `home-manager.yaml`)
+
+
+Example:
+
+`sops.yaml`
+```
+keys:
+  # Used for editing and management of sops secrets
+  - &admin_kate key
+  # Used to unlock secrets/home-manager.yaml
+  - &user_kate key
+  # Machine keys
+  - &physical_aurora key
+  # Server keys
+  ...
+
+creation_rules:
+  - path_regex: secrets/shared.yaml$
+    key_groups:
+    - age:
+      - *admin_kate
+      - *physical_aurora
+      - *server_...
+      ...
+
+  - path_regex: secrets/home-manager.yaml$
+    key_groups:
+    - age:
+      - *admin_kate
+      - *user_kate
+
+  - path_regex: secrets/home-manager-init.yaml$
+    key_groups:
+    - age:
+      - *admin_kate
+      - *physical_aurora
+```
+
+`secrets/home-manager-init.yaml` (decrypted)
+```
+home_manager_user_key: |
+  # created: TIME
+  # public key: age1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  AGE-SECRET-KEY-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+```
+
+`secrets/home-manager.yaml` (decrypted)
+```
+# Used by the home-manager service
+some_secret: some_value
+some_other_secret: some_other_value
+```
 
 
 ## Server Provisioning
