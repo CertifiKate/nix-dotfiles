@@ -30,4 +30,8 @@
       size = 16 * 1024;
     }
   ];
+  boot.resumeDevice = "/dev/nvme0n1p2";
+  boot.kernelParams = [
+    "resume_offset=13154304"
+  ];
 }
