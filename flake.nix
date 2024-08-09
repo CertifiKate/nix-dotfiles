@@ -17,6 +17,8 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs-stable";
 
     nix-minecraft.url = "github:Infinidoge/nix-minecraft";
+
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   };
 
   # Based on https://www.reddit.com/r/NixOS/comments/yk4n8d/comment/iurkkxv
@@ -150,12 +152,14 @@
       aurora = {
         hostType = "physical";
         roles = [
+          inputs.nixos-hardware.nixosModules.lenovo-thinkpad-e14-amd
           ./nixos/roles/physical/desktop/gnome
           ./nixos/roles/physical/desktop/sway
         ];
         hmRoles = [
           ./home-manager/roles/sops-management
           ./home-manager/roles/ansible-controller
+          ./home-manager/roles/desktop/gnome
           ./home-manager/roles/desktop/sway
         ];
       };

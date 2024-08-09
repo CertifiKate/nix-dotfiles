@@ -125,6 +125,22 @@
         "url": "ssh://git@github.com/CertifiKate/nix-secrets.git"
       }
     },
+    "nixos-hardware": {
+      "locked": {
+        "lastModified": 1723149858,
+        "narHash": "sha256-3u51s7jdhavmEL1ggtd8wqrTH2clTy5yaZmhLvAXTqc=",
+        "owner": "NixOS",
+        "repo": "nixos-hardware",
+        "rev": "107bb46eef1f05e86fc485ee8af9b637e5157988",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "master",
+        "repo": "nixos-hardware",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1715266358,
@@ -226,6 +242,7 @@
         "nix-colors": "nix-colors",
         "nix-minecraft": "nix-minecraft",
         "nix-secrets": "nix-secrets",
+        "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-stable": "nixpkgs-stable",
         "sops-nix": "sops-nix"
