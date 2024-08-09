@@ -146,6 +146,21 @@
     # NixOS System definitions
     # If hostType = server then home-manager is opt-in, otherwise opt-out
     systems = {
+      # Lenovo Thinkpad E14 Gen 6 (AMD)
+      aurora = {
+        hostType = "physical";
+        roles = [
+          ./nixos/roles/physical/desktop/gnome
+          ./nixos/roles/physical/desktop/sway
+        ];
+        hmRoles = [
+          ./home-manager/roles/sops-management
+          ./home-manager/roles/ansible-controller
+          ./home-manager/roles/desktop/sway
+        ];
+      };
+
+      # Acer Swift 3 SF353-51
       swift3 = {
         hostType = "physical";
         roles = [
