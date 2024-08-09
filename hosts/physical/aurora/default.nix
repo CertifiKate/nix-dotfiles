@@ -35,4 +35,5 @@
   boot.kernelParams = [
     "resume_offset=13154304"
   ];
+  systemd.sleep.extraConfig = "HibernateDelaySec=4h";
 }
