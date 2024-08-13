@@ -216,6 +216,24 @@
         ];
       };
 
+      media-01 = {
+        hostType = "servers";
+        serverType = "lxc";
+        roles = [
+          ./nixos/roles/server/common/media_server
+          ./nixos/roles/server/jellyfin
+        ];
+      };
+
+      media-02 = {
+        hostType = "servers";
+        serverType = "lxc";
+        roles = [
+          ./nixos/roles/server/common/media_server
+          ./nixos/roles/server/media_dl
+        ];
+      };
+
       # ==== VMs =====================
       backup-01 = {
         hostType = "servers";
