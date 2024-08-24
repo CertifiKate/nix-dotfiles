@@ -69,12 +69,12 @@ in {
       # Media
       sonarr = {
         host = "sonarr";
-        dest = "http://192.168.10.51:8989";
+        dest = "http://media-02.srv:8989";
       };
 
       radarr = {
         host = "radarr";
-        dest = "http://192.168.10.51:7878";
+        dest = "http://media-02.srv:7878";
       };
 
       prowlarr = {
