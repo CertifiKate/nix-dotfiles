@@ -1,12 +1,18 @@
 {
   config,
   pkgs,
+  lib,
   ...
 }: {
   imports = [
     ./hardware-configuration.nix
     ../default.nix
   ];
+
+  # Overwrite the path used for our shorthand aliases/functions
+  environment.variables = {
+    NIX_FLAKE_PATH = lib.mkForce "/home/kate/source/nix-dotfiles";
+  };
 
   # Bootloader
   boot.loader.systemd-boot.enable = true;
@@ -16,6 +22,10 @@
   services.fprintd = {
     enable = true;
   };
+
+  # Fix ethernet not being detected
+  boot.initrd.kernelModules = ["8821cu"];
+  boot.extraModulePackages = [config.boot.kernelPackages.rtl8821cu];
 
   # ==== Power Management ====
   # Set by default in Gnome

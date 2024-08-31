@@ -38,8 +38,31 @@
             icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
             definedAliases = ["@np"];
           };
+          "Nix Options" = {
+            urls = [
+              {
+                template = "https://search.nixos.org/options?channel=unstable";
+                params = [
+                  {
+                    name = "sort";
+                    value = "alpha_asc";
+                  }
+                  {
+                    name = "query";
+                    value = "{searchTerms}";
+                  }
+                ];
+              }
+            ];
+            icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+            definedAliases = ["@no"];
+          };
           "NixOS Wiki" = {
-            urls = [{template = "https://nixos.wiki/index.php?search={searchTerms}";}];
+            urls = [
+              {
+                template = "https://wiki.nixos.org/w/index.php?search={searchTerms}";
+              }
+            ];
             iconUpdateURL = "https://nixos.wiki/favicon.png";
             updateInterval = 24 * 60 * 60 * 1000;
             definedAliases = ["@nw"];
