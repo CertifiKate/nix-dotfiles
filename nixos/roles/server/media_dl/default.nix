@@ -6,6 +6,13 @@ let
   # TODO: Unused
   media_dir = "/data";
 in {
+  # Setup backup service
+  CertifiKate.backup_service = {
+    paths = [
+      "${base_project_dir}"
+    ];
+  };
+
   # Allow traefik to access config data dir
   systemd = {
     tmpfiles.rules = [

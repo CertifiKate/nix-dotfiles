@@ -101,7 +101,7 @@ in {
 
       jellyfin = {
         host = "media";
-        dest = "http://192.168.10.50:8096";
+        dest = "http://media-01.srv:8096";
         auth = false;
       };
 
