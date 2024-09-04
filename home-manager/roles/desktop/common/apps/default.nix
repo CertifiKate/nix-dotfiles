@@ -3,6 +3,7 @@
     ./alacritty
     ./bitwarden
     ./firefox
+    ./minecraft
     ./vscode
   ];
 }
