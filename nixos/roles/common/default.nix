@@ -35,6 +35,8 @@ in {
   environment.systemPackages = with pkgs; [
     ranger
     btop
+    dig
+    tree
   ];
 
   # Keep SSH agent in sudo

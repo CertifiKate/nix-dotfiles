@@ -4,6 +4,7 @@
     ./bitwarden
     ./firefox
     ./minecraft
+    ./spotify
     ./vscode
   ];
 }
