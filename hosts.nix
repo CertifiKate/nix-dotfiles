@@ -4,10 +4,11 @@
   home-manager,
   hostName,
   user,
-  systemType,
-  roles,
-  hmRoles,
-  extraImports,
+  systemType ? "physical",
+  serverType ? null,
+  roles ? [],
+  hmRoles ? [],
+  extraImports ? [],
   ...
 }:
 # Inspired by https://github.com/Baitinq/nixos-config/blob/31f76adafbf897df10fe574b9a675f94e4f56a93/hosts/default.nix
@@ -18,22 +19,27 @@ let
       networking.hostName = hostName;
       nix.settings.experimental-features = ["nix-command" "flakes"];
     }
-    # Include our host config
+
+    # Include our host specific config
     ./hosts/${systemType}/${hostName}
 
     # Absolute minimum config required
     ./base.nix
+
     # Include our shared configuration
     ./nixos/roles/common
+
+    # Add in sops
     inputs.sops-nix.nixosModules.sops
   ];
 
   mkNixRoles = roles: (map (n: ./nixos/roles/${n}) roles);
   mkHMRoles = roles: (map (n: ./home-manager/roles/${n}) roles);
 
-  mkHost = hostName: user: systemType: roles: hmRoles: extraImports:
+  mkHost = hostName: user: systemType: serverType: roles: hmRoles: extraImports:
     if systemType == "server"
     then
+      # If it's a NixOS server system. Not intended for end-user use, so no home-manager modules
       nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
 
@@ -41,7 +47,12 @@ let
           # Shared modules
           commonNixOSModules hostName systemType
           # Add all our specified roles
-          ++ mkNixRoles roles;
+          ++ mkNixRoles roles
+          ++ [
+            ./nixos/roles/server
+            ./nixos/roles/server/${serverType}
+            ./nixos/modules/backup
+          ];
         specialArgs = {
           inherit inputs;
           # A .json file from the nix-secrets repo with non-important info.
@@ -54,6 +65,7 @@ let
       # TODO Add standalone home-manager
     }
     else
+      # If it's a NixOS end-user system (this could be a server VM!)
       nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
 
@@ -99,14 +111,4 @@ let
         };
       };
 in
-  mkHost hostName user systemType roles hmRoles extraImports
-# map (mInput @ {
-#   host,
-#   hardware,
-#   system,
-#   ...
-# }: {
-#   name = host + "-" + hardware + "-" + system;
-#   value = mkHost mInput systemType extraImports;
-# })
-
+  mkHost hostName user systemType serverType roles hmRoles extraImports
