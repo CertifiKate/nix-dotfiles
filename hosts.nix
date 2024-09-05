@@ -27,7 +27,7 @@ let
     ./base.nix
 
     # Include our shared configuration
-    ./nixos/roles/common
+    ./nixos/common
 
     # Add in sops
     inputs.sops-nix.nixosModules.sops
@@ -96,7 +96,7 @@ let
               home-manager.users.${user}.imports =
                 [
                   ./home.nix
-                  ./home-manager/roles/common
+                  ./home-manager/common
                   inputs.sops-nix.homeManagerModules.sops
                 ]
                 # Add specified home-manager roles

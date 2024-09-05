@@ -11,8 +11,8 @@ let
   secretsPath = builtins.toString inputs.nix-secrets;
 in {
   imports = [
-    ../../../users/kate.nix
-    ../../modules/zsh
+    ../../users/kate.nix
+    ../modules/zsh
   ];
 
   # ==============================
