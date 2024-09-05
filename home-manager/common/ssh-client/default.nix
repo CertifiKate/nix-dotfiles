@@ -1,6 +1,7 @@
 {
   inputs,
   lib,
+  user,
   ...
 }: let
   secretsPath = builtins.toString inputs.nix-secrets;
@@ -14,26 +15,26 @@ in {
   # Add all of our private keys
 
   # For low-security stuff, logging into lxc/vms, etc.
-  sops.secrets."kate_ssh_key" = {
+  sops.secrets."${user}_ssh_key" = {
     sopsFile = "${secretsPath}/secrets/home-manager.yaml";
-    path = "/home/kate/.ssh/id_ed25519_kate";
+    path = "/home/${user}/.ssh/id_ed25519_${user}";
   };
 
   # For github exclusively
-  sops.secrets."kate_github_key" = {
+  sops.secrets."${user}_github_key" = {
     sopsFile = "${secretsPath}/secrets/home-manager.yaml";
-    path = "/home/kate/.ssh/id_ed25519_github";
+    path = "/home/${user}/.ssh/id_ed25519_github";
   };
 
   # For higher security stuff, ie. proxmox hosts, github as a fallback
   # /should/ be able to do anything the low-sec ones can do
-  sops.secrets."kate_yubikey_5c_key" = {
+  sops.secrets."${user}_yubikey_5c_key" = {
     sopsFile = "${secretsPath}/secrets/home-manager.yaml";
-    path = "/home/kate/.ssh/id_ed25519_sk_rk_yubikey5c";
+    path = "/home/${user}/.ssh/id_ed25519_sk_rk_yubikey5c";
   };
-  sops.secrets."kate_yubikey_5_key" = {
+  sops.secrets."${user}_yubikey_5_key" = {
     sopsFile = "${secretsPath}/secrets/home-manager.yaml";
-    path = "/home/kate/.ssh/id_ed25519_sk_rk_yubikey5";
+    path = "/home/${user}/.ssh/id_ed25519_sk_rk_yubikey5";
   };
 
   # Github ssh config
@@ -41,31 +42,31 @@ in {
     "github.com" = lib.hm.dag.entryBefore ["*"] {
       user = "git";
       identityFile = [
-        "/home/kate/.ssh/id_ed25519_github"
+        "/home/${user}/.ssh/id_ed25519_github"
       ];
     };
     "*.srv" = lib.hm.dag.entryBefore ["*"] {
       identityFile = [
-        "/home/kate/.ssh/id_ed25519_kate"
+        "/home/${user}/.ssh/id_ed25519_${user}"
       ];
     };
     "*.dmz" = lib.hm.dag.entryBefore ["*"] {
       identityFile = [
-        "/home/kate/.ssh/id_ed25519_sk_rk_yubikey5c"
-        "/home/kate/.ssh/id_ed25519_sk_rk_yubikey5"
+        "/home/${user}/.ssh/id_ed25519_sk_rk_yubikey5c"
+        "/home/${user}/.ssh/id_ed25519_sk_rk_yubikey5"
       ];
     };
     "*.infra" = lib.hm.dag.entryBefore ["*"] {
       identityFile = [
-        "/home/kate/.ssh/id_ed25519_sk_rk_yubikey5c"
-        "/home/kate/.ssh/id_ed25519_sk_rk_yubikey5"
+        "/home/${user}/.ssh/id_ed25519_sk_rk_yubikey5c"
+        "/home/${user}/.ssh/id_ed25519_sk_rk_yubikey5"
       ];
     };
     "*" = {
       identityFile = [
-        "/home/kate/.ssh/id_ed25519_kate"
-        "/home/kate/.ssh/id_ed25519_sk_rk_yubikey5c"
-        "/home/kate/.ssh/id_ed25519_sk_rk_yubikey5"
+        "/home/${user}/.ssh/id_ed25519_${user}"
+        "/home/${user}/.ssh/id_ed25519_sk_rk_yubikey5c"
+        "/home/${user}/.ssh/id_ed25519_sk_rk_yubikey5"
       ];
     };
   };

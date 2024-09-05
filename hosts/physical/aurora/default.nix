@@ -1,7 +1,7 @@
 {
   config,
-  pkgs,
   lib,
+  user,
   ...
 }: {
   imports = [
@@ -11,7 +11,7 @@
 
   # Overwrite the path used for our shorthand aliases/functions
   environment.variables = {
-    NIX_FLAKE_PATH = lib.mkForce "/home/kate/source/nix-dotfiles";
+    NIX_FLAKE_PATH = lib.mkForce "/home/${user}/source/nix-dotfiles";
   };
 
   # Bootloader

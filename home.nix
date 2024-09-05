@@ -1,9 +1,12 @@
-{inputs, ...}:
+{
+  inputs,
+  user,
+  ...
+}:
 # Absolute minimum config for home manager
 # TODO: Get username programatically?
 let
   secretsPath = builtins.toString inputs.nix-secrets;
-  user = "kate";
 in {
   home = {
     username = "${user}";

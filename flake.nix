@@ -34,6 +34,7 @@
       inherit inputs outputs nixpkgs home-manager;
     };
 
+    # Set the primary/default user. Can be overwritten on a system level
     user = "kate";
 
     systems = {
@@ -150,7 +151,7 @@
       import ./hosts.nix (commonInherits
         // {
           hostName = "${host}";
-          user = user;
+          user = system.user or user;
           serverType = system.serverType;
         }
         // system);

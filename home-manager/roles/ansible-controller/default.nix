@@ -1,6 +1,7 @@
 {
   inputs,
   pkgs,
+  user,
   ...
 }: let
   secretsPath = builtins.toString inputs.nix-secrets;
@@ -12,7 +13,7 @@ in {
 
   sops.secrets."ansible_ssh_key" = {
     sopsFile = "${secretsPath}/secrets/home-manager.yaml";
-    path = "/home/kate/.ssh/ansible-key";
+    path = "/home/${user}/.ssh/ansible-key";
   };
 
   programs.zsh.shellAliases = {

@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  user,
+  ...
+}: {
   programs.firefox = {
     enable = true;
     policies = {
@@ -15,7 +19,7 @@
       DisplayBookmarksToolbar = true;
       NoDefaultBookmarks = true;
     };
-    profiles.kate = {
+    profiles."${user}" = {
       search = {
         force = true;
         engines = {

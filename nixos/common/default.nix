@@ -1,6 +1,7 @@
 {
   inputs,
   pkgs,
+  user,
   ...
 }:
 #
@@ -11,7 +12,7 @@ let
   secretsPath = builtins.toString inputs.nix-secrets;
 in {
   imports = [
-    ../../users/kate.nix
+    ../../users/${user}.nix
     ../modules/zsh
   ];
 
