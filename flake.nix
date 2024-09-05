@@ -13,8 +13,10 @@
       flake = false;
     };
 
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs-stable";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs-stable";
+    };
 
     nix-minecraft.url = "github:Infinidoge/nix-minecraft";
 

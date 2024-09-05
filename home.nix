@@ -4,7 +4,6 @@
   ...
 }:
 # Absolute minimum config for home manager
-# TODO: Get username programatically?
 let
   secretsPath = builtins.toString inputs.nix-secrets;
 in {
