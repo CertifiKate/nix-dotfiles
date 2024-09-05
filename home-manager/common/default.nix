@@ -1,11 +1,4 @@
-{
-  inputs,
-  outputs,
-  lib,
-  config,
-  pkgs,
-  ...
-}: let
+{inputs, ...}: let
   secretsPath = builtins.toString inputs.nix-secrets;
 in {
   imports = [

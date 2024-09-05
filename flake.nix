@@ -13,248 +13,151 @@
       flake = false;
     };
 
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs-stable";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs-stable";
+    };
 
     nix-minecraft.url = "github:Infinidoge/nix-minecraft";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   };
 
-  # Based on https://www.reddit.com/r/NixOS/comments/yk4n8d/comment/iurkkxv
   outputs = {
     self,
     nixpkgs,
-    nixpkgs-stable,
-    sops-nix,
-    nix-colors,
     home-manager,
     ...
   } @ inputs: let
     inherit (self) outputs;
 
-    # ==============================
-    # NixOs Configuration
-    # ==============================
+    commonInherits = {
+      inherit (nixpkgs) lib;
+      inherit inputs outputs nixpkgs home-manager;
+    };
 
-    # Basic configuration modules
-    commonModules = name: cfg: [
-      # Set common config options
-      {
-        nix.settings.experimental-features = ["nix-command" "flakes"];
-        networking.hostName = name;
-      }
+    # Set the primary/default user. Can be overwritten on a system level
+    user = "kate";
 
-      # Include our host config
-      ./hosts/${(cfg.hostType or "servers")}/${name}
-
-      # Absolute minimum config required
-      ./base.nix
-      # Include our shared configuration
-      ./nixos/roles/common
-
-      sops-nix.nixosModules.sops
-    ];
-
-    # Server Modules
-    serverModules = name: cfg: [
-      ./nixos/roles/server
-      ./nixos/roles/server/${cfg.serverType or "lxc"}
-      ./nixos/modules/backup
-    ];
-
-    physicalDeviceModules = name: cfg: [
-      # ./nixos/roles/physical
-      ./nixos/roles/physical/common/vpn
-    ];
-
-    # ==============================
-    # Home-Manager Configuration
-    # ==============================
-
-    # Common home-manager options (I /think/ this should be nixos neutral, but I currently only use nixos)
-    mkHomeManagerModules = cfg: [
-      {
-        home-manager.users.kate.imports =
-          [
-            ./home.nix
-            ./home-manager/roles/common
-          ]
-          ++ (cfg.hmRoles or []);
-      }
-      # Add sops age-key to use for home-manager to decrypt sops secrets (without needing to add it ourselves)
-      {
-        # TODO: Vars for user
-        sops.secrets."home_manager_user_key" = {
-          sopsFile = "${builtins.toString inputs.nix-secrets}/secrets/home-manager-init.yaml";
-          path = "/home/kate/.config/sops-age.txt";
-          owner = "kate";
-        };
-      }
-    ];
-
-    # NixOs specific home-manager modules
-    mkNixOsHomeManagerModules = cfg:
-      [
-        home-manager.nixosModules.home-manager
-        {
-          # TOOD: Add user into this inherit -let it be used by home-manager
-          home-manager.extraSpecialArgs = {
-            inherit inputs nix-colors;
-          };
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.users.kate.imports = [
-            inputs.sops-nix.homeManagerModules.sops
-          ];
-        }
-      ]
-      ++ mkHomeManagerModules cfg;
-
-    # ==============================
-    # NixOs Config Generation
-    #
-    # Uses above configs to generate the nixos systems
-    # Uses systems var to populate
-    # ==============================
-
-    # Generates the relevant system configuration based on inputs
-    mkNixosSystem = name: cfg:
-      nixpkgs.lib.nixosSystem {
-        system = cfg.system or "x86_64-linux";
-
-        # Include our common modules, plus any host specified roles
-        modules =
-          (commonModules name cfg)
-          ++ (cfg.roles or [])
-          ++
-          # If the hostType is servers then add in our serverModules
-          nixpkgs.lib.optionals (cfg.hostType == "servers") (serverModules name cfg)
-          ++
-          # If the hostType is physical then add in our physicalDeviceModules
-          nixpkgs.lib.optionals (cfg.hostType == "physical") (physicalDeviceModules name cfg)
-          ++
-          # Include HomeManager (opt in for servers, opt out otherwise)
-          nixpkgs.lib.optionals ((cfg.hostType == "servers" && (cfg.usesHomeManager or false)) || (cfg.hostType != "servers" && cfg.usesHomeManager or true)) (mkNixOsHomeManagerModules cfg);
-
-        specialArgs = {
-          inherit inputs;
-
-          # A .json file from the nix-secrets repo with non-important info.
-          # Stuff we just don't want public (ie. project_tld) but don't care if it's in the nix store
-          private = builtins.fromJSON (builtins.readFile "${builtins.toString inputs.nix-secrets}/private.json");
-        };
-      };
-
-    # NixOS System definitions
-    # If hostType = server then home-manager is opt-in, otherwise opt-out
     systems = {
+      # ==============================
+      # Physical Devices
+      # ==============================
       # Lenovo Thinkpad E14 Gen 6 (AMD)
       aurora = {
-        hostType = "physical";
+        systemType = "physical";
         roles = [
-          inputs.nixos-hardware.nixosModules.lenovo-thinkpad-e14-amd
-          ./nixos/roles/physical/desktop/gnome
-          ./nixos/roles/physical/desktop/sway
+          /physical/desktop/gnome
+          /physical/desktop/sway
         ];
         hmRoles = [
-          ./home-manager/roles/sops-management
-          ./home-manager/roles/ansible-controller
-          ./home-manager/roles/desktop/gnome
-          ./home-manager/roles/desktop/sway
+          /desktop/gnome
+          /desktop/sway
+          /sops-management
+          /ansible-controller
+        ];
+        extraImports = [
+          inputs.nixos-hardware.nixosModules.lenovo-thinkpad-e14-amd
         ];
       };
 
       # Acer Swift 3 SF353-51
       swift3 = {
-        hostType = "physical";
+        systemType = "physical";
         roles = [
-          ./nixos/roles/physical/desktop/gnome
-          ./nixos/roles/physical/desktop/sway
+          /physical/desktop/gnome
+          /physical/desktop/sway
         ];
         hmRoles = [
-          ./home-manager/roles/sops-management
-          ./home-manager/roles/ansible-controller
-          ./home-manager/roles/desktop/sway
+          /desktop/gnome
+          /desktop/sway
+          /sops-management
+          /ansible-controller
         ];
       };
 
       # ==============================
-      # Servers
+      # Server
       # ==============================
-
       # ==== LXCs ====================
       build-01 = {
-        hostType = "servers";
+        systemType = "server";
         serverType = "lxc";
-        usesHomeManager = true;
-        hmRoles = [
-          ./home-manager/roles/sops-management
-        ];
+        # hmRoles = [
+        #   ./home-manager/roles/sops-management
+        # ];
       };
 
       auth-01 = {
-        hostType = "servers";
+        systemType = "server";
         serverType = "lxc";
         roles = [
-          ./nixos/roles/server/auth
+          /server/auth
         ];
       };
 
       prox-01 = {
-        hostType = "servers";
+        systemType = "server";
         serverType = "lxc";
         roles = [
-          ./nixos/roles/server/proxy
+          /server/proxy
         ];
       };
 
       avahi-01 = {
-        hostType = "servers";
+        systemType = "server";
         serverType = "lxc";
         roles = [
-          ./nixos/roles/server/mdns-repeater
+          /server/mdns-repeater
         ];
       };
 
       media-01 = {
-        hostType = "servers";
+        systemType = "server";
         serverType = "lxc";
         roles = [
-          ./nixos/roles/server/common/media_server
-          ./nixos/roles/server/jellyfin
+          /server/common/media_server
+          /server/jellyfin
         ];
       };
 
       media-02 = {
-        hostType = "servers";
+        systemType = "server";
         serverType = "lxc";
         roles = [
-          ./nixos/roles/server/common/media_server
-          ./nixos/roles/server/media_dl
+          /server/common/media_server
+          /server/media_dl
         ];
       };
 
       # ==== VMs =====================
       backup-01 = {
-        hostType = "servers";
+        systemType = "server";
         serverType = "vm";
-        roles = [
+        extraImports = [
           ./nixos/modules/backup/server
         ];
       };
 
       mine-01 = {
-        hostType = "servers";
+        systemType = "server";
         serverType = "vm";
         roles = [
-          ./nixos/roles/server/minecraft
+          /server/minecraft
         ];
       };
-
       # ==============================
     };
-  in rec {
-    nixosConfigurations = nixpkgs.lib.mapAttrs mkNixosSystem systems;
+
+    mkSystem = host: system:
+      import ./hosts.nix (commonInherits
+        // {
+          hostName = "${host}";
+          user = system.user or user;
+          serverType = system.serverType;
+        }
+        // system);
+  in {
+    nixosConfigurations = nixpkgs.lib.mapAttrs mkSystem systems;
   };
 }

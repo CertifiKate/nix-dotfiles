@@ -1,4 +1,4 @@
-let
+{user, ...}: let
   wallpaper = "monet.jpg";
 in {
   imports = [
@@ -31,8 +31,8 @@ in {
       clock-format = "12h";
     };
     "org/gnome/desktop/background" = {
-      picture-uri = "file:///home/kate/.config/bg/${wallpaper}";
-      picture-uri-dark = "file:///home/kate/.config/bg/${wallpaper}";
+      picture-uri = "file:///home/${user}/.config/bg/${wallpaper}";
+      picture-uri-dark = "file:///home/${user}/.config/bg/${wallpaper}";
     };
 
     # Keyboard shortcuts
