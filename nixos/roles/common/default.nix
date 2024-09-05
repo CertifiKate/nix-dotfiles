@@ -37,6 +37,7 @@ in {
     btop
     dig
     tree
+    traceroute
   ];
 
   # Keep SSH agent in sudo

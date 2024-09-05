@@ -65,6 +65,7 @@
 
     physicalDeviceModules = name: cfg: [
       # ./nixos/roles/physical
+      ./nixos/roles/physical/common/vpn
     ];
 
     # ==============================
