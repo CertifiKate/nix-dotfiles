@@ -2,14 +2,13 @@ let
   base_project_dir = "/services";
   sonarr_project_dir = "${base_project_dir}/sonarr";
   radarr_project_dir = "${base_project_dir}/radarr";
-  jellyseer_project_dir = "${base_project_dir}/jellyseer";
-  # TODO: Unused
-  media_dir = "/data";
 in {
   # Setup backup service
   CertifiKate.backup_service = {
     paths = [
       "${base_project_dir}"
+      # For some reason we can't specify the jellyseerr directory...
+      "/var/lib/jellyseerr"
     ];
   };
 
@@ -32,6 +31,11 @@ in {
     enable = true;
     dataDir = "${radarr_project_dir}/data";
     group = "media";
+    openFirewall = true;
+  };
+
+  services.jellyseerr = {
+    enable = true;
     openFirewall = true;
   };
 }

@@ -95,7 +95,7 @@ in {
 
       jellyseer = {
         host = "jellyseer";
-        dest = "http://192.168.10.51:5055";
+        dest = "http://media-02.srv:5055";
         auth = false;
       };
 
