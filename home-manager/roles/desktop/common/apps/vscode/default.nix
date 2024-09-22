@@ -10,6 +10,7 @@
       # bbenoist.nix
       kamadorueda.alejandra
       jnoortheen.nix-ide
+      ms-vscode-remote.remote-ssh
     ];
 
     userSettings = {
