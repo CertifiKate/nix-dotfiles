@@ -9,6 +9,8 @@
   roles ? [],
   hmRoles ? [],
   extraImports ? [],
+  colmenaConfig ? {},
+  nodes ? [],
   ...
 }:
 # Inspired by https://github.com/Baitinq/nixos-config/blob/31f76adafbf897df10fe574b9a675f94e4f56a93/hosts/default.nix
@@ -36,7 +38,7 @@ let
   mkNixRoles = roles: (map (n: ./nixos/roles/${n}) roles);
   mkHMRoles = roles: (map (n: ./home-manager/roles/${n}) roles);
 
-  mkHost = hostName: user: systemType: serverType: roles: hmRoles: extraImports:
+  mkHost = hostName: user: systemType: serverType: roles: hmRoles: extraImports: colmenaConfig:
     if systemType == "server"
     then
       # If it's a NixOS server system. Not intended for end-user use, so no home-manager modules
@@ -59,6 +61,7 @@ let
           # A .json file from the nix-secrets repo with non-important info.
           # Stuff we just don't want public (ie. project_tld) but don't care if it's in the nix store
           private = builtins.fromJSON (builtins.readFile "${builtins.toString inputs.nix-secrets}/private.json");
+          colmenaConfig = colmenaConfig;
         };
       }
     else if systemType == "standalone"
@@ -113,4 +116,4 @@ let
         };
       };
 in
-  mkHost hostName user systemType serverType roles hmRoles extraImports
+  mkHost hostName user systemType serverType roles hmRoles extraImports colmenaConfig

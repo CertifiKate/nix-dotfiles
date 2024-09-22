@@ -40,113 +40,144 @@
     user = "kate";
 
     systems = {
-      # ==============================
-      # Physical Devices
-      # ==============================
-      # Lenovo Thinkpad E14 Gen 6 (AMD)
-      aurora = {
-        systemType = "physical";
-        roles = [
-          /physical/desktop/gnome
-          /physical/desktop/sway
-        ];
-        hmRoles = [
-          /desktop/gnome
-          /desktop/sway
-          /sops-management
-          /ansible-controller
-        ];
-        extraImports = [
-          inputs.nixos-hardware.nixosModules.lenovo-thinkpad-e14-amd
-        ];
+      physical = {
+        # Lenovo Thinkpad E14 Gen 6 (AMD)
+        aurora = {
+          systemType = "physical";
+          roles = [
+            /physical/desktop/gnome
+            /physical/desktop/sway
+            /server/deployment-host
+          ];
+          hmRoles = [
+            /desktop/gnome
+            /desktop/sway
+            /sops-management
+            /ansible-controller
+          ];
+          extraImports = [
+            inputs.nixos-hardware.nixosModules.lenovo-thinkpad-e14-amd
+          ];
+        };
+
+        # Acer Swift 3 SF353-51
+        swift3 = {
+          systemType = "physical";
+          roles = [
+            /physical/desktop/gnome
+            /physical/desktop/sway
+          ];
+          hmRoles = [
+            /desktop/gnome
+            /desktop/sway
+            /sops-management
+            /ansible-controller
+          ];
+        };
       };
 
-      # Acer Swift 3 SF353-51
-      swift3 = {
-        systemType = "physical";
-        roles = [
-          /physical/desktop/gnome
-          /physical/desktop/sway
-        ];
-        hmRoles = [
-          /desktop/gnome
-          /desktop/sway
-          /sops-management
-          /ansible-controller
-        ];
-      };
+      server = {
+        # ==== LXCs ====================
+        build-01 = {
+          systemType = "server";
+          serverType = "lxc";
+          # hmRoles = [
+          #   ./home-manager/roles/sops-management
+          # ];
+          colmenaConfig = {
+            targetHost = "build-01.srv";
+            tags = ["build"];
+          };
+        };
 
-      # ==============================
-      # Server
-      # ==============================
-      # ==== LXCs ====================
-      build-01 = {
-        systemType = "server";
-        serverType = "lxc";
-        # hmRoles = [
-        #   ./home-manager/roles/sops-management
-        # ];
-      };
+        auth-01 = {
+          systemType = "server";
+          serverType = "lxc";
+          roles = [
+            /server/auth
+          ];
+          colmenaConfig = {
+            targetHost = "auth-01.srv";
+            tags = ["core" "auth"];
+          };
+        };
 
-      auth-01 = {
-        systemType = "server";
-        serverType = "lxc";
-        roles = [
-          /server/auth
-        ];
-      };
+        prox-01 = {
+          systemType = "server";
+          serverType = "lxc";
+          roles = [
+            /server/proxy
+          ];
+          colmenaConfig = {
+            targetHost = "prox-01.srv";
+            tags = ["core" "proxy"];
+          };
+        };
 
-      prox-01 = {
-        systemType = "server";
-        serverType = "lxc";
-        roles = [
-          /server/proxy
-        ];
-      };
+        avahi-01 = {
+          systemType = "server";
+          serverType = "lxc";
+          roles = [
+            /server/mdns-repeater
+          ];
+          colmenaConfig = {
+            targetHost = "avahi-01.srv";
+            tags = ["avahi"];
+          };
+        };
 
-      avahi-01 = {
-        systemType = "server";
-        serverType = "lxc";
-        roles = [
-          /server/mdns-repeater
-        ];
-      };
+        media-01 = {
+          systemType = "server";
+          serverType = "lxc";
+          roles = [
+            /server/common/media_server
+            /server/jellyfin
+          ];
+          colmenaConfig = {
+            targetHost = "media-01.srv";
+            tags = ["media"];
+          };
+        };
 
-      media-01 = {
-        systemType = "server";
-        serverType = "lxc";
-        roles = [
-          /server/common/media_server
-          /server/jellyfin
-        ];
-      };
+        media-02 = {
+          systemType = "server";
+          serverType = "lxc";
+          roles = [
+            /server/common/media_server
+            /server/media_dl
+          ];
+          colmenaConfig = {
+            targetHost = "media-02.srv";
+            tags = ["media"];
+          };
+        };
 
-      media-02 = {
-        systemType = "server";
-        serverType = "lxc";
-        roles = [
-          /server/common/media_server
-          /server/media_dl
-        ];
-      };
+        # ==== VMs =====================
+        backup-01 = {
+          systemType = "server";
+          serverType = "vm";
+          extraImports = [
+            ./nixos/modules/backup/server
+          ];
+          colmenaConfig = {
+            targetHost = "backup-01.srv";
+            tags = ["core" "backup"];
+          };
+        };
 
-      # ==== VMs =====================
-      backup-01 = {
-        systemType = "server";
-        serverType = "vm";
-        extraImports = [
-          ./nixos/modules/backup/server
-        ];
+        mine-01 = {
+          systemType = "server";
+          serverType = "vm";
+          roles = [
+            /server/minecraft
+          ];
+          colmenaConfig = {
+            targetHost = "mine-01.dmz";
+            tags = ["minecraft"];
+          };
+        };
+        # ==============================
       };
-
-      mine-01 = {
-        systemType = "server";
-        serverType = "vm";
-        roles = [
-          /server/minecraft
-        ];
-      };
-      # ==============================
     };
 
     mkSystem = host: system:
@@ -158,6 +189,28 @@
         }
         // system);
   in {
-    nixosConfigurations = nixpkgs.lib.mapAttrs mkSystem systems;
+    serverConfigs = nixpkgs.lib.mapAttrs mkSystem (systems.server);
+    physicalConfigs = nixpkgs.lib.mapAttrs mkSystem (systems.physical);
+
+    # Collection of all of our configs
+    nixosConfigurations = self.physicalConfigs // self.serverConfigs;
+
+    colmena =
+      {
+        meta = {
+          nixpkgs = import inputs.nixpkgs {system = "x86_64-linux";};
+          # nodeNixpkgs = builtins.mapAttrs (_: v: v.pkgs) self.nixosConfigurations;
+          nodeSpecialArgs = builtins.mapAttrs (_: v: v._module.specialArgs) self.serverConfigs;
+        };
+      }
+      // builtins.mapAttrs (_: v: {
+        deployment =
+          v._module.specialArgs.colmenaConfig
+          // {
+            targetUser = "deploy_user";
+          };
+        imports = v._module.args.modules;
+      })
+      self.serverConfigs;
   };
 }
