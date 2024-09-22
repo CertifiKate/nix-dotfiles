@@ -49,9 +49,4 @@ in {
     '';
   };
 
-  # Auto clean old store files
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-  };
 }
