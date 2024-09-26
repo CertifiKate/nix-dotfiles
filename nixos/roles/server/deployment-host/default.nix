@@ -10,7 +10,7 @@ in {
     colmena
   ];
 
-  # For low-security stuff, logging into lxc/vms, etc.
+  # Key used for colmena
   sops.secrets."deploy_ssh_key" = {
     sopsFile = "${secretsPath}/secrets/deploy.yaml";
     path = "/home/${user}/.ssh/id_ed25519_colmena_deploy";

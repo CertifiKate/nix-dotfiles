@@ -81,9 +81,9 @@
         build-01 = {
           systemType = "server";
           serverType = "lxc";
-          # hmRoles = [
-          #   ./home-manager/roles/sops-management
-          # ];
+          roles = [
+            /server/deployment-host
+          ];
           colmenaConfig = {
             targetHost = "build-01.srv";
             tags = ["build"];
