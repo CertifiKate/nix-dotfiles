@@ -10,7 +10,9 @@
       kamadorueda.alejandra
       jnoortheen.nix-ide
       ms-vscode-remote.remote-ssh
+      streetsidesoftware.code-spell-checker
     ];
+
     enableUpdateCheck = false;
     mutableExtensionsDir = false;
 
