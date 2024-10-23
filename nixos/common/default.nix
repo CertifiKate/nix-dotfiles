@@ -2,6 +2,8 @@
   inputs,
   pkgs,
   user,
+  config,
+  lib,
   ...
 }:
 #
@@ -13,6 +15,7 @@ let
 in {
   imports = [
     ../../users/${user}.nix
+    ../modules/remote-build
     ../modules/zsh
   ];
 
@@ -48,5 +51,4 @@ in {
       Defaults timestamp_timeout=30
     '';
   };
-
 }
