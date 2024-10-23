@@ -56,7 +56,7 @@
             /ansible-controller
           ];
           extraModules = [
-            # inputs.nixos-hardware.nixosModules.lenovo-thinkpad-e14-amd
+            inputs.nixos-hardware.nixosModules.lenovo-thinkpad-e14-amd
           ];
         };
 
@@ -90,8 +90,7 @@
             tags = ["build"];
           };
           extraModules = [
-            # inputs.nixos-hardware.nixosModules.lenovo-thinkpad-e14-amd
-            {CertifiKate.useRemoteBuild = false;}
+            inputs.nixos-hardware.nixosModules.lenovo-thinkpad-e14-amd
           ];
         };
 
