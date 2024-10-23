@@ -8,7 +8,7 @@
 in {
   home.packages = with pkgs; [
     ansible
-    python312Packages.proxmoxer
+    # python312Packages.proxmoxer
   ];
 
   sops.secrets."ansible_ssh_key" = {
