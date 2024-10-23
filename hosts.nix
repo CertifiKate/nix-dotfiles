@@ -8,7 +8,7 @@
   serverType ? null,
   roles ? [],
   hmRoles ? [],
-  extraImports ? [],
+  extraModules ? [],
   colmenaConfig ? {},
   nodes ? [],
   ...
@@ -38,7 +38,7 @@ let
   mkNixRoles = roles: (map (n: ./nixos/roles/${n}) roles);
   mkHMRoles = roles: (map (n: ./home-manager/roles/${n}) roles);
 
-  mkHost = hostName: user: systemType: serverType: roles: hmRoles: extraImports: colmenaConfig:
+  mkHost = hostName: user: systemType: serverType: roles: hmRoles: extraModules: colmenaConfig:
     if systemType == "server"
     then
       # If it's a NixOS server system. Not intended for end-user use, so no home-manager modules
@@ -54,7 +54,9 @@ let
             ./nixos/roles/server
             ./nixos/roles/server/${serverType}
             ./nixos/modules/backup
-          ];
+          ]
+          ++ extraModules;
+
         specialArgs = {
           inherit inputs;
           inherit user;
@@ -78,6 +80,7 @@ let
           commonNixOSModules hostName systemType
           # Add all our specified roles
           ++ mkNixRoles roles
+          ++ extraModules
           # Add all Home-Manager configurations + specified HM roles
           ++ [
             home-manager.nixosModules.home-manager
@@ -116,4 +119,4 @@ let
         };
       };
 in
-  mkHost hostName user systemType serverType roles hmRoles extraImports colmenaConfig
+  mkHost hostName user systemType serverType roles hmRoles extraModules colmenaConfig

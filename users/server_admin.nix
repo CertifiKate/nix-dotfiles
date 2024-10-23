@@ -1,4 +1,4 @@
-# Essentially a re-skinned ansible user, but with Yubikey ONLY login
+# Admin with passwordless sudo, but with Yubikey ONLY login
 {
   users.users."server_admin" = {
     isNormalUser = true;

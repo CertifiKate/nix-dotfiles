@@ -55,8 +55,9 @@
             /sops-management
             /ansible-controller
           ];
-          extraImports = [
-            inputs.nixos-hardware.nixosModules.lenovo-thinkpad-e14-amd
+          extraModules = [
+            # inputs.nixos-hardware.nixosModules.lenovo-thinkpad-e14-amd
+            {CertifiKate.useRemoteBuild = false;}
           ];
         };
 
@@ -83,11 +84,16 @@
           serverType = "lxc";
           roles = [
             /server/deployment-host
+            /server/nix-builder
           ];
           colmenaConfig = {
             targetHost = "build-01.srv";
             tags = ["build"];
           };
+          extraModules = [
+            # inputs.nixos-hardware.nixosModules.lenovo-thinkpad-e14-amd
+            {CertifiKate.useRemoteBuild = false;}
+          ];
         };
 
         auth-01 = {
@@ -156,7 +162,7 @@
         backup-01 = {
           systemType = "server";
           serverType = "vm";
-          extraImports = [
+          extraModules = [
             ./nixos/modules/backup/server
           ];
           colmenaConfig = {
@@ -185,7 +191,7 @@
         // {
           hostName = "${host}";
           user = system.user or user;
-          serverType = system.serverType;
+          serverType = system.serverType or null;
         }
         // system);
   in {
@@ -208,6 +214,10 @@
           v._module.specialArgs.colmenaConfig
           // {
             targetUser = "deploy_user";
+            # TODO: Not supported in 0.4, use ssh agent as a bandaid because I don't have time to deal with updating
+            # sshOptions = [
+            #   "-i ~/.ssh/id_ed25519_colmena_deploy"
+            # ];
           };
         imports = v._module.args.modules;
       })

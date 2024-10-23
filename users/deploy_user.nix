@@ -1,3 +1,5 @@
+# Used exclusively for deployments
+# TODO: Investigate limiting permissions of user
 {
   users.users."deploy_user" = {
     isNormalUser = true;
