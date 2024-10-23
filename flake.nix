@@ -57,7 +57,6 @@
           ];
           extraModules = [
             # inputs.nixos-hardware.nixosModules.lenovo-thinkpad-e14-amd
-            {CertifiKate.useRemoteBuild = false;}
           ];
         };
 

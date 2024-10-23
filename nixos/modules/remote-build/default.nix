@@ -11,7 +11,7 @@ in {
   };
 
   config =
-    # lib.mkIf config.CertifiKate.useRemoteBuild
+    lib.mkIf config.CertifiKate.useRemoteBuild
     {
       nix = {
         distributedBuilds = true;
