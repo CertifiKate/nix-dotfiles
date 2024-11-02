@@ -156,6 +156,18 @@
           };
         };
 
+        util-01 = {
+          systemType = "server";
+          serverType = "lxc";
+          roles = [
+            /server/budget
+          ];
+          colmenaConfig = {
+            targetHost = "util-01.srv";
+            tags = ["utility"];
+          };
+        };
+
         # ==== VMs =====================
         backup-01 = {
           systemType = "server";

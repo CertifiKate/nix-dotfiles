@@ -66,6 +66,11 @@ in {
         dest = "http://192.168.10.30:4001";
       };
 
+      actual = {
+        host = "actualbudget";
+        dest = "http://util-01.srv:5006";
+      };
+
       # Media
       sonarr = {
         host = "sonarr";
