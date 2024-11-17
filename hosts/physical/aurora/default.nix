@@ -14,6 +14,12 @@
   environment.variables = {
     NIX_FLAKE_PATH = lib.mkForce "/home/${user}/source/nix-dotfiles";
   };
+  environment.systemPackages = [
+    pkgs.dotnet-sdk_8
+    pkgs.dotnetCorePackages.dotnet_8.runtime
+    pkgs.dotnetCorePackages.dotnet_8.aspnetcore
+    pkgs.dotnet-aspnetcore_8
+  ];
 
   # Bootloader
   boot.loader.systemd-boot.enable = true;

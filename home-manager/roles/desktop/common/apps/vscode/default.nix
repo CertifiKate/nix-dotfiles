@@ -11,6 +11,9 @@
       jnoortheen.nix-ide
       ms-vscode-remote.remote-ssh
       streetsidesoftware.code-spell-checker
+      ms-dotnettools.csharp
+      ms-dotnettools.csdevkit
+      ms-dotnettools.vscode-dotnet-runtime
     ];
 
     enableUpdateCheck = false;
