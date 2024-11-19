@@ -8,7 +8,7 @@
   secretsPath = builtins.toString inputs.nix-secrets;
 
   project_tld = "${private.project_tld}";
-  project_dir = "/config/proxy";
+  project_dir = "/services/proxy";
   config_dir = "${project_dir}/config";
   data_dir = "${project_dir}/data";
 in {
