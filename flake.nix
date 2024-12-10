@@ -50,6 +50,7 @@
             /server/deployment-host
           ];
           hmRoles = [
+            /personal
             /desktop/gnome
             /desktop/sway
             /sops-management
@@ -68,6 +69,7 @@
             /physical/desktop/sway
           ];
           hmRoles = [
+            /personal
             /desktop/gnome
             /desktop/sway
             /sops-management
