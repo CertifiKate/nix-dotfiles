@@ -5,6 +5,7 @@
     ./firefox
     ./inkscape
     ./minecraft
+    ./protonmail
     ./spotify
     ./vscode
   ];

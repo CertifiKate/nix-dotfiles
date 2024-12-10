@@ -69,6 +69,7 @@ in {
       actual = {
         host = "actualbudget";
         dest = "http://util-01.srv:5006";
+        auth = false;
       };
 
       # Media

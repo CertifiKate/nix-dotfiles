@@ -1,5 +1,5 @@
 {pkgs, ...}: let
-  remote_rebuild_user = "server_admin";
+  remote_rebuild_user = "deploy_user";
   remote_build_srv = "build-01.srv";
 in {
   environment.systemPackages = with pkgs; [
