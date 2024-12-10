@@ -2,7 +2,7 @@
   inputs = {
     # I want to use unstable by default but for some things use stable
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.05";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.11";
 
     sops-nix.url = "github:Mic92/sops-nix";
 
