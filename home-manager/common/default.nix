@@ -17,8 +17,10 @@ in {
   # (this /seems/ to be able to run alongside the NixOS config without issue)
   programs.zsh = {
     enable = true;
+    history.append = true;
     enableCompletion = true;
     autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
     oh-my-zsh = {
       enable = true;
       theme = "bira";

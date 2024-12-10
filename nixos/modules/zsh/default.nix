@@ -10,6 +10,7 @@ in {
 
   environment.variables = {
     NIX_FLAKE_PATH = "/etc/nixos/";
+    PROMPT_COLOR = "red";
   };
 
   # Font used for figlet MOTD
@@ -34,22 +35,17 @@ in {
       nr = "sudo nixos-rebuild switch --flake $NIX_FLAKE_PATH";
     };
 
-    # TODO: Cache the figlet -f to a motd file
-    # TODO: Split this out
-    # TODO: Add better rebuilding - caching to build-01 regardless of options??
     promptInit = ''
       # Nix remote rebuild
       nrr() {
         nixos-rebuild --target-host ${remote_rebuild_user}@$1 --use-remote-sudo switch --flake $NIX_FLAKE_PATH
       }
-      # Testing remote rebuild with build host
-      nrb(){
-        nixos-rebuild --build-host ${remote_rebuild_user}@${remote_build_srv} --target-host ${remote_rebuild_user}@$1 --use-remote-sudo switch --flake $NIX_FLAKE_PATH
-      }
 
-      echo "$fg[red]$(figlet $(cat /etc/hostname) -f /etc/bulbhead.flf)"
-      # TODO: Work out why this isn't being properly set in ZSH
-      export HOST=$(cat /etc/hostname)
+      if ! [ -e "~/.motd" ] ; then
+        sh -c 'figlet $(cat /etc/hostname) -lf /etc/bulbhead.flf > ~/.motd'
+      fi
+
+      echo "$fg[$PROMPT_COLOR]$(cat ~/.motd)"
     '';
   };
 
