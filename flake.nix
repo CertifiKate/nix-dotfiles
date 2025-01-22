@@ -46,7 +46,7 @@
           systemType = "physical";
           roles = [
             /physical/desktop/gnome
-            /physical/desktop/sway
+            /physical/desktop/development
             /server/deployment-host
           ];
           hmRoles = [

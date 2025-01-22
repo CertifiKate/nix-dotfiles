@@ -14,6 +14,8 @@
       ms-dotnettools.csharp
       ms-dotnettools.csdevkit
       ms-dotnettools.vscode-dotnet-runtime
+      ms-vscode-remote.remote-containers
+      ms-azuretools.vscode-docker
     ];
 
     enableUpdateCheck = false;
