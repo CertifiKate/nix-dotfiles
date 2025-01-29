@@ -9,15 +9,18 @@
   secretsPath = builtins.toString inputs.nix-secrets;
 
   project_tld = "${private.project_tld}";
+  base_dn = "${private.ldap_base_dn}";
 
   project_dir = "/services/authelia";
   config_dir = "${project_dir}/config";
+  ldap_dir = "${project_dir}/ldap";
   data_dir = "${project_dir}/data";
 in {
   # Setup backup service
   CertifiKate.backup_service = {
     paths = [
       "${project_dir}"
+      "/var/lib/lldap"
     ];
   };
 
@@ -25,13 +28,18 @@ in {
     authelia
   ];
 
-  networking.firewall.allowedTCPPorts = [9091];
+  networking.firewall.allowedTCPPorts = [
+    9091 # Authelia
+    6360 # LDAPS
+    17170 # LLDAP Web UI
+  ];
 
   # Allow traefik to access config data dir
   systemd = {
     tmpfiles.rules = [
       "d ${config_dir} 700 authelia authelia"
       "d ${data_dir} 700 authelia authelia"
+      "d ${ldap_dir} 700 lldap lldap"
     ];
   };
 
@@ -53,12 +61,26 @@ in {
     path = "${config_dir}/user-database.yml";
   };
 
+  sops.secrets."ldap_jwt_secret" = {
+    owner = "lldap";
+    sopsFile = "${secretsPath}/secrets/authentication.yaml";
+  };
+  sops.secrets."ldap_user_pass" = {
+    owner = "lldap";
+    sopsFile = "${secretsPath}/secrets/authentication.yaml";
+  };
+
   users = {
     groups.authelia = {};
     users.authelia = {
       isSystemUser = true;
       group = "authelia";
     };
+    users.lldap = {
+      isSystemUser = true;
+      group = "lldap";
+    };
+    groups.lldap = {};
   };
 
   # This was super fun to find buried in the service config after two hours debugging.
@@ -119,7 +141,10 @@ in {
             policy = "bypass";
           }
           {
-            domain = "traefik.${project_tld}";
+            domain = [
+              "traefik"
+              "ldap"
+            ];
             subject = "group:admins";
             policy = "one_factor";
           }
@@ -146,4 +171,20 @@ in {
       };
     };
   };
+
+  services.lldap = {
+    enable = true;
+    settings = {
+      ldap_base_dn = base_dn;
+      ldap_user_dn = "ldap_admin";
+      ldap_user_email = "ldap_admin@${project_tld}";
+      http_url = "https://ldap.${project_tld}";
+      database_url = "sqlite://./users.db?mode=rwc";
+    };
+    environment = {
+      LLDAP_JWT_SECRET_FILE = config.sops.secrets."ldap_jwt_secret".path;
+      LLDAP_LDAP_USER_PASS_FILE = config.sops.secrets."ldap_user_pass".path;
+    };
+  };
+  systemd.services.lldap.serviceConfig.ProtectSystem = lib.mkForce false;
 }

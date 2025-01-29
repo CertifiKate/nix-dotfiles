@@ -54,6 +54,11 @@ in {
         auth = false;
       };
 
+      ldap = {
+        host = "ldap";
+        dest = "http://auth-01.srv:17170";
+      };
+
       gotify = {
         host = "gotify";
         dest = "http://192.168.10.30:3300";
@@ -84,7 +89,6 @@ in {
       };
 
       prowlarr = {
-        host = "prowlarr";
         dest = "http://192.168.10.51:9696";
       };
 
