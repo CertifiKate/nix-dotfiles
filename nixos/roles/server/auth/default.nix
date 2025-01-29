@@ -30,7 +30,8 @@ in {
 
   networking.firewall.allowedTCPPorts = [
     9091 # Authelia
-    6360 # LDAPS
+    3890 # LDAP
+    # 6360 # LDAPS
     17170 # LLDAP Web UI
   ];
 
@@ -55,10 +56,9 @@ in {
     owner = "authelia";
     sopsFile = "${secretsPath}/secrets/authentication.yaml";
   };
-  sops.secrets."authelia_users_database" = {
+  sops.secrets."authelia_ldap_password" = {
     owner = "authelia";
     sopsFile = "${secretsPath}/secrets/authentication.yaml";
-    path = "${config_dir}/user-database.yml";
   };
 
   sops.secrets."ldap_jwt_secret" = {
@@ -96,6 +96,9 @@ in {
       storageEncryptionKeyFile = config.sops.secrets."authelia_storage_key".path;
     };
 
+    environmentVariables = {
+      AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD_FILE = config.sops.secrets."authelia_ldap_password".path;
+    };
     settings = {
       theme = "dark";
 
@@ -115,7 +118,19 @@ in {
         ];
       };
 
-      authentication_backend.file.path = "${config_dir}/user-database.yml";
+      authentication_backend.ldap = {
+        implementation = "lldap";
+        base_dn = base_dn;
+        address = "ldap://localhost:3890";
+        user = "uid=ldap_admin_authelia,ou=people,${base_dn}";
+        attributes = {
+          username = "uid";
+          mail = "mail";
+          display_name = "displayName";
+        };
+        additional_users_dn = "ou=people";
+      };
+
       # TODO: Move this to an actual db - add full-blown db server?
       storage.local.path = "${config_dir}/db.sqlite3";
       notifier.filesystem.filename = "${data_dir}/notifier.txt";
@@ -186,5 +201,6 @@ in {
       LLDAP_LDAP_USER_PASS_FILE = config.sops.secrets."ldap_user_pass".path;
     };
   };
-  systemd.services.lldap.serviceConfig.ProtectSystem = lib.mkForce false;
+
+  systemd.services."authelia-main".after = ["lldap.service"];
 }
