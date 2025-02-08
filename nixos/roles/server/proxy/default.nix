@@ -89,6 +89,7 @@ in {
       };
 
       prowlarr = {
+        host = "prowlarr";
         dest = "http://192.168.10.51:9696";
       };
 
@@ -123,7 +124,6 @@ in {
       };
     };
 
-    # TODO: Can we add back the router-x service-x prefix?
     mkRouters = name: cfg: {
       service = "${name}";
       rule = "${cfg.rule or "Host(`${cfg.host}.${project_tld}`)"}";
@@ -149,7 +149,27 @@ in {
       loadBalancer = {servers = [{url = "${cfg.dest}";}];};
     };
 
-    allRouters = lib.mapAttrs mkRouters services;
+    defaultRouters = {
+      traefik = {
+        service = "api@internal";
+        rule = "Host(`traefik.${project_tld}`)";
+        entryPoints = "webHttps";
+        priority = "10";
+        tls = {
+          certResolver = "letsEncrypt";
+          domains = [
+            {
+              main = "${project_tld}";
+              sans = ["*.${project_tld}"];
+            }
+          ];
+        };
+      };
+    };
+
+    customRouters = lib.mapAttrs mkRouters services;
+    allRouters = customRouters // defaultRouters;
+
     allServices = lib.mapAttrs mkServices services;
   in rec {
     enable = true;
@@ -179,8 +199,6 @@ in {
       };
 
       api = {
-        dashboard = true;
-        insecure = true;
       };
 
       certificatesResolvers.letsEncrypt.acme = {

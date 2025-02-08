@@ -139,7 +139,6 @@ in {
         default_policy = "deny";
         rules = [
           # Bypass APIs
-          # TODO: See if we can bring more into authelia and bypass their apis?
           {
             domain = [
               "${project_tld}"
@@ -157,29 +156,29 @@ in {
           }
           {
             domain = [
-              "traefik"
-              "ldap"
+              "traefik.${project_tld}"
+              "ldap.${project_tld}"
             ];
-            subject = "group:admins";
+            subject = "group:admin";
             policy = "one_factor";
           }
           {
             domain = [
-              "sonarr"
-              "radarr"
-              "prowlarr"
-              "torrent"
+              "sonarr.${project_tld}"
+              "radarr.${project_tld}"
+              "prowlarr.${project_tld}"
+              "torrent.${project_tld}"
             ];
-            # Allow dev OR admin to access media servers
             subject = [
-              "group:dev"
+              "group:media_admin"
               "group:admin"
             ];
             policy = "one_factor";
           }
-          # Catch all policy
           {
-            domain = "*.${project_tld}";
+            domain = [
+              "recipes.${project_tld}"
+            ];
             policy = "one_factor";
           }
         ];
