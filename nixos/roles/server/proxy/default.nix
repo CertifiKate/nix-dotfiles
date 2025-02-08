@@ -41,11 +41,6 @@ in {
   };
 
   services.traefik = let
-    # TODO: Handle static service/routers (traefik dashboard, authelia?)
-    defaultServices = {
-    };
-
-    # TODO: These will be moved to dns entries after they've been migrated
     services = {
       # Core
       authelia = {
@@ -128,11 +123,14 @@ in {
       service = "${name}";
       rule = "${cfg.rule or "Host(`${cfg.host}.${project_tld}`)"}";
       entryPoints = "webHttps";
-      priority = "10";
 
-      middlewares = lib.mkIf (cfg.auth or true) [
-        "authelia@file"
-      ];
+      middlewares =
+        [
+          "error-pages@file"
+        ]
+        ++ lib.optionals (cfg.auth or true) [
+          "authelia@file"
+        ];
 
       tls = {
         certResolver = "letsEncrypt";
@@ -150,9 +148,25 @@ in {
     };
 
     defaultRouters = {
-      traefik = {
-        service = "api@internal";
-        rule = "Host(`traefik.${project_tld}`)";
+      # TODO: Look into this being broken
+      # traefik = {
+      #   service = "api@internal";
+      #   rule = "Host(`traefik.${project_tld}`)";
+      #   entryPoints = "webHttps";
+      #   priority = "10";
+      #   tls = {
+      #     certResolver = "letsEncrypt";
+      #     domains = [
+      #       {
+      #         main = "${project_tld}";
+      #         sans = ["*.${project_tld}"];
+      #       }
+      #     ];
+      #   };
+      # };
+      error-pages = {
+        service = "error-pages";
+        rule = "HostRegexp(`.+`)";
         entryPoints = "webHttps";
         priority = "10";
         tls = {
@@ -167,11 +181,18 @@ in {
       };
     };
 
+    defaultServices = {
+      error-pages = {
+        loadBalancer = {servers = [{url = "http://127.0.0.1:8081";}];};
+      };
+    };
+
     customRouters = lib.mapAttrs mkRouters services;
     allRouters = customRouters // defaultRouters;
 
-    allServices = lib.mapAttrs mkServices services;
-  in rec {
+    customServices = lib.mapAttrs mkServices services;
+    allServices = customServices // defaultServices;
+  in {
     enable = true;
     dataDir = "${data_dir}";
     environmentFiles = [
@@ -196,9 +217,6 @@ in {
           proxyProtocol.trustedIPs = ["192.168.10.15/32"];
           forwardedHeaders.trustedIPs = ["192.168.10.15/32"];
         };
-      };
-
-      api = {
       };
 
       certificatesResolvers.letsEncrypt.acme = {
@@ -227,11 +245,29 @@ in {
               "Remote-Name"
             ];
           };
+          error-pages.errors = {
+            status = "400-599";
+            service = "error-pages";
+            query = "/{status}.html";
+          };
         };
 
         routers = allRouters;
         services = allServices;
       };
+    };
+  };
+
+  virtualisation.oci-containers.containers = {
+    error-pages = {
+      autoStart = true;
+      image = "ghcr.io/tarampampam/error-pages:3";
+      environment = {
+        TEMPLATE_NAME = "lost-in-space";
+      };
+      ports = [
+        "127.0.0.1:8081:8080/tcp"
+      ];
     };
   };
 }
