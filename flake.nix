@@ -113,6 +113,7 @@
           serverType = "lxc";
           roles = [
             /server/proxy
+            /server/cloudflared
           ];
           colmenaConfig = {
             targetHost = "prox-01.srv";
