@@ -10,6 +10,8 @@
 
   project_tld = "${private.project_tld}";
   base_dn = "${private.ldap_base_dn}";
+  smtp_sender = "${private.smtp_sender}";
+  smtp_address = "smtp://${private.smtp_address}:587";
 
   project_dir = "/services/authelia";
   config_dir = "${project_dir}/config";
@@ -59,6 +61,10 @@ in {
     owner = "authelia";
     sopsFile = "${secretsPath}/secrets/authentication.yaml";
   };
+  sops.secrets."smtp_app_password" = {
+    owner = "authelia";
+    sopsFile = "${secretsPath}/secrets/shared.yaml";
+  };
 
   sops.secrets."ldap_jwt_secret" = {
     owner = "lldap";
@@ -97,6 +103,7 @@ in {
 
     environmentVariables = {
       AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD_FILE = config.sops.secrets."authelia_ldap_password".path;
+      AUTHELIA_NOTIFIER_SMTP_PASSWORD_FILE = config.sops.secrets."smtp_app_password".path;
     };
     settings = {
       theme = "dark";
@@ -131,7 +138,16 @@ in {
 
       # TODO: Move this to an actual db - add full-blown db server?
       storage.local.path = "${config_dir}/db.sqlite3";
-      notifier.filesystem.filename = "${data_dir}/notifier.txt";
+      notifier.smtp = {
+        address = smtp_address;
+        username = "${smtp_sender}";
+        sender = "Authelia <${smtp_sender}>";
+      };
+
+      identity_validation = {
+        reset_password = {
+        };
+      };
 
       access_control = {
         default_policy = "deny";
