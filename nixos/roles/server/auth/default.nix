@@ -31,7 +31,6 @@ in {
   networking.firewall.allowedTCPPorts = [
     9091 # Authelia
     3890 # LDAP
-    # 6360 # LDAPS
     17170 # LLDAP Web UI
   ];
 
@@ -112,8 +111,7 @@ in {
           {
             domain = "${project_tld}";
             authelia_url = "https://auth.${project_tld}";
-            # TODO: Add custom dashboard?
-            default_redirection_url = "https://media.${project_tld}";
+            default_redirection_url = "https://${project_tld}";
           }
         ];
       };
@@ -177,7 +175,19 @@ in {
           }
           {
             domain = [
+              "jellyseer.${project_tld}"
+              # TODO
+              # "media.${project_tld}"
+            ];
+            subject = [
+              "group:media"
+            ];
+            policy = "one_factor";
+          }
+          {
+            domain = [
               "recipes.${project_tld}"
+              "${project_tld}"
             ];
             policy = "one_factor";
           }

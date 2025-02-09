@@ -3,6 +3,7 @@
   inputs,
   lib,
   private,
+  config,
   ...
 }: let
   secretsPath = builtins.toString inputs.nix-secrets;
@@ -12,6 +13,10 @@
   config_dir = "${project_dir}/config";
   data_dir = "${project_dir}/data";
 in {
+  imports = [
+    ./dashboard.nix
+  ];
+
   environment.systemPackages = with pkgs; [
     traefik
   ];
@@ -60,6 +65,11 @@ in {
         auth = false;
       };
 
+      dashboard = {
+        rule = "Host(`${project_tld}`)";
+        dest = "http://127.0.0.1:8082";
+      };
+
       # Util
       tandoor = {
         host = "recipes";
@@ -102,7 +112,6 @@ in {
       jellyseer = {
         host = "jellyseer";
         dest = "http://media-02.srv:5055";
-        auth = false;
       };
 
       jellyfin = {
@@ -122,6 +131,7 @@ in {
     mkRouters = name: cfg: {
       service = "${name}";
       rule = "${cfg.rule or "Host(`${cfg.host}.${project_tld}`)"}";
+      priority = "128";
       entryPoints = "webHttps";
 
       middlewares =
@@ -168,7 +178,7 @@ in {
         service = "error-pages";
         rule = "HostRegexp(`.+`)";
         entryPoints = "webHttps";
-        priority = "10";
+        priority = "64";
         tls = {
           certResolver = "letsEncrypt";
           domains = [
@@ -184,6 +194,9 @@ in {
     defaultServices = {
       error-pages = {
         loadBalancer = {servers = [{url = "http://127.0.0.1:8081";}];};
+      };
+      dashboard = {
+        loadBalancer = {servers = [{url = "http://127.0.0.1:8082";}];};
       };
     };
 
@@ -258,6 +271,7 @@ in {
     };
   };
 
+  # Add error pages
   virtualisation.oci-containers.containers = {
     error-pages = {
       autoStart = true;

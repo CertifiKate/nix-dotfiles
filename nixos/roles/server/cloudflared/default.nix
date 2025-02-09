@@ -24,6 +24,7 @@ in {
           "media.${project_tld}" = "https://localhost:443";
           "jellyseer.${project_tld}" = "https://localhost:443";
           "home.${project_tld}" = "https://localhost:443";
+          "auth.${project_tld}" = "https://localhost:443";
           "${project_tld}" = "https://localhost:443";
         };
         originRequest = {
