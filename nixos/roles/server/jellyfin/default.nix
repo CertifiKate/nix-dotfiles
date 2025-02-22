@@ -11,12 +11,21 @@ in {
     ];
   };
 
+  # 1. enable vaapi on OS-level
+  nixpkgs.config.packageOverrides = pkgs: {
+    vaapiIntel = pkgs.vaapiIntel.override {enableHybridCodec = true;};
+  };
+
+  environment.systemPackages = with pkgs; [
+    libva-utils
+    intel-gpu-tools
+    intel-media-driver
+  ];
   hardware.graphics = {
-    # hardware.opengl in 24.05
     enable = true;
     extraPackages = with pkgs; [
       intel-media-driver
-      intel-vaapi-driver # previously vaapiIntel
+      intel-vaapi-driver
       vaapiVdpau
       intel-compute-runtime # OpenCL filter support (hardware tonemapping and subtitle burn-in)
       vpl-gpu-rt # QSV on 11th gen or newer
