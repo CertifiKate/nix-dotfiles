@@ -19,7 +19,7 @@
     ];
 
     enableUpdateCheck = false;
-    mutableExtensionsDir = false;
+    mutableExtensionsDir = true;
 
     userSettings = {
       "git.autofetch" = true;
