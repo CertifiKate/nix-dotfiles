@@ -181,6 +181,7 @@ in {
               "sonarr.${project_tld}"
               "radarr.${project_tld}"
               "prowlarr.${project_tld}"
+              "lidarr.${project_tld}"
               "torrent.${project_tld}"
             ];
             subject = [

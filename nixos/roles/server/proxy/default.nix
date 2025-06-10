@@ -98,6 +98,11 @@ in {
         dest = "http://192.168.10.51:9696";
       };
 
+      lidarr = {
+        host = "lidarr";
+        dest = "http://media-02.srv:8686";
+      };
+
       qbittorrent = {
         host = "torrent";
         dest = "http://192.168.10.51:8080";

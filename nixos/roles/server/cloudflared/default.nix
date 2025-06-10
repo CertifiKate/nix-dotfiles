@@ -10,14 +10,17 @@
 in {
   sops.secrets."cloudflared_tunnel_cert" = {
     sopsFile = "${secretsPath}/secrets/proxy.yaml";
-    owner = config.services.cloudflared.user;
-    group = config.services.cloudflared.group;
+  };
+
+  sops.secrets."cloudflared_tunnel_creation_cert" = {
+    sopsFile = "${secretsPath}/secrets/proxy.yaml";
   };
 
   services.cloudflared = {
     enable = true;
     tunnels = {
       "default-tunnel" = {
+        certificateFile = config.sops.secrets."cloudflared_tunnel_creation_cert".path;
         credentialsFile = config.sops.secrets."cloudflared_tunnel_cert".path;
         default = "http_status:404";
         ingress = {

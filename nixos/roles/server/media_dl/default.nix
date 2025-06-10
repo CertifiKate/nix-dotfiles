@@ -2,6 +2,7 @@ let
   base_project_dir = "/services";
   sonarr_project_dir = "${base_project_dir}/sonarr";
   radarr_project_dir = "${base_project_dir}/radarr";
+  lidarr_project_dir = "${base_project_dir}/lidarr";
 in {
   # Setup backup service
   CertifiKate.backup_service = {
@@ -30,6 +31,13 @@ in {
   services.radarr = {
     enable = true;
     dataDir = "${radarr_project_dir}/data";
+    group = "media";
+    openFirewall = true;
+  };
+
+  services.lidarr = {
+    enable = true;
+    dataDir = "${lidarr_project_dir}/data";
     group = "media";
     openFirewall = true;
   };
