@@ -33,10 +33,6 @@
   # boot.initrd.kernelModules = ["8821cu"];
   # boot.extraModulePackages = [config.boot.kernelPackages.rtl8821cu];
 
-  # Use 6.11 kernel (or later) to fix microphone not being detected
-  # https://www.reddit.com/r/NixOS/comments/1fzpkcg/thinkpad_e14_gen_6_amd_microphone_issues/
-  boot.kernelPackages = pkgs.linuxPackages_6_11;
-
   # ==== Power Management ====
   # Set by default in Gnome
   services.power-profiles-daemon.enable = false;

@@ -2,7 +2,7 @@
   inputs = {
     # I want to use unstable by default but for some things use stable
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.11";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
 
     sops-nix.url = "github:Mic92/sops-nix";
 
@@ -46,6 +46,7 @@
           systemType = "physical";
           roles = [
             /physical/desktop/gnome
+            /physical/desktop/cosmic
             /physical/desktop/development
             /server/deployment-host
           ];

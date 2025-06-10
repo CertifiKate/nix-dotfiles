@@ -67,7 +67,7 @@
                 template = "https://wiki.nixos.org/w/index.php?search={searchTerms}";
               }
             ];
-            iconUpdateURL = "https://nixos.wiki/favicon.png";
+            icon = "https://nixos.wiki/favicon.png";
             updateInterval = 24 * 60 * 60 * 1000;
             definedAliases = ["@nw"];
           };
@@ -76,11 +76,11 @@
             icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
             definedAliases = ["@hm"];
           };
-          "Wikipedia (en)".metaData.alias = "@wiki";
-          "Google".metaData.hidden = true;
-          "Amazon.com".metaData.hidden = true;
-          "Bing".metaData.hidden = true;
-          "eBay".metaData.hidden = true;
+          "wikipedia".metaData.alias = "@wiki";
+          "google".metaData.hidden = true;
+          "amazondotcom-us".metaData.hidden = true;
+          "bing".metaData.hidden = true;
+          "ebay".metaData.hidden = true;
         };
       };
     };
