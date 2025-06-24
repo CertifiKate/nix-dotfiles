@@ -45,7 +45,7 @@
         modules =
           [
             ./base.nix
-            ./modules/nixos/common
+            ./nixos/common
             # Add in sops
             inputs.sops-nix.nixosModules.sops
             path
@@ -67,10 +67,10 @@
       mkNixOSConfig {
         path = path;
         extraModules = [
-          ./modules/nixos/common
+          ./nixos/common
           ./hosts/server
-          ./modules/nixos/modules/backup
-          ./modules/nixos/roles/server/${serverType}
+          ./nixos/modules/backup
+          ./nixos/roles/server/${serverType}
         ];
       };
   in {

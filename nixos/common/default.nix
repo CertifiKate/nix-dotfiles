@@ -14,7 +14,7 @@ let
   secretsPath = builtins.toString inputs.nix-secrets;
 in {
   imports = [
-    ../../../users/${vars.user}.nix
+    ../../users/${vars.user}.nix
     ../modules/remote-build.nix
     ../modules/zsh.nix
   ];

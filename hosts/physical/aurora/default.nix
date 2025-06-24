@@ -12,17 +12,17 @@
 
     inputs.nixos-hardware.nixosModules.lenovo-thinkpad-e14-amd
 
-    ../../../modules/nixos/roles/physical/desktop/gnome
-    ../../../modules/nixos/roles/physical/desktop/cosmic
-    ../../../modules/nixos/roles/server/deployment-host
+    ../../../nixos/roles/physical/desktop/gnome
+    ../../../nixos/roles/physical/desktop/cosmic
+    ../../../nixos/roles/server/deployment-host
   ];
 
   home-manager = {
     users.${vars.user}.imports = [
-      ../../../modules/home-manager/common
-      ../../../modules/home-manager/roles/personal
-      ../../../modules/home-manager/roles/desktop/gnome
-      ../../../modules/home-manager/roles/sops-management
+      ../../../home-manager/common
+      ../../../home-manager/roles/personal
+      ../../../home-manager/roles/desktop/gnome
+      ../../../home-manager/roles/sops-management
     ];
   };
 

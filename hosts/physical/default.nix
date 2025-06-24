@@ -7,7 +7,7 @@
   # All Physical machines should use home manager so import our common nixos home-manager config
   imports = [
     inputs.home-manager.nixosModules.home-manager
-    ../../modules/nixos/modules/home-manager.nix
+    ../../nixos/modules/home-manager.nix
   ];
 
   # Yubikey
