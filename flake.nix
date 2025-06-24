@@ -35,6 +35,8 @@
 
     # Restructuring based on https://github.com/eh8/chenglab/blob/main/flake.nix
 
+    systems = ["x86_64-linux"];
+
     # Generic NixOS config for all systems
     mkNixOSConfig = {
       path,
@@ -74,6 +76,7 @@
         ];
       };
   in {
+    formatter = nixpkgs.lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.alejandra);
     # Collection of all of our configs
     nixosConfigurations = {
       # Laptop
