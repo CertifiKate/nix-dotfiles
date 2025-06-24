@@ -3,7 +3,7 @@
   nixpkgs,
   home-manager,
   hostName,
-  user,
+  vars,
   systemType ? "physical",
   serverType ? null,
   roles ? [],

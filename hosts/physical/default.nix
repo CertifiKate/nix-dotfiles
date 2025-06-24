@@ -1,4 +1,15 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  inputs,
+  vars,
+  ...
+}: {
+  # All Physical machines should use home manager so import our common nixos home-manager config
+  imports = [
+    inputs.home-manager.nixosModules.home-manager
+    ../../modules/nixos/modules/home-manager.nix
+  ];
+
   # Yubikey
   services.pcscd.enable = true;
 
@@ -36,16 +47,6 @@
     alsa-utils
     lm_sensors
   ];
-
-  # hardware.pulseaudio.enable = false;
-  # services.pipewire = {
-  #   enable = true;
-  #   audio.enable = true;
-  #   alsa.enable = true;
-  #   alsa.support32Bit = true;
-  #   pulse.enable = true;
-  #   wireplumber.enable = true;
-  # };
 
   # Enable our boot loading animation
   boot = {

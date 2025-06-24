@@ -1,60 +1,30 @@
 {
   lib,
-  user,
+  vars,
   pkgs,
+  inputs,
   ...
 }: {
   imports = [
     ./hardware-configuration.nix
+    ./system-configuration.nix
     ../default.nix
+
+    inputs.nixos-hardware.nixosModules.lenovo-thinkpad-e14-amd
+
+    ../../../modules/nixos/roles/physical/desktop/gnome
+    ../../../modules/nixos/roles/physical/desktop/cosmic
+    ../../../modules/nixos/roles/server/deployment-host
   ];
 
-  # Overwrite the path used for our shorthand aliases/functions
-  environment.variables = {
-    NIX_FLAKE_PATH = lib.mkForce "/home/${user}/source/nix-dotfiles";
-  };
-  environment.systemPackages = [
-    pkgs.dotnet-sdk_8
-    pkgs.dotnetCorePackages.dotnet_8.runtime
-    pkgs.dotnetCorePackages.dotnet_8.aspnetcore
-    pkgs.dotnet-aspnetcore_8
-  ];
-
-  # Bootloader
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
-  # Enable fingerprint
-  services.fprintd = {
-    enable = true;
+  home-manager = {
+    users.${vars.user}.imports = [
+      ../../../modules/home-manager/common
+      ../../../modules/home-manager/roles/personal
+      ../../../modules/home-manager/roles/desktop/gnome
+      ../../../modules/home-manager/roles/sops-management
+    ];
   };
 
-  # Fix ethernet not being detected
-  # boot.initrd.kernelModules = ["8821cu"];
-  # boot.extraModulePackages = [config.boot.kernelPackages.rtl8821cu];
-
-  # ==== Power Management ====
-  # Set by default in Gnome
-  services.power-profiles-daemon.enable = false;
-  services.tlp = {
-    enable = true;
-  };
-
-  # Setup hibernation
-  swapDevices = [
-    {
-      device = "/var/lib/swapfile";
-      size = 16 * 1024;
-    }
-  ];
-  boot.resumeDevice = "/dev/nvme0n1p2";
-  boot.kernelParams = [
-    "resume_offset=13154304"
-  ];
-  systemd.sleep.extraConfig = "HibernateDelaySec=4h";
-  networking.firewall.checkReversePath = false;
-
-  # Add DisplayLink support
-  # nix-prefetch-url --name displaylink-600.zip https://www.synaptics.com/sites/default/files/exe_files/2024-05/DisplayLink%20USB%20Graphics%20Software%20for%20Ubuntu6.0-EXE.zip                                       255 ↵
-  services.xserver.videoDrivers = ["displaylink"];
+  networking.hostName = "aurora";
 }

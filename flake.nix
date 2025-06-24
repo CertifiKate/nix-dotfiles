@@ -26,215 +26,62 @@
   outputs = {
     self,
     nixpkgs,
-    home-manager,
     ...
   } @ inputs: let
     inherit (self) outputs;
 
-    commonInherits = {
-      inherit (nixpkgs) lib;
-      inherit inputs outputs nixpkgs home-manager;
-    };
-
     # Set the primary/default user. Can be overwritten on a system level
-    user = "kate";
+    vars.user = "kate";
 
-    systems = {
-      physical = {
-        # Lenovo Thinkpad E14 Gen 6 (AMD)
-        aurora = {
-          systemType = "physical";
-          roles = [
-            /physical/desktop/gnome
-            /physical/desktop/cosmic
-            /physical/desktop/development
-            /server/deployment-host
-          ];
-          hmRoles = [
-            /personal
-            /desktop/gnome
-            /desktop/sway
-            /sops-management
-            /ansible-controller
-          ];
-          extraModules = [
-            inputs.nixos-hardware.nixosModules.lenovo-thinkpad-e14-amd
-          ];
-        };
+    # Restructuring based on https://github.com/eh8/chenglab/blob/main/flake.nix
 
-        # Acer Swift 3 SF353-51
-        swift3 = {
-          systemType = "physical";
-          roles = [
-            /physical/desktop/gnome
-            /physical/desktop/sway
-          ];
-          hmRoles = [
-            /personal
-            /desktop/gnome
-            /desktop/sway
-            /sops-management
-            /ansible-controller
-          ];
-        };
+    # Generic NixOS config for all systems
+    mkNixOSConfig = {
+      path,
+      extraModules ? [],
+    }:
+      nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs outputs vars;};
+        modules =
+          [
+            ./base.nix
+            ./modules/nixos/common
+            # Add in sops
+            inputs.sops-nix.nixosModules.sops
+            path
+          ]
+          ++ extraModules;
       };
 
-      server = {
-        # ==== LXCs ====================
-        build-01 = {
-          systemType = "server";
-          serverType = "lxc";
-          roles = [
-            /server/deployment-host
-            /server/nix-builder
-          ];
-          colmenaConfig = {
-            targetHost = "build-01.srv";
-            tags = ["build"];
-          };
-          extraModules = [
-            inputs.nixos-hardware.nixosModules.lenovo-thinkpad-e14-amd
-          ];
-        };
-
-        auth-01 = {
-          systemType = "server";
-          serverType = "lxc";
-          roles = [
-            /server/auth
-          ];
-          colmenaConfig = {
-            targetHost = "auth-01.srv";
-            tags = ["core" "auth"];
-          };
-        };
-
-        prox-01 = {
-          systemType = "server";
-          serverType = "lxc";
-          roles = [
-            /server/proxy
-            /server/cloudflared
-          ];
-          colmenaConfig = {
-            targetHost = "prox-01.srv";
-            tags = ["core" "proxy"];
-          };
-        };
-
-        avahi-01 = {
-          systemType = "server";
-          serverType = "lxc";
-          roles = [
-            /server/mdns-repeater
-          ];
-          colmenaConfig = {
-            targetHost = "avahi-01.srv";
-            tags = ["avahi"];
-          };
-        };
-
-        media-01 = {
-          systemType = "server";
-          serverType = "lxc";
-          roles = [
-            /server/common/media_server
-            /server/jellyfin
-          ];
-          colmenaConfig = {
-            targetHost = "media-01.srv";
-            tags = ["media"];
-          };
-        };
-
-        media-02 = {
-          systemType = "server";
-          serverType = "lxc";
-          roles = [
-            /server/common/media_server
-            /server/media_dl
-          ];
-          colmenaConfig = {
-            targetHost = "media-02.srv";
-            tags = ["media"];
-          };
-        };
-
-        util-01 = {
-          systemType = "server";
-          serverType = "lxc";
-          roles = [
-            /server/budget
-          ];
-          colmenaConfig = {
-            targetHost = "util-01.srv";
-            tags = ["utility"];
-          };
-        };
-
-        # ==== VMs =====================
-        backup-01 = {
-          systemType = "server";
-          serverType = "vm";
-          extraModules = [
-            ./nixos/modules/backup/server
-          ];
-          colmenaConfig = {
-            targetHost = "backup-01.srv";
-            tags = ["core" "backup"];
-          };
-        };
-
-        mine-01 = {
-          systemType = "server";
-          serverType = "vm";
-          roles = [
-            /server/minecraft
-          ];
-          colmenaConfig = {
-            targetHost = "mine-01.dmz";
-            tags = ["minecraft"];
-          };
-        };
-        # ==============================
+    # Defines additional modules for physical machines
+    mkPhysicalNixOSConfig = path:
+      mkNixOSConfig {
+        path = path;
+        extraModules = [
+          ./hosts/physical
+        ];
       };
-    };
 
-    mkSystem = host: system:
-      import ./hosts.nix (commonInherits
-        // {
-          hostName = "${host}";
-          user = system.user or user;
-          serverType = system.serverType or null;
-        }
-        // system);
+    # Defines additional modules for servers
+    mkServerNixOSConfig = path: serverType:
+      mkNixOSConfig {
+        path = path;
+        extraModules = [
+          ./modules/nixos/common
+          ./hosts/server
+          ./modules/nixos/modules/backup
+          ./modules/nixos/roles/server/${serverType}
+        ];
+      };
   in {
-    serverConfigs = nixpkgs.lib.mapAttrs mkSystem (systems.server);
-    physicalConfigs = nixpkgs.lib.mapAttrs mkSystem (systems.physical);
-
     # Collection of all of our configs
-    nixosConfigurations = self.physicalConfigs // self.serverConfigs;
+    nixosConfigurations = {
+      # Laptop
+      aurora = mkPhysicalNixOSConfig ./hosts/physical/aurora;
 
-    colmena =
-      {
-        meta = {
-          nixpkgs = import inputs.nixpkgs {system = "x86_64-linux";};
-          # nodeNixpkgs = builtins.mapAttrs (_: v: v.pkgs) self.nixosConfigurations;
-          nodeSpecialArgs = builtins.mapAttrs (_: v: v._module.specialArgs) self.serverConfigs;
-        };
-      }
-      // builtins.mapAttrs (_: v: {
-        deployment =
-          v._module.specialArgs.colmenaConfig
-          // {
-            targetUser = "deploy_user";
-            # TODO: Not supported in 0.4, use ssh agent as a bandaid because I don't have time to deal with updating
-            # sshOptions = [
-            #   "-i ~/.ssh/id_ed25519_colmena_deploy"
-            # ];
-          };
-        imports = v._module.args.modules;
-      })
-      self.serverConfigs;
+      # Servers
+      # TODO: all of this...
+      # prox-01 = mkServerNixOSConfig ./hosts/server/prox-01 "lxc";
+    };
   };
 }
