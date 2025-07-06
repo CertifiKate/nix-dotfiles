@@ -43,7 +43,12 @@
       extraModules ? [],
     }:
       nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs vars;};
+        specialArgs = {
+          inherit inputs outputs vars;
+          # A .json file from the nix-secrets repo with non-important info.
+          # Stuff we just don't want public (ie. project_tld) but don't care if it's in the nix store
+          private = builtins.fromJSON (builtins.readFile "${builtins.toString inputs.nix-secrets}/private.json");
+        };
         modules =
           [
             ./base.nix
@@ -69,22 +74,32 @@
       mkNixOSConfig {
         path = path;
         extraModules = [
-          ./nixos/common
           ./hosts/server
-          ./nixos/modules/backup
           ./nixos/roles/server/${serverType}
+          ./nixos/common
+          ./nixos/modules/backup
         ];
       };
   in {
     formatter = nixpkgs.lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.alejandra);
+
     # Collection of all of our configs
     nixosConfigurations = {
-      # Laptop
+      # === Laptop ===
       aurora = mkPhysicalNixOSConfig ./hosts/physical/aurora;
 
-      # Servers
-      # TODO: all of this...
-      # prox-01 = mkServerNixOSConfig ./hosts/server/prox-01 "lxc";
+      # === Servers ===
+      # LXCs
+      auth-01 = mkServerNixOSConfig ./hosts/server/auth-01 "lxc";
+      avahi-01 = mkServerNixOSConfig ./hosts/server/avahi-01 "lxc";
+      build-01 = mkServerNixOSConfig ./hosts/server/build-01 "lxc";
+      media-01 = mkServerNixOSConfig ./hosts/server/media-01 "lxc";
+      media-02 = mkServerNixOSConfig ./hosts/server/media-02 "lxc";
+      prox-01 = mkServerNixOSConfig ./hosts/server/prox-01 "lxc";
+      util-01 = mkServerNixOSConfig ./hosts/server/util-01 "lxc";
+      # VMs
+      backup-01 = mkServerNixOSConfig ./hosts/server/backup-01 "vm";
+      mine-01 = mkServerNixOSConfig ./hosts/server/mine-01 "vm";
     };
   };
 }
