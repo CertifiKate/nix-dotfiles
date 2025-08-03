@@ -1,9 +1,13 @@
 {
   inputs,
   pkgs,
+  private,
+  config,
   ...
 }: let
   minecraft_dir = "/services/minecraft";
+  secretsPath = builtins.toString inputs.nix-secrets;
+  project_tld = "${private.project_tld}";
 in {
   imports = [inputs.nix-minecraft.nixosModules.minecraft-servers];
   nixpkgs.overlays = [inputs.nix-minecraft.overlay];
@@ -12,6 +16,21 @@ in {
     paths = [
       minecraft_dir
     ];
+  };
+
+  # Setup DDNS service using Cloudflare
+  sops.secrets."cloudflare_dyndns_token" = {
+    sopsFile = "${secretsPath}/secrets/dyndns.yaml";
+  };
+
+  services.cloudflare-dyndns = {
+    enable = true;
+    ipv4 = true;
+    ipv6 = false;
+    domains = [
+      "mc.${project_tld}"
+    ];
+    apiTokenFile = config.sops.secrets."cloudflare_dyndns_token".path;
   };
 
   services.minecraft-servers = {
