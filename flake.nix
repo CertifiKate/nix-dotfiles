@@ -87,6 +87,8 @@
     nixosConfigurations = {
       # === Laptop ===
       aurora = mkPhysicalNixOSConfig ./hosts/physical/aurora;
+      # === Desktop ===
+      cosmos = mkPhysicalNixOSConfig ./hosts/physical/cosmos;
 
       # === Servers ===
       # LXCs
