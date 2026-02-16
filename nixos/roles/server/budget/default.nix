@@ -15,7 +15,7 @@ in {
   virtualisation.oci-containers.containers = {
     actualbudget = {
       autoStart = true;
-      image = "ghcr.io/actualbudget/actual-server:25.7.1";
+      image = "ghcr.io/actualbudget/actual-server:25.12.0";
       ports = ["5006:5006"];
       volumes = [
         "${actual_budget_dir}:/data"

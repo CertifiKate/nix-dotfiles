@@ -42,18 +42,40 @@ in {
     dataDir = minecraft_dir;
 
     servers.vanilla = {
-      enable = true;
+      enable = false;
       enableReload = true;
-      package = pkgs.paperServers.paper-1_21_6;
+      package = pkgs.paperServers.paper-1_21_10;
+      jvmOpts = [
+        "-Xms4G"
+        "-Xmx4G"
+      ];
       serverProperties = {
-        motd = "Kate's NEW NEW Minecraft server";
+        motd = "Kate's NEW NEW NEW Minecraft server";
         hide-online-players = true;
         difficulty = "normal";
         enforce-whitelist = true;
         white-list = true;
         server-port = 25565;
         spawn-protection = 0;
-        level-seed = "1217942224227008520";
+        level-seed = "-1106759604738884840";
+      };
+    };
+    servers.modded = {
+      enable = true;
+      enableReload = true;
+      package = pkgs.fabricServers.fabric-1_20_1;
+      jvmOpts = [
+        "-Xms8G"
+        "-Xmx8G"
+      ];
+      serverProperties = {
+        motd = "Kate's MODDED Minecraft server";
+        hide-online-players = true;
+        difficulty = "normal";
+        enforce-whitelist = true;
+        white-list = true;
+        server-port = 25565;
+        spawn-protection = 0;
       };
     };
   };

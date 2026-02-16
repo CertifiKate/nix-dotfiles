@@ -1,6 +1,6 @@
 {...}: {
   imports = [
-    ../../../nixoa/roles/server/cloudflared
+    ../../../nixos/roles/server/cloudflared
     ../../../nixos/roles/server/proxy
   ];
 

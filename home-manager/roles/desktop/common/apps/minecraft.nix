@@ -1,5 +1,9 @@
 {pkgs, ...}: {
   home.packages = with pkgs; [
-    prismlauncher
+    (prismlauncher.override {
+      jdks = [
+        temurin-bin-17
+      ];
+    })
   ];
 }
