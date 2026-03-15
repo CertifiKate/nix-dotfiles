@@ -7,7 +7,7 @@
 
   # Add sops age-key to use for home-manager to decrypt sops secrets (without needing to add it ourselves)
   sops.secrets."home_manager_user_key" = {
-    sopsFile = "${builtins.toString inputs.nix-secrets}/secrets/home-manager-init.yaml";
+    sopsFile = "${toString inputs.nix-secrets}/secrets/home-manager-init.yaml";
     path = "/home/${vars.user}/.config/sops-age.txt";
     owner = vars.user;
   };

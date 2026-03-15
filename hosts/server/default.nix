@@ -3,6 +3,12 @@
   imports = [
     ../../users/server_admin.nix
     ../../users/deploy_user.nix
+
+    # Import all server roles so configs are shared. Flags enable specific services on each host.
+    ../../nixos/roles/server
+
+    # All servers should have backup enabled, but the actual paths are defined in the service modules. This is required to ensure the backup client is installed and configured on all servers.
+    ../../nixos/modules/backup/client
   ];
 
   nix.settings.trusted-users = [

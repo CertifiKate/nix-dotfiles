@@ -1,8 +1,5 @@
 {...}: {
-  imports = [
-    ../../../nixos/roles/server/common/media_server
-    ../../../nixos/roles/server/media_dl
-  ];
+  CertifiKate.roles.server.media_dl.enable = true;
 
   networking.hostName = "media-02";
 }

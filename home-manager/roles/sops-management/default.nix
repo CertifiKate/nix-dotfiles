@@ -4,7 +4,7 @@
   vars,
   ...
 }: let
-  secretsPath = builtins.toString inputs.nix-secrets;
+  secretsPath = toString inputs.nix-secrets;
 in {
   # The administration key (not the home-manager key)
   sops.secrets."${vars.user}_sops_admin_key" = {

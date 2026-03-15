@@ -50,7 +50,7 @@
           inherit inputs outputs vars;
           # A .json file from the nix-secrets repo with non-important info.
           # Stuff we just don't want public (ie. project_tld) but don't care if it's in the nix store
-          private = builtins.fromJSON (builtins.readFile "${builtins.toString inputs.nix-secrets}/private.json");
+          private = builtins.fromJSON (builtins.readFile "${toString inputs.nix-secrets}/private.json");
         };
         modules =
           [
@@ -78,9 +78,8 @@
         path = path;
         extraModules = [
           ./hosts/server
-          ./nixos/roles/server/${serverType}
+          ./nixos/roles/server/common/${serverType}
           ./nixos/common
-          ./nixos/modules/backup
         ];
       };
   in {

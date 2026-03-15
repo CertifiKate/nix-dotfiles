@@ -9,7 +9,7 @@
 # Can use secrets, flake inputs, etc.
 #
 let
-  secretsPath = builtins.toString inputs.nix-secrets;
+  secretsPath = toString inputs.nix-secrets;
 in {
   imports = [
     ../../users/${vars.user}.nix

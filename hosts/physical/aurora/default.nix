@@ -1,6 +1,7 @@
 {
   vars,
   inputs,
+  lib,
   ...
 }: {
   imports = [
@@ -12,8 +13,10 @@
 
     ../../../nixos/roles/physical/desktop/gnome
     ../../../nixos/roles/physical/desktop/cosmic
-    ../../../nixos/roles/server/deployment-host
+    ../../../nixos/roles/server/common/options.nix
+    ../../../nixos/roles/server/services/deployment-host
   ];
+  CertifiKate.roles.server.deployment_host.enable = true;
 
   home-manager = {
     users.${vars.user}.imports = [

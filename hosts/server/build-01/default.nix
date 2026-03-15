@@ -1,8 +1,6 @@
 {lib, ...}: {
-  imports = [
-    ../../../nixos/roles/server/deployment-host
-    ../../../nixos/roles/server/nix-builder
-  ];
+  CertifiKate.roles.server.deployment_host.enable = true;
+  CertifiKate.roles.server.nix_builder.enable = true;
 
   networking.hostName = "build-01";
 

@@ -37,12 +37,14 @@ in {
     promptInit = ''
       # Nix remote rebuild
       nrr() {
-        nixos-rebuild --target-host ${remote_rebuild_user}@$1 --use-remote-sudo switch --flake $NIX_FLAKE_PATH
+        nixos-rebuild --target-host ${remote_rebuild_user}@$1 --sudo switch --flake $NIX_FLAKE_PATH
       }
 
       if ! [ -e "~/.motd" ] ; then
         sh -c 'figlet $(cat /etc/hostname) -lf /etc/bulbhead.flf > ~/.motd'
       fi
+
+      HOST=$(cat /etc/hostname)
 
       echo "$fg[$PROMPT_COLOR]$(cat ~/.motd)"
     '';

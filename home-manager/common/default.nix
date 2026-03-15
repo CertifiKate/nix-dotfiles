@@ -4,7 +4,7 @@
   vars,
   ...
 }: let
-  secretsPath = builtins.toString inputs.nix-secrets;
+  secretsPath = toString inputs.nix-secrets;
 in {
   home = {
     username = "${vars.user}";

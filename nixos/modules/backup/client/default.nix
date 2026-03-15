@@ -4,13 +4,12 @@
   lib,
   ...
 }: let
-  cfg = config.CertifiKate.backup_service;
-
   backup_user = "backup";
   backup_host = "backup-01.srv";
+  cfg = config.CertifiKate.modules.backup_service;
 in {
   # TODO: Add scoping of paths?
-  options.CertifiKate.backup_service = {
+  options.CertifiKate.modules.backup_service = {
     paths = lib.mkOption {
       type = with lib; types.listOf types.path;
       default = [];
