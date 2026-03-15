@@ -6,12 +6,6 @@
 }: let
   secretsPath = builtins.toString inputs.nix-secrets;
 in {
-  programs.ssh = {
-    enable = true;
-    addKeysToAgent = "yes";
-    forwardAgent = true;
-  };
-
   # Add all of our private keys
 
   # For low-security stuff, logging into lxc/vms, etc.
@@ -37,37 +31,42 @@ in {
     path = "/home/${vars.user}/.ssh/id_ed25519_sk_rk_yubikey5";
   };
 
-  # Github ssh config
-  programs.ssh.matchBlocks = {
-    "github.com" = lib.hm.dag.entryBefore ["*"] {
-      user = "git";
-      identityFile = [
-        "/home/${vars.user}/.ssh/id_ed25519_github"
-      ];
-    };
-    "*.srv" = lib.hm.dag.entryBefore ["*"] {
-      identityFile = [
-        "/home/${vars.user}/.ssh/id_ed25519_${vars.user}"
-      ];
-    };
-    "*.dmz" = lib.hm.dag.entryBefore ["*"] {
-      identityFile = [
-        "/home/${vars.user}/.ssh/id_ed25519_sk_rk_yubikey5c"
-        "/home/${vars.user}/.ssh/id_ed25519_sk_rk_yubikey5"
-      ];
-    };
-    "*.infra" = lib.hm.dag.entryBefore ["*"] {
-      identityFile = [
-        "/home/${vars.user}/.ssh/id_ed25519_sk_rk_yubikey5c"
-        "/home/${vars.user}/.ssh/id_ed25519_sk_rk_yubikey5"
-      ];
-    };
-    "*" = {
-      identityFile = [
-        "/home/${vars.user}/.ssh/id_ed25519_${vars.user}"
-        "/home/${vars.user}/.ssh/id_ed25519_sk_rk_yubikey5c"
-        "/home/${vars.user}/.ssh/id_ed25519_sk_rk_yubikey5"
-      ];
+  programs.ssh = {
+    enable = true;
+    enableDefaultConfig = false;
+    matchBlocks = {
+      "github.com" = lib.hm.dag.entryBefore ["*"] {
+        user = "git";
+        identityFile = [
+          "/home/${vars.user}/.ssh/id_ed25519_github"
+        ];
+      };
+      "*.srv" = lib.hm.dag.entryBefore ["*"] {
+        identityFile = [
+          "/home/${vars.user}/.ssh/id_ed25519_${vars.user}"
+        ];
+      };
+      "*.dmz" = lib.hm.dag.entryBefore ["*"] {
+        identityFile = [
+          "/home/${vars.user}/.ssh/id_ed25519_sk_rk_yubikey5c"
+          "/home/${vars.user}/.ssh/id_ed25519_sk_rk_yubikey5"
+        ];
+      };
+      "*.infra" = lib.hm.dag.entryBefore ["*"] {
+        identityFile = [
+          "/home/${vars.user}/.ssh/id_ed25519_sk_rk_yubikey5c"
+          "/home/${vars.user}/.ssh/id_ed25519_sk_rk_yubikey5"
+        ];
+      };
+      "*" = {
+        addKeysToAgent = "yes";
+        forwardAgent = true;
+        identityFile = [
+          "/home/${vars.user}/.ssh/id_ed25519_${vars.user}"
+          "/home/${vars.user}/.ssh/id_ed25519_sk_rk_yubikey5c"
+          "/home/${vars.user}/.ssh/id_ed25519_sk_rk_yubikey5"
+        ];
+      };
     };
   };
 }
