@@ -183,6 +183,7 @@ in {
               "prowlarr.${project_tld}"
               "lidarr.${project_tld}"
               "torrent.${project_tld}"
+              "cleanuparr.${project_tld}"
             ];
             subject = [
               "group:media_admin"

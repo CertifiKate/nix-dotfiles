@@ -19,7 +19,7 @@
     };
 
     nix-minecraft.url = "github:Infinidoge/nix-minecraft";
-
+    vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   };
 

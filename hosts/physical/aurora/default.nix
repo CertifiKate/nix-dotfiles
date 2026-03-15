@@ -21,6 +21,7 @@
       ../../../home-manager/roles/personal
       ../../../home-manager/roles/desktop/gnome
       ../../../home-manager/roles/sops-management
+      ../../../home-manager/roles/ansible-controller/ansible-controller.nix
     ];
   };
 

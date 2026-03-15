@@ -40,7 +40,6 @@ in {
     openFirewall = true;
 
     dataDir = minecraft_dir;
-
     servers.vanilla = {
       enable = false;
       enableReload = true;

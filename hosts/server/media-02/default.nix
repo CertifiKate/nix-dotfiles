@@ -1,6 +1,6 @@
 {...}: {
   imports = [
-    ../../../nixos/roles/common/media_server
+    ../../../nixos/roles/server/common/media_server
     ../../../nixos/roles/server/media_dl
   ];
 

@@ -108,6 +108,11 @@ in {
         dest = "http://192.168.10.51:8080";
       };
 
+      cleanuparr = {
+        host = "cleanuparr";
+        dest = "http://media-02.srv:11011";
+      };
+
       library = {
         host = "library";
         dest = "http://192.168.10.51:8083";
