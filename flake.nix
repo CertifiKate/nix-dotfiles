@@ -108,6 +108,8 @@
       # Incus Hypervisors
       # For now, these are VMs on proxmox, will be moved to bare-metal NixOS machines later
       incus-01 = mkServerNixOSConfig ./hosts/server/incus/incus-01 "incus-host";
+      incus-02 = mkServerNixOSConfig ./hosts/server/incus/incus-02 "incus-host";
+      incus-03 = mkServerNixOSConfig ./hosts/server/incus/incus-03 "incus-host";
     };
   };
 }
