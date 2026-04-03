@@ -96,7 +96,6 @@
       # LXCs
       auth-01 = mkServerNixOSConfig ./hosts/server/auth-01 "lxc";
       avahi-01 = mkServerNixOSConfig ./hosts/server/avahi-01 "lxc";
-      build-01 = mkServerNixOSConfig ./hosts/server/build-01 "lxc";
       media-01 = mkServerNixOSConfig ./hosts/server/media-01 "lxc";
       media-02 = mkServerNixOSConfig ./hosts/server/media-02 "lxc";
       prox-01 = mkServerNixOSConfig ./hosts/server/prox-01 "lxc";

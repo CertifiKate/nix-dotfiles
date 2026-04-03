@@ -7,7 +7,6 @@
     ./services/backup
     ./services/budget
     ./services/cloudflared
-    ./services/deployment-host
     ./services/jellyfin
     ./services/mdns-repeater
     ./services/media_dl

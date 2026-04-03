@@ -6,7 +6,6 @@
     backup.enable = lib.mkEnableOption "Backup server services";
     budget.enable = lib.mkEnableOption "Budget management service (Actual Budget)";
     cloudflared.enable = lib.mkEnableOption "Cloudflared tunnel client";
-    deployment_host.enable = lib.mkEnableOption "Deployment host services";
     jellyfin.enable = lib.mkEnableOption "Jellyfin media server";
     mdns_repeater.enable = lib.mkEnableOption "mDNS repeater service for local network discovery";
     media_dl.enable = lib.mkEnableOption "Media download services (Sonarr, Radarr, etc)";
