@@ -104,6 +104,10 @@
       # VMs
       backup-01 = mkServerNixOSConfig ./hosts/server/backup-01 "vm";
       mine-01 = mkServerNixOSConfig ./hosts/server/mine-01 "vm";
+
+      # Incus Hypervisors
+      # For now, these are VMs on proxmox, will be moved to bare-metal NixOS machines later
+      incus-01 = mkServerNixOSConfig ./hosts/server/incus/incus-01 "incus-host";
     };
   };
 }
