@@ -82,6 +82,19 @@
           ./nixos/common
         ];
       };
+    mkIncusHypervisorConfig = path: bootstrap:
+      mkNixOSConfig {
+        path = path;
+        extraModules = [
+          ./hosts/server
+          (
+            if bootstrap
+            then ./nixos/roles/server/common/incus-host/bootstrap.nix
+            else ./nixos/roles/server/common/incus-host/member.nix
+          )
+          ./nixos/common
+        ];
+      };
   in {
     formatter = nixpkgs.lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.alejandra);
 
@@ -93,6 +106,12 @@
       cosmos = mkPhysicalNixOSConfig ./hosts/physical/cosmos;
 
       # === Servers ===
+      # Incus Hypervisors
+      # For now, these are VMs on proxmox, will be moved to bare-metal NixOS machines later
+      incus-01 = mkIncusHypervisorConfig ./hosts/server/incus/incus-01 true; # This one is our bootstrap node
+      incus-02 = mkIncusHypervisorConfig ./hosts/server/incus/incus-02 false;
+      incus-03 = mkIncusHypervisorConfig ./hosts/server/incus/incus-03 false;
+
       # LXCs
       auth-01 = mkServerNixOSConfig ./hosts/server/auth-01 "lxc";
       avahi-01 = mkServerNixOSConfig ./hosts/server/avahi-01 "lxc";
@@ -103,12 +122,6 @@
       # VMs
       backup-01 = mkServerNixOSConfig ./hosts/server/backup-01 "vm";
       mine-01 = mkServerNixOSConfig ./hosts/server/mine-01 "vm";
-
-      # Incus Hypervisors
-      # For now, these are VMs on proxmox, will be moved to bare-metal NixOS machines later
-      incus-01 = mkServerNixOSConfig ./hosts/server/incus/incus-01 "incus-host";
-      incus-02 = mkServerNixOSConfig ./hosts/server/incus/incus-02 "incus-host";
-      incus-03 = mkServerNixOSConfig ./hosts/server/incus/incus-03 "incus-host";
     };
   };
 }
