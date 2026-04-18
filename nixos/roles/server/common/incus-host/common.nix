@@ -46,19 +46,6 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    networking.hostName = cfg.serverName;
-    networking.interfaces = {
-      # Configure the external interface with a static IP address
-      "${cfg.external_interfaces}" = {
-        ipv4.addresses = [
-          {
-            address = cfg.serverAddress;
-            prefixLength = 24;
-          }
-        ];
-      };
-    };
-
     virtualisation.incus = {
       enable = true;
       package = pkgs.incus;
