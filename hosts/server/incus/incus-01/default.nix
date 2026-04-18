@@ -2,6 +2,7 @@
   server_name = "incus-01";
   external_interface = "enp1s0";
   server_address = "192.168.0.6";
+  gateway_address = "192.168.0.1";
 in {
   imports = [
     ./hardware-configuration.nix
@@ -27,5 +28,9 @@ in {
         }
       ];
     };
+  };
+  networking.defaultGateway = {
+    address = gateway_address;
+    interface = external_interface;
   };
 }
