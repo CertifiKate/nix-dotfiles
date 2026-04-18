@@ -14,11 +14,10 @@ in {
   };
 
   programs.vscode = {
-    enable = true;
     profiles.default = {
-      extensions = with pkgs.vscode-extensions; [
+      extensions = lib.mkBefore (with pkgs.vscode-extensions; [
         hashicorp.terraform
-      ];
+      ]);
     };
   };
 

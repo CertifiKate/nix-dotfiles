@@ -18,7 +18,6 @@ in {
     external_interfaces = external_interface;
   };
 
-  # Configure this host with a static IP address on the external interface
   networking.interfaces = {
     "${external_interface}" = {
       ipv4.addresses = [

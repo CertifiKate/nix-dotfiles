@@ -23,7 +23,7 @@
       ../../../home-manager/roles/desktop/gnome
       ../../../home-manager/roles/sops-management
       ../../../home-manager/roles/ansible-controller/ansible-controller.nix
-      ../../../home-manager/roles/deploy-host/default.nix
+      ../../../home-manager/roles/deploy-host
     ];
   };
 

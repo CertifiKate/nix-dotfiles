@@ -46,6 +46,10 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    security.apparmor.enable = true;
+
+    networking.useNetworkd = lib.mkForce true;
+
     virtualisation.incus = {
       enable = true;
       package = pkgs.incus;
