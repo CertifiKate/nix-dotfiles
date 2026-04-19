@@ -60,7 +60,7 @@ resource "incus_profile" "net_server" {
     name = "eth0"
     type = "nic"
     properties = {
-      network = "${incus_network.net_vlan99.name}"
+      network = "${incus_network.net_vlan10.name}"
     }
 
   }
