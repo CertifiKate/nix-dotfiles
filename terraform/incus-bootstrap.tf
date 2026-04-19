@@ -21,33 +21,64 @@ resource "incus_storage_pool" "zfs_pool" {
 }
 
 
-# Network profiles
-resource "incus_profile" "net_vlan10" {
-  name    = "net-vlan10"
+# Set up the base level networks for the cluster
+resource "incus_network" "net_vlan10_incus01" {
+  name = "net-vlan10"
+  target = "incus-01"
+  type = "macvlan"
+  config = {
+    "parent" = "vlan10"
+  }
+}
+
+resource "incus_network" "net_vlan99_incus01" {
+  name = "net-vlan99"
+  target = "incus-01"
+  type = "macvlan"
+  config = {
+    "parent" = "vlan99"
+  }
+
+}
+
+resource "incus_network" "net_vlan10" {
+  depends_on = [ incus_network.net_vlan10_incus01 ]
+  type = "macvlan"
+  name = "net-vlan10"
+}
+
+resource "incus_network" "net_vlan99" {
+  depends_on = [ incus_network.net_vlan99_incus01 ]
+  type = "macvlan"
+  name = "net-vlan99"
+}
+
+
+resource "incus_profile" "net_server" {
+  name    = "net-server"
   device {
-    name = "net_vlan10"
-    type    = "nic"
+    name = "eth0"
+    type = "nic"
     properties = {
-      nictype = "bridged"
-      parent  = "enp1s0"
-      vlan = "10"
-      # "vlan.tagged" = "10"
+      network = "${incus_network.net_vlan99.name}"
+    }
+
+  }
+}
+
+
+resource "incus_profile" "net_dmz" {
+  name    = "net-dmz"
+  device {
+    name = "eth0"
+    type = "nic"
+    properties = {
+      network = "${incus_network.net_vlan99.name}"
     }
   }
 }
 
-# resource "incus_profile" "net_vlan99" {
-#   name    = "net-vlan99"
-#   device {
-#     name = "net_vlan99"
-#     type    = "nic"
-#     properties = {
-#       nictype = "macvlan"
-#       parent  = "vlan99"
-#       mode    = "bridge"
-#     }
-#   }
-# }
+
 
 # Default profile with root disk on ZFS pool
 resource "incus_profile" "default" {

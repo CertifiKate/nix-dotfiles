@@ -50,6 +50,19 @@ in {
 
     networking.useNetworkd = lib.mkForce true;
 
+    networking = {
+      vlans = {
+        vlan10 = {
+          id = 10;
+          interface = cfg.external_interfaces;
+        };
+        vlan99 = {
+          id = 99;
+          interface = cfg.external_interfaces;
+        };
+      };
+    };
+
     virtualisation.incus = {
       enable = true;
       package = pkgs.incus;
