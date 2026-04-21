@@ -27,6 +27,12 @@ in {
         default = 8443;
         description = "Port to bind interface to";
       };
+      serverBucketPort = lib.mkOption {
+        type = lib.types.int;
+        default = 8334;
+        description = "Port to bind storage buckets interface to";
+      };
+
       external_interfaces = lib.mkOption {type = lib.types.str;};
 
       # Member specific
@@ -70,11 +76,12 @@ in {
       preseed = {
         config = {
           "core.https_address" = "${cfg.serverAddress}:${toString cfg.serverPort}";
+          "core.storage_buckets_address" = "${cfg.serverAddress}:${toString cfg.serverBucketPort}";
         };
       };
     };
 
     networking.nftables.enable = true;
-    networking.firewall.allowedTCPPorts = [cfg.serverPort];
+    networking.firewall.allowedTCPPorts = [cfg.serverPort cfg.serverBucketPort];
   };
 }

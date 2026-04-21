@@ -62,7 +62,6 @@ resource "incus_profile" "net_server" {
     properties = {
       network = "${incus_network.net_vlan10.name}"
     }
-
   }
 }
 
@@ -132,5 +131,26 @@ resource "incus_profile" "comp_xlarge" {
   config = {
     "limits.cpu"    = "8"
     "limits.memory" = "16GiB"
+  }
+}
+
+# Setup an S3 bucket for storing Terraform State
+resource "incus_storage_bucket" "s3_terraform_state" {
+  name = "terraform-state"
+  pool = incus_storage_pool.zfs_pool.name
+}
+
+resource "incus_storage_bucket_key" "s3_terraform_state_object" {
+  name = "terraform.tfstate"
+  pool = incus_storage_pool.zfs_pool.name
+  role = "admin"
+  storage_bucket = incus_storage_bucket.s3_terraform_state.name
+}
+
+resource "null_resource" "incus_remote" {
+  provisioner "local-exec" {
+    command = <<-EOT
+      incus remote add cluster ${var.cluster_address} --accept-certificate 2>/dev/null || true
+    EOT
   }
 }

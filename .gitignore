@@ -12,3 +12,9 @@ devenv.local.yaml
 .pre-commit-config.yaml
 
 .terraform
+
+# Terraform state files
+# Incus allows for refreshing the state file, so we can ignore it in git
+terraform.tfstate*
+terraform.tfvars
+*.env

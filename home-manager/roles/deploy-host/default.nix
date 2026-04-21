@@ -13,6 +13,11 @@ in {
     path = "/home/${vars.user}/.ssh/id_ed25519_colmena_deploy";
   };
 
+  sops.secrets."host_keys" = {
+    sopsFile = "${secretsPath}/secrets/deploy.yaml";
+    path = "/home/${vars.user}/.keys/deploy_keys.yaml";
+  };
+
   programs.vscode = {
     profiles.default = {
       extensions = lib.mkBefore (with pkgs.vscode-extensions; [
