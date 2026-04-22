@@ -125,6 +125,26 @@
       # VMs
       backup-01 = mkServerNixOSConfig ./hosts/server/backup-01 "vm";
       mine-01 = mkServerNixOSConfig ./hosts/server/mine-01 "vm";
+
+      # === Images ===
+      # Golden images to be pushed to Incus
+      # Contain nothing interesting except SSH and pre-setup users
+      golden-incus-vm = mkNixOSConfig {
+        path = ./golden.nix;
+        extraModules = [
+          ./hosts/server
+          "${inputs.nixpkgs}/nixos/modules/virtualisation/incus-virtual-machine.nix"
+          {nixpkgs.hostPlatform = {system = "x86_64-linux";};}
+        ];
+      };
+      golden-lxc = mkNixOSConfig {
+        path = ./golden.nix;
+        extraModules = [
+          ./hosts/server
+          "${inputs.nixpkgs}/nixos/modules/virtualisation/lxc-container.nix"
+          {nixpkgs.hostPlatform = {system = "x86_64-linux";};}
+        ];
+      };
     };
   };
 }

@@ -2,6 +2,7 @@
   inputs,
   config,
   pkgs,
+  lib,
   ...
 }:
 #
@@ -12,6 +13,7 @@
   imports = [
     ./base.nix
     ./users/server_admin.nix
+    ./users/deploy_user.nix
   ];
 
   nix.settings.trusted-users = [
@@ -26,6 +28,5 @@
 
   services.openssh.enable = true;
 
-  services.openssh.settings.PermitRootLogin = "yes";
-  services.getty.autologinUser = "root";
+  services.getty.autologinUser = "server_admin";
 }

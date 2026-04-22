@@ -1,7 +1,6 @@
 # Bootstrap Incus infrastructure: storage, networks, profiles, image sources
 
 
-
 # === Storage pools
 # Node specific storage pool (ZFS)
 resource "incus_storage_pool" "zfs_pool_incus_01" {
@@ -152,5 +151,43 @@ resource "null_resource" "incus_remote" {
     command = <<-EOT
       incus remote add cluster ${var.cluster_address} --accept-certificate 2>/dev/null || true
     EOT
+  }
+}
+
+variable "nixos_golden_image_tag" {
+  type = string
+  default = "nixos-custom/golden"
+}
+
+resource "null_resource" "golden_image_vm" {
+  triggers = {
+    image_alias = var.nixos_golden_image_tag
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/usr/bin/env", "bash"]
+    command     = "${path.module}/scripts/push-golden-vm.sh"
+    environment = {
+      IMAGE_ALIAS = var.nixos_golden_image_tag
+      FLAKE_PATH  = "${path.module}/.."
+    }
+  }
+}
+
+resource "null_resource" "golden_image_lxc" {
+  # Just stops it running in parallel!
+  depends_on = [null_resource.golden_image_vm]
+
+  triggers = {
+    image_alias = var.nixos_golden_image_tag
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/usr/bin/env", "bash"]
+    command     = "${path.module}/scripts/push-golden-lxc.sh"
+    environment = {
+      IMAGE_ALIAS = var.nixos_golden_image_tag
+      FLAKE_PATH  = "${path.module}/.."
+    }
   }
 }
