@@ -18,6 +18,7 @@
 
   nix.settings.trusted-users = [
     "server_admin"
+    "deploy_user"
   ];
 
   environment.systemPackages = with pkgs; [

@@ -17,6 +17,14 @@ in {
     ../modules/zsh.nix
   ];
 
+  CertifiKate.remoteBuilders = {
+    enable = true;
+    buildHosts = [
+      "build-01.srv"
+      "build-02.srv"
+    ];
+  };
+
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
   # ==============================
@@ -42,6 +50,7 @@ in {
     dig
     tree
     traceroute
+    gnumake
   ];
 
   # Keep SSH agent in sudo

@@ -6,6 +6,10 @@
 }: let
   secretsPath = toString inputs.nix-secrets;
 in {
+  imports = [
+    ./remote-build.nix
+  ];
+
   home = {
     username = "${vars.user}";
     homeDirectory = "/home/${vars.user}";
@@ -18,6 +22,14 @@ in {
       keyFile = "/home/${vars.user}/.config/sops-age.txt";
       generateKey = false;
     };
+  };
+
+  CertifiKate.remoteBuilders = {
+    enable = true;
+    buildHosts = [
+      "build-01.srv"
+      "build-02.srv"
+    ];
   };
 
   programs.direnv = {
