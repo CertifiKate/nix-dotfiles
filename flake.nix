@@ -24,6 +24,9 @@
     nix-minecraft.url = "github:Infinidoge/nix-minecraft";
     vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    colmena = {
+      url = "github:zhaofengli/colmena";
+    };
   };
 
   outputs = {
@@ -41,27 +44,28 @@
     systems = ["x86_64-linux"];
 
     # Generic NixOS config for all systems
+    specialArgs = {
+      inherit inputs outputs vars;
+      private = builtins.fromJSON (builtins.readFile "${toString inputs.nix-secrets}/private.json");
+    };
+
     mkNixOSConfig = {
       path,
       extraModules ? [],
-    }:
-      nixpkgs.lib.nixosSystem {
-        specialArgs = {
-          inherit inputs outputs vars;
-          # A .json file from the nix-secrets repo with non-important info.
-          # Stuff we just don't want public (ie. project_tld) but don't care if it's in the nix store
-          private = builtins.fromJSON (builtins.readFile "${toString inputs.nix-secrets}/private.json");
-        };
-        modules =
-          [
-            ./base.nix
-            ./nixos/common
-            # Add in sops
-            inputs.sops-nix.nixosModules.sops
-            path
-          ]
-          ++ extraModules;
-      };
+    }: let
+      modules =
+        [
+          ./base.nix
+          ./nixos/common
+          inputs.sops-nix.nixosModules.sops
+          path
+        ]
+        ++ extraModules;
+    in
+      (nixpkgs.lib.nixosSystem {
+        inherit specialArgs modules;
+      })
+      // {inherit modules;};
 
     # Defines additional modules for physical machines
     mkPhysicalNixOSConfig = path:
@@ -95,6 +99,15 @@
           ./nixos/common
         ];
       };
+    # Wrap our system definitions so we can add Colmena outputs to it
+    mkColmenaAttr = nixOSConfig: deploymentAttrs: {
+      imports = nixOSConfig.modules;
+      deployment =
+        {
+          targetUser = "deploy_user";
+        }
+        // deploymentAttrs;
+    };
   in {
     formatter = nixpkgs.lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.alejandra);
 
@@ -154,5 +167,58 @@
         ];
       };
     };
+
+    colmenaHive = inputs.colmena.lib.makeHive (let
+      configs = self.nixosConfigurations;
+    in {
+      meta = {
+        inherit specialArgs;
+        nixpkgs = import nixpkgs {
+          system = "x86_64-linux";
+        };
+      };
+      # === Hypervisors ===
+      "incus-01.infra" = mkColmenaAttr configs.incus-01 {
+        tags = ["incus"];
+      };
+      # "incus-02.infra" = mkColmenaAttr configs.incus-02 {
+      #   tags = ["incus"];
+      # };
+      # "incus-03.infra" = mkColmenaAttr configs.incus-03 {
+      #   tags = ["incus"];
+      # };
+
+      # === Servers ===
+      "auth-01.srv" = mkColmenaAttr configs.auth-01 {
+        tags = ["auth"];
+      };
+      "build-01.srv" = mkColmenaAttr configs.build-01 {
+        tags = ["build"];
+      };
+      "build-02.srv" = mkColmenaAttr configs.build-02 {
+        tags = ["build"];
+      };
+      # "monitor-01.srv" = mkColmenaAttr configs.monitor-01 {
+      #   tags = ["monitor"];
+      # };
+      "media-01.srv" = mkColmenaAttr configs.media-01 {
+        tags = ["media"];
+      };
+      "media-02.srv" = mkColmenaAttr configs.media-02 {
+        tags = ["media"];
+      };
+      "prox-01.srv" = mkColmenaAttr configs.prox-01 {
+        tags = ["proxy"];
+      };
+      "util-01.srv" = mkColmenaAttr configs.util-01 {
+        tags = ["util"];
+      };
+      "backup-01.srv" = mkColmenaAttr configs.backup-01 {
+        tags = ["backup"];
+      };
+      "mine-01.srv" = mkColmenaAttr configs.mine-01 {
+        tags = ["minecraft"];
+      };
+    });
   };
 }

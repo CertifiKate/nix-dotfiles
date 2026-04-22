@@ -10,7 +10,7 @@ in {
   # Key used for colmena
   sops.secrets."deploy_ssh_key" = {
     sopsFile = "${secretsPath}/secrets/deploy.yaml";
-    path = "/home/${vars.user}/.ssh/id_ed25519_colmena_deploy";
+    path = "/home/${vars.user}/.ssh/id_ed25519_deploy";
   };
 
   sops.secrets."host_keys" = {
@@ -26,11 +26,20 @@ in {
     };
   };
 
+  home.packages = [
+    inputs.colmena.packages.${pkgs.system}.colmena
+  ];
+
   programs.ssh.matchBlocks = {
     # Add the deploy key to all .srv hosts, which should be the ones we use colmena to manage
     "*.srv" = lib.hm.dag.entryBefore ["*"] {
       identityFile = [
-        "/home/${vars.user}/.ssh/id_ed25519_colmena_deploy"
+        "/home/${vars.user}/.ssh/id_ed25519_deploy"
+      ];
+    };
+    "*.infra" = lib.hm.dag.entryBefore ["*"] {
+      identityFile = [
+        "/home/${vars.user}/.ssh/id_ed25519_deploy"
       ];
     };
   };

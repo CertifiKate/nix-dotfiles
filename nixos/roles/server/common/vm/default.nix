@@ -1,6 +1,6 @@
 {modulesPath, ...}: {
   imports = [
-    (modulesPath + "/virtualisation/proxmox-image.nix")
+    "${modulesPath}/virtualisation/incus-virtual-machine.nix"
   ];
   nixpkgs.system = "x86_64-linux";
 }
