@@ -1,5 +1,16 @@
 # Bootstrap Incus infrastructure: storage, networks, profiles, image sources
-
+terraform {
+  required_providers {
+    incus = {
+      source  = "lxc/incus"
+      version = "~> 1.0"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.0"
+    }
+  }
+}
 
 # === Storage pools
 # Node specific storage pool (ZFS)
@@ -17,6 +28,9 @@ resource "incus_storage_pool" "zfs_pool" {
   depends_on = [ incus_storage_pool.zfs_pool_incus_01 ]
   name   = "zfs-pool-01"
   driver = "zfs"
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 
@@ -77,7 +91,6 @@ resource "incus_profile" "net_dmz" {
 }
 
 
-
 # Default profile with root disk on ZFS pool
 resource "incus_profile" "default" {
   name = "default"
@@ -88,6 +101,35 @@ resource "incus_profile" "default" {
       path = "/"
       pool = incus_storage_pool.zfs_pool.name
       size = "4GiB"
+    }
+  }
+  # Everything should have delete protection!
+  config = {
+    "security.protection.delete" = "true"
+  }
+}
+
+resource "incus_profile" "disk_medium" {
+  name = "disk-medium"
+  device {
+    name = "root"
+    type = "disk"
+    properties = {
+      path = "/"
+      pool = incus_storage_pool.zfs_pool.name
+      size = "8GiB"
+    }
+  }
+}
+resource "incus_profile" "disk_large" {
+  name = "disk-large"
+  device {
+    name = "root"
+    type = "disk"
+    properties = {
+      path = "/"
+      pool = incus_storage_pool.zfs_pool.name
+      size = "32GiB"
     }
   }
 }
@@ -186,4 +228,34 @@ resource "null_resource" "golden_image_lxc" {
       FLAKE_PATH  = "${path.module}/.."
     }
   }
+}
+
+
+resource "null_resource" "bootstrap_complete" {
+  depends_on = [
+    # Storage
+    incus_storage_pool.zfs_pool,
+    incus_storage_bucket.s3_terraform_state,
+    incus_storage_bucket_key.s3_terraform_state_object,
+
+    # Networks
+    incus_network.net_vlan10,
+    incus_network.net_vlan99,
+
+    # Profiles
+    incus_profile.default,
+    incus_profile.disk_medium,
+    incus_profile.disk_large,
+    incus_profile.comp_xsmall,
+    incus_profile.comp_small,
+    incus_profile.comp_medium,
+    incus_profile.comp_large,
+    incus_profile.comp_xlarge,
+    incus_profile.net_server,
+    incus_profile.net_dmz,
+
+    # Golden images
+    null_resource.golden_image_vm,
+    null_resource.golden_image_lxc,
+  ]
 }

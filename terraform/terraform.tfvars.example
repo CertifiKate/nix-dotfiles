@@ -1,22 +1,4 @@
-default_image = "images:alpine/3.21/cloud"
+nixos_golden_image_vers = 1
 
 host_keys_file = "/path/to/key/file"
 cluster_address = "https://cluster-address-here"
-
-instances = {
-  "monitor-01" = {
-    description = "Central monitoring server for Prometheus and Grafana"
-    profiles = ["net-server", "comp-small"]
-    type     = "container"
-  }
-  "build-01" = {
-    description = "Build server for CI/CD pipelines"
-    profiles = ["net-server", "comp-medium"]
-    type     = "container"
-  }
-  "build-02" = {
-    description = "Secondary build server for CI/CD pipelines"
-    profiles = ["net-server", "comp-medium"]
-    type     = "container"
-  }
-}

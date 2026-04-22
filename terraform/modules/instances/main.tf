@@ -1,10 +1,19 @@
+terraform {
+  required_providers {
+    incus = {
+      source  = "lxc/incus"
+      version = "~> 1.0"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.0"
+    }
+  }
+}
+
 # Create instances based on the provided configuration
 resource "incus_instance" "instances" {
   # Make sure the images are deployed first
-  depends_on = [
-    null_resource.golden_image_lxc,
-    null_resource.golden_image_vm
-  ]
 
   for_each = var.instances
 
@@ -42,7 +51,6 @@ resource "null_resource" "sops_key" {
 
   depends_on = [
     incus_instance.instances,
-    null_resource.incus_remote,
   ]
 
   triggers = {
