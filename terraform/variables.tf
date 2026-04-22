@@ -1,7 +1,13 @@
-variable "default_image" {
+variable "default_image_vm" {
   description = "Default image to use for instances if not specified"
   type        = string
-  default    = "nixos/24.05"
+  default    = ""
+}
+
+variable "default_image_lxc" {
+  description = "Default image to use for instances if not specified"
+  type        = string
+  default    = ""
 }
 
 variable "host_keys_file" {
@@ -14,13 +20,18 @@ variable "cluster_address" {
   type = string
 }
 
+variable "nixos_golden_image_vers" {
+  type = number
+  default = 1
+}
+
 variable "instances" {
   description = "Map of Incus instances to create"
   type = map(object({
     profiles = list(string)
     type     = string
 
-    image    = optional(string)
+    image    = string
     description = optional(string)
     config   = optional(map(string), {})
   }))

@@ -154,21 +154,17 @@ resource "null_resource" "incus_remote" {
   }
 }
 
-variable "nixos_golden_image_tag" {
-  type = string
-  default = "nixos-custom/golden"
-}
 
 resource "null_resource" "golden_image_vm" {
   triggers = {
-    image_alias = var.nixos_golden_image_tag
+    image_version = var.nixos_golden_image_vers
   }
 
   provisioner "local-exec" {
     interpreter = ["/usr/bin/env", "bash"]
     command     = "${path.module}/scripts/push-golden-vm.sh"
     environment = {
-      IMAGE_ALIAS = var.nixos_golden_image_tag
+      IMAGE_ALIAS = "nixos/custom/golden/vm"
       FLAKE_PATH  = "${path.module}/.."
     }
   }
@@ -179,14 +175,14 @@ resource "null_resource" "golden_image_lxc" {
   depends_on = [null_resource.golden_image_vm]
 
   triggers = {
-    image_alias = var.nixos_golden_image_tag
+    image_version = var.nixos_golden_image_vers
   }
 
   provisioner "local-exec" {
     interpreter = ["/usr/bin/env", "bash"]
     command     = "${path.module}/scripts/push-golden-lxc.sh"
     environment = {
-      IMAGE_ALIAS = var.nixos_golden_image_tag
+      IMAGE_ALIAS = "nixos/custom/golden/lxc"
       FLAKE_PATH  = "${path.module}/.."
     }
   }

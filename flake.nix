@@ -134,7 +134,11 @@
         extraModules = [
           ./hosts/server
           "${inputs.nixpkgs}/nixos/modules/virtualisation/incus-virtual-machine.nix"
-          {nixpkgs.hostPlatform = {system = "x86_64-linux";};}
+          {
+            nixpkgs.hostPlatform = {system = "x86_64-linux";};
+            system.nixos.distroName = "NixOS Golden LXC";
+            system.nixos.label = "golden-lxc";
+          }
         ];
       };
       golden-lxc = mkNixOSConfig {
@@ -142,7 +146,11 @@
         extraModules = [
           ./hosts/server
           "${inputs.nixpkgs}/nixos/modules/virtualisation/lxc-container.nix"
-          {nixpkgs.hostPlatform = {system = "x86_64-linux";};}
+          {
+            nixpkgs.hostPlatform = {system = "x86_64-linux";};
+            system.nixos.distroName = "NixOS Golden VM";
+            system.nixos.label = "golden-vm";
+          }
         ];
       };
     };

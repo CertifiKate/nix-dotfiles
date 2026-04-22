@@ -1,12 +1,19 @@
-
 # Create instances based on the provided configuration
 resource "incus_instance" "instances" {
+  # Make sure the images are deployed first
+  depends_on = [
+    null_resource.golden_image_lxc,
+    null_resource.golden_image_vm
+  ]
+
   for_each = var.instances
 
   name  = each.key
-  image = each.value.image != null ? each.value.image : var.default_image
+  image = each.value.image
   type  = each.value.type
   description = each.value.description
+  # TODO: Only on creation!
+  running = true
 
   # TODO: Handle location for groups? based on capabilities?
   # location = ""
@@ -15,7 +22,15 @@ resource "incus_instance" "instances" {
     "default",
   ], each.value.profiles)
 
-  config = each.value.config
+  # Pass in our custom config, but also pass through the cloud init to set hostnames
+  config = merge(each.value.config, {
+    "cloud-init.user-data" = <<-EOT
+      #cloud-config
+      hostname: ${each.key}
+      manage_etc_hosts: true
+      preserve_hostname: false
+    EOT
+  })
 }
 
 locals {
@@ -31,8 +46,10 @@ resource "null_resource" "sops_key" {
   ]
 
   triggers = {
-    instance_id = incus_instance.instances[each.key].name
+    # Re-deploy when instance chances (which has new mac address)
+    mac_address = incus_instance.instances[each.key].mac_address
   }
+  
 
   provisioner "local-exec" {
     command     = <<-EOT
