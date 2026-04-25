@@ -23,9 +23,18 @@ resource "incus_storage_pool" "zfs_pool_incus_01" {
   target = "incus-01"
 }
 
+resource "incus_storage_pool" "zfs_pool_incus_02" {
+  name   = "zfs-pool-01"
+  driver = "zfs"
+  config = {
+    size = "100GiB"
+  }
+  target = "incus-02"
+}
+
 # Cluster specific storage pool (ZFS)
 resource "incus_storage_pool" "zfs_pool" {
-  depends_on = [ incus_storage_pool.zfs_pool_incus_01 ]
+  depends_on = [ incus_storage_pool.zfs_pool_incus_01, incus_storage_pool.zfs_pool_incus_02 ]
   name   = "zfs-pool-01"
   driver = "zfs"
   lifecycle {
@@ -51,17 +60,35 @@ resource "incus_network" "net_vlan99_incus01" {
   config = {
     "parent" = "vlan99"
   }
-
 }
 
+resource "incus_network" "net_vlan10_incus02" {
+  name = "net-vlan10"
+  target = "incus-02"
+  type = "macvlan"
+  config = {
+    "parent" = "vlan10"
+  }
+}
+
+resource "incus_network" "net_vlan99_incus02" {
+  name = "net-vlan99"
+  target = "incus-02"
+  type = "macvlan"
+  config = {
+    "parent" = "vlan99"
+  }
+}
+
+
 resource "incus_network" "net_vlan10" {
-  depends_on = [ incus_network.net_vlan10_incus01 ]
+  depends_on = [ incus_network.net_vlan10_incus01, incus_network.net_vlan10_incus02 ]
   type = "macvlan"
   name = "net-vlan10"
 }
 
 resource "incus_network" "net_vlan99" {
-  depends_on = [ incus_network.net_vlan99_incus01 ]
+  depends_on = [ incus_network.net_vlan99_incus01, incus_network.net_vlan99_incus02 ]
   type = "macvlan"
   name = "net-vlan99"
 }

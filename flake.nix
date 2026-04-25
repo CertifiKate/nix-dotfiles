@@ -181,9 +181,9 @@
       "incus-01.infra" = mkColmenaAttr configs.incus-01 {
         tags = ["incus"];
       };
-      # "incus-02.infra" = mkColmenaAttr configs.incus-02 {
-      #   tags = ["incus"];
-      # };
+      "incus-02.infra" = mkColmenaAttr configs.incus-02 {
+        tags = ["incus"];
+      };
       # "incus-03.infra" = mkColmenaAttr configs.incus-03 {
       #   tags = ["incus"];
       # };

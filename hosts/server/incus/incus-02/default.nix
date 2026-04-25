@@ -1,20 +1,35 @@
-{config, ...}: {
+{modulesPath, ...}: let
+  server_name = "incus-02";
+  external_interface = "enp1s0";
+  server_address = "192.168.0.7";
+  gateway_address = "192.168.0.1";
+in {
   imports = [
     ./hardware-configuration.nix
     ./system-configuration.nix
   ];
-  networking.hostName = "incus-02";
-  nixpkgs.system = "x86_64-linux";
+
+  networking.hostName = server_name;
 
   CertifiKate.roles.server.incus_host = {
     enable = true;
-    serverName = "incus-02";
-    serverAddress = "192.168.10.202";
+    serverName = server_name;
+    serverAddress = server_address;
+    external_interfaces = external_interface;
+  };
 
-    # clusterToken = config.sops.secrets.incus_cluster_token.path;
-    # clusterCertificate = config.sops.secrets.incus_cluster_cert.path;
-    clusterAddress = "192.168.10.202:8443";
-
-    external_interfaces = "ens18";
+  networking.interfaces = {
+    "${external_interface}" = {
+      ipv4.addresses = [
+        {
+          address = server_address;
+          prefixLength = 24;
+        }
+      ];
+    };
+  };
+  networking.defaultGateway = {
+    address = gateway_address;
+    interface = external_interface;
   };
 }
