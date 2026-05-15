@@ -117,6 +117,8 @@
       aurora = mkPhysicalNixOSConfig ./hosts/physical/aurora;
       # === Desktop ===
       cosmos = mkPhysicalNixOSConfig ./hosts/physical/cosmos;
+      # === HTPC ===
+      htpc = mkPhysicalNixOSConfig ./hosts/physical/htpc;
 
       # === Servers ===
       # Incus Hypervisors
