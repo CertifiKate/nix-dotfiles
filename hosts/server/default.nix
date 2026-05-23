@@ -1,5 +1,4 @@
-# Essentially we just want to de-dupe roles/lxcs and roles/vms
-{...}: {
+{lib, ...}: {
   imports = [
     ../../users/server_admin.nix
     ../../users/deploy_user.nix
@@ -15,6 +14,13 @@
     "server_admin"
     "deploy_user"
   ];
+
+  # Don't need many generations - only keep them for immediate post-deploy rollback
+  nix.gc = lib.mkForce {
+    automatic = true;
+    dates = "daily";
+    options = "--delete-older-than 2d";
+  };
 
   services.openssh = {
     enable = true;

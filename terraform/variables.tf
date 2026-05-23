@@ -29,11 +29,13 @@ variable "instances" {
   description = "Map of Incus instances to create"
   type = map(object({
     profiles = list(string)
-    type     = string
+    type = string
 
-    image    = string
-    description = optional(string)
-    config   = optional(map(string), {})
+    image = string
+    description = optional(string, null)
+    config = optional(map(string), {})
+    target = optional(string, null)
+    device = optional(map(map(string)), {})
   }))
 
   validation {

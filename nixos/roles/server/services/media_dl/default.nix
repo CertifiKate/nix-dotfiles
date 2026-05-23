@@ -14,6 +14,7 @@
   prowlarr_project_dir = "${base_project_dir}/prowlarr";
   cleanuparr_project_dir = "${base_project_dir}/cleanuparr";
   qbittorrent_project_dir = "${base_project_dir}/qbittorrent";
+  seerr_project_dir = "${base_project_dir}/seerr";
 
   torrent_web_ui_port = 8080;
   torrent_vpn_port = 43418;
@@ -104,8 +105,8 @@ in {
             }
           ];
         };
-        jellyseer = {
-          host = "jellyseer";
+        seerr = {
+          host = "jellyseerr";
           dest = "http://media-02.srv:5055";
           rules = [
             {
@@ -132,8 +133,6 @@ in {
       CertifiKate.modules.backup_service = {
         paths = [
           "${base_project_dir}"
-          # For some reason we can't specify the jellyseerr directory...
-          "/var/lib/jellyseerr"
         ];
       };
 
@@ -178,10 +177,13 @@ in {
         openFirewall = true;
       };
 
-      services.jellyseerr = {
+      services.seerr = {
         enable = true;
+        configDir = "${seerr_project_dir}/data";
         openFirewall = true;
       };
+      systemd.services."seerr".serviceConfig.ReadWritePaths = ["${seerr_project_dir}/data"];
+      systemd.services."seerr".serviceConfig.Group = "media";
 
       services.qbittorrent = {
         enable = true;

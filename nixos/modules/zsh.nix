@@ -49,6 +49,8 @@ in {
       echo "$fg[$PROMPT_COLOR]$(cat ~/.motd)"
     '';
   };
+  # Stop ZSH complaining
+  system.userActivationScripts.zshrc = "touch .zshrc";
 
   # Set this as default shell. What other user is going to complain? It's just me
   users.defaultUserShell = pkgs.zsh;

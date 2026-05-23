@@ -15,7 +15,6 @@ in {
       preseed.cluster =
         {
           enabled = true;
-          server_address = cfg.clusterAddress;
         }
         // (
           if cfg.clusterToken != null && cfg.clusterCertificate != null

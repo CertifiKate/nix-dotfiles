@@ -1,5 +1,6 @@
 {
   imports = [
+    ./common/default.nix
     ./common/options.nix
     ./common/media_server
 
@@ -8,6 +9,7 @@
     ./services/budget
     ./services/cloudflared
     ./services/jellyfin
+    ./services/monitoring
     ./services/mdns-repeater
     ./services/media_dl
     ./services/minecraft

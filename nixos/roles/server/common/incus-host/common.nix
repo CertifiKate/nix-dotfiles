@@ -32,8 +32,46 @@ in {
         default = 8334;
         description = "Port to bind storage buckets interface to";
       };
-
+      serverMetricsPort = lib.mkOption {
+        type = lib.types.int;
+        default = 8444;
+        description = "Port to bind metrics interface to";
+      };
+      serverGroups = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [];
+        description = "List of groups to assign the server to for cluster organization";
+      };
       external_interfaces = lib.mkOption {type = lib.types.str;};
+
+      virtualIP = lib.mkOption {
+        type = lib.types.submodule {
+          options = {
+            enable = lib.mkOption {
+              type = lib.types.bool;
+              default = false;
+              description = "Enable keepalived for this host";
+            };
+            address = lib.mkOption {
+              type = lib.types.str;
+            };
+            interface = lib.mkOption {
+              type = lib.types.str;
+              description = "Network interface to bind to";
+            };
+            priority = lib.mkOption {
+              type = lib.types.int;
+              default = 10;
+              description = "VRRP priority (higher = master)";
+            };
+            routerId = lib.mkOption {
+              type = lib.types.int;
+              default = 99;
+              description = "VRRP virtual router ID";
+            };
+          };
+        };
+      };
 
       # Member specific
       clusterToken = lib.mkOption {
@@ -73,15 +111,55 @@ in {
       enable = true;
       package = pkgs.incus;
       ui.enable = true;
-      preseed = {
-        config = {
-          "core.https_address" = "${cfg.serverAddress}:${toString cfg.serverPort}";
-          "core.storage_buckets_address" = "${cfg.serverAddress}:${toString cfg.serverBucketPort}";
-        };
+    };
+
+    # Configure incus (without preseed)
+    # Preseed seems to handle things a little bit differently than normal config set commands - below would fail in preseed on pre-bootstrapped hosts
+    systemd.services.incus-configure = {
+      description = "Configure Incus settings";
+      after = ["incus.service"];
+      wants = ["incus.service"];
+      wantedBy = ["multi-user.target"];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = pkgs.writeShellScript "incus-configure" ''
+          ${pkgs.incus}/bin/incus config set core.https_address ":${toString cfg.serverPort}"
+          ${pkgs.incus}/bin/incus config set core.storage_buckets_address ":${toString cfg.serverBucketPort}"
+          ${pkgs.incus}/bin/incus config set core.metrics_address "${cfg.serverAddress}:${toString cfg.serverMetricsPort}"
+        '';
       };
     };
 
     networking.nftables.enable = true;
-    networking.firewall.allowedTCPPorts = [cfg.serverPort cfg.serverBucketPort];
+
+    networking.firewall.interfaces = lib.mkMerge [
+      {
+        "${cfg.external_interfaces}".allowedTCPPorts = [cfg.serverPort cfg.serverBucketPort cfg.serverMetricsPort];
+      }
+      # Also allow on the virtual IP interface if it's different than the external interface (for floating IP setup)
+      (lib.mkIf (cfg.virtualIP.enable && cfg.virtualIP.interface != cfg.external_interfaces) {
+        "${cfg.virtualIP.interface}".allowedTCPPorts = [cfg.serverPort cfg.serverBucketPort cfg.serverMetricsPort];
+      })
+    ];
+
+    networking.firewall.extraInputRules = ''
+      ip protocol vrrp accept
+    '';
+
+    services.keepalived = lib.mkIf cfg.virtualIP.enable {
+      enable = true;
+      vrrpInstances.incus_ui = {
+        interface = cfg.virtualIP.interface;
+        virtualRouterId = cfg.virtualIP.routerId;
+        priority = cfg.virtualIP.priority;
+        virtualIps = [
+          (lib.filterAttrs (n: v: v != null) {
+            addr = cfg.virtualIP.address;
+            # brd = cfg.virtualIP.brd;
+          })
+        ];
+      };
+    };
   };
 }

@@ -16,6 +16,13 @@ in {
     serverName = server_name;
     serverAddress = server_address;
     external_interfaces = external_interface;
+    serverGroups = ["has_zigbee"];
+    virtualIP = {
+      enable = true;
+      address = "192.168.0.200";
+      interface = external_interface;
+      priority = 101;
+    };
   };
 
   networking.interfaces = {

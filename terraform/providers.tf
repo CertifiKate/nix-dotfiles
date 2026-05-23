@@ -27,4 +27,9 @@ provider "incus" {
     name = "incus-02"
     address  = "https://incus-02.infra:8443"
   }
+  remote {
+    name = "incus-03"
+    address  = "https://incus-03.infra:8443"
+  }
+
 }

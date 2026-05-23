@@ -12,6 +12,7 @@
     minecraft.enable = lib.mkEnableOption "Minecraft server";
     nix_builder.enable = lib.mkEnableOption "Nix builder services";
     proxy.enable = lib.mkEnableOption "Reverse proxy services (Traefik)";
+    monitoring.enable = lib.mkEnableOption "Monitoring services (Prometheus, Grafana, etc)";
 
     # ==============================
     # Routing definitions for traefik and authelia

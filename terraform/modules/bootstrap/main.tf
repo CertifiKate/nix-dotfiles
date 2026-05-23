@@ -32,9 +32,18 @@ resource "incus_storage_pool" "zfs_pool_incus_02" {
   target = "incus-02"
 }
 
+resource "incus_storage_pool" "zfs_pool_incus_03" {
+  name   = "zfs-pool-01"
+  driver = "zfs"
+  config = {
+    size = "100GiB"
+  }
+  target = "incus-03"
+}
+
 # Cluster specific storage pool (ZFS)
 resource "incus_storage_pool" "zfs_pool" {
-  depends_on = [ incus_storage_pool.zfs_pool_incus_01, incus_storage_pool.zfs_pool_incus_02 ]
+  depends_on = [ incus_storage_pool.zfs_pool_incus_01, incus_storage_pool.zfs_pool_incus_02, incus_storage_pool.zfs_pool_incus_03 ]
   name   = "zfs-pool-01"
   driver = "zfs"
   lifecycle {
@@ -80,15 +89,33 @@ resource "incus_network" "net_vlan99_incus02" {
   }
 }
 
+resource "incus_network" "net_vlan10_incus03" {
+  name = "net-vlan10"
+  target = "incus-03"
+  type = "macvlan"
+  config = {
+    "parent" = "vlan10"
+  }
+}
+
+resource "incus_network" "net_vlan99_incus03" {
+  name = "net-vlan99"
+  target = "incus-03"
+  type = "macvlan"
+  config = {
+    "parent" = "vlan99"
+  }
+}
+
 
 resource "incus_network" "net_vlan10" {
-  depends_on = [ incus_network.net_vlan10_incus01, incus_network.net_vlan10_incus02 ]
+  depends_on = [ incus_network.net_vlan10_incus01, incus_network.net_vlan10_incus02, incus_network.net_vlan10_incus03 ]
   type = "macvlan"
   name = "net-vlan10"
 }
 
 resource "incus_network" "net_vlan99" {
-  depends_on = [ incus_network.net_vlan99_incus01, incus_network.net_vlan99_incus02 ]
+  depends_on = [ incus_network.net_vlan99_incus01, incus_network.net_vlan99_incus02, incus_network.net_vlan99_incus03 ]
   type = "macvlan"
   name = "net-vlan99"
 }
@@ -133,6 +160,19 @@ resource "incus_profile" "default" {
   # Everything should have delete protection!
   config = {
     "security.protection.delete" = "true"
+  }
+}
+
+resource "incus_profile" "disk_small" {
+  name = "disk-small"
+  device {
+    name = "root"
+    type = "disk"
+    properties = {
+      path = "/"
+      pool = incus_storage_pool.zfs_pool.name
+      size = "2GiB"
+    }
   }
 }
 
@@ -234,7 +274,7 @@ resource "null_resource" "golden_image_vm" {
     command     = "${path.module}/scripts/push-golden-vm.sh"
     environment = {
       IMAGE_ALIAS = "nixos/custom/golden/vm"
-      FLAKE_PATH  = "${path.module}/.."
+      FLAKE_PATH  = "${path.root}/.."
     }
   }
 }
@@ -252,7 +292,7 @@ resource "null_resource" "golden_image_lxc" {
     command     = "${path.module}/scripts/push-golden-lxc.sh"
     environment = {
       IMAGE_ALIAS = "nixos/custom/golden/lxc"
-      FLAKE_PATH  = "${path.module}/.."
+      FLAKE_PATH  = "${path.root}/.."
     }
   }
 }
@@ -271,6 +311,7 @@ resource "null_resource" "bootstrap_complete" {
 
     # Profiles
     incus_profile.default,
+    incus_profile.disk_small,
     incus_profile.disk_medium,
     incus_profile.disk_large,
     incus_profile.comp_xsmall,

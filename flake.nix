@@ -174,11 +174,15 @@
       configs = self.nixosConfigurations;
     in {
       meta = {
+        # Tags must be used, we don't let it deploy to anything unless it's tagged
+        allowApplyAll = false;
+
         inherit specialArgs;
         nixpkgs = import nixpkgs {
           system = "x86_64-linux";
         };
       };
+
       # === Hypervisors ===
       "incus-01.infra" = mkColmenaAttr configs.incus-01 {
         tags = ["incus"];
@@ -186,41 +190,41 @@
       "incus-02.infra" = mkColmenaAttr configs.incus-02 {
         tags = ["incus"];
       };
-      # "incus-03.infra" = mkColmenaAttr configs.incus-03 {
-      #   tags = ["incus"];
-      # };
+      "incus-03.infra" = mkColmenaAttr configs.incus-03 {
+        tags = ["incus"];
+      };
 
       # === Servers ===
       "auth-01.srv" = mkColmenaAttr configs.auth-01 {
-        tags = ["auth"];
+        tags = ["srv" "core" "auth"];
       };
       "build-01.srv" = mkColmenaAttr configs.build-01 {
-        tags = ["build"];
+        tags = ["srv" "build"];
       };
       "build-02.srv" = mkColmenaAttr configs.build-02 {
-        tags = ["build"];
+        tags = ["srv" "build"];
       };
-      # "monitor-01.srv" = mkColmenaAttr configs.monitor-01 {
-      #   tags = ["monitor"];
-      # };
+      "monitor-01.srv" = mkColmenaAttr configs.monitor-01 {
+        tags = ["srv" "monitor"];
+      };
       "media-01.srv" = mkColmenaAttr configs.media-01 {
-        tags = ["media"];
+        tags = ["srv" "media"];
       };
       "media-02.srv" = mkColmenaAttr configs.media-02 {
-        tags = ["media"];
+        tags = ["srv" "media"];
       };
       "prox-01.srv" = mkColmenaAttr configs.prox-01 {
-        tags = ["proxy"];
+        tags = ["srv" "core" "proxy"];
       };
       "util-01.srv" = mkColmenaAttr configs.util-01 {
-        tags = ["util"];
+        tags = ["srv" "util"];
       };
-      "backup-01.srv" = mkColmenaAttr configs.backup-01 {
-        tags = ["backup"];
-      };
-      "mine-01.srv" = mkColmenaAttr configs.mine-01 {
-        tags = ["minecraft"];
-      };
+      # "backup-01.srv" = mkColmenaAttr configs.backup-01 {
+      #   tags = ["srv" "core" "backup"];
+      # };
+      # "mine-01.srv" = mkColmenaAttr configs.mine-01 {
+      #   tags = ["srv" "minecraft"];
+      # };
     });
   };
 }

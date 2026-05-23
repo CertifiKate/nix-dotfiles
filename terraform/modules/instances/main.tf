@@ -25,7 +25,7 @@ resource "incus_instance" "instances" {
   running = true
 
   # TODO: Handle location for groups? based on capabilities?
-  # location = ""
+  target = each.value.target
 
   profiles = concat([
     "default",
@@ -40,6 +40,15 @@ resource "incus_instance" "instances" {
       preserve_hostname: false
     EOT
   })
+
+  dynamic "device" {
+    for_each = each.value.device
+    content {
+      name       = device.key
+      type       = contains(keys(device.value), "type") ? device.value.type : device.key
+      properties = { for k, v in device.value : k => v if k != "type" }
+    }
+  }
 }
 
 locals {

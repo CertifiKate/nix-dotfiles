@@ -13,10 +13,12 @@
   smtp_sender = "${private.smtp_sender}";
   smtp_address = "smtp://${private.smtp_address}:587";
 
-  project_dir = "/services/authelia";
-  config_dir = "${project_dir}/config";
-  ldap_dir = "${project_dir}/ldap";
-  data_dir = "${project_dir}/data";
+  project_dir = "/services";
+  authelia_dir = "${project_dir}/authelia";
+
+  ldap_dir = "${project_dir}/lldap";
+  authelia_config_dir = "${authelia_dir}/config";
+  authelia_data_dir = "${authelia_dir}/data";
 in {
   config = lib.mkMerge [
     {
@@ -65,8 +67,8 @@ in {
       # Allow traefik to access config data dir
       systemd = {
         tmpfiles.rules = [
-          "d ${config_dir} 700 authelia authelia"
-          "d ${data_dir} 700 authelia authelia"
+          "d ${authelia_config_dir} 700 authelia authelia"
+          "d ${authelia_data_dir} 700 authelia authelia"
           "d ${ldap_dir} 700 lldap lldap"
         ];
       };
@@ -163,7 +165,7 @@ in {
           };
 
           # TODO: Move this to an actual db - add full-blown db server?
-          storage.local.path = "${config_dir}/db.sqlite3";
+          storage.local.path = "${authelia_data_dir}/db.sqlite3";
           notifier.smtp = {
             address = smtp_address;
             username = "${smtp_sender}";
@@ -222,13 +224,15 @@ in {
           ldap_user_dn = "ldap_admin";
           ldap_user_email = "ldap_admin@${project_tld}";
           http_url = "https://ldap.${project_tld}";
-          database_url = "sqlite://./users.db?mode=rwc";
+          database_url = "sqlite://${ldap_dir}/users.db?mode=rwc";
         };
         environment = {
           LLDAP_JWT_SECRET_FILE = config.sops.secrets."ldap_jwt_secret".path;
           LLDAP_LDAP_USER_PASS_FILE = config.sops.secrets."ldap_user_pass".path;
         };
       };
+      # Override the service so it uses our state dir
+      systemd.services."lldap".serviceConfig.WorkingDirectory = lib.mkForce "${ldap_dir}";
 
       systemd.services."authelia-main".after = ["lldap.service"];
     })
