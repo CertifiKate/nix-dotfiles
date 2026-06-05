@@ -11,8 +11,9 @@ variable "instances" {
     profiles    = list(string)
     type        = string
     image       = string
-    target      = optional(string)
-    config      = optional(map(string))
-    device      = optional(map(any))
+    target               = optional(string)
+    skip_default_profile = optional(bool, false)
+    config               = optional(map(string))
+    device               = optional(map(any))
   }))
 }

@@ -9,6 +9,7 @@
     ./services/budget
     ./services/cloudflared
     ./services/jellyfin
+    ./services/metrics_relay
     ./services/monitoring
     ./services/mdns-repeater
     ./services/media_dl

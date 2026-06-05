@@ -3,6 +3,7 @@
   config,
   pkgs,
   lib,
+  inputs,
   ...
 }: let
   cfg = config.CertifiKate.roles.server.incus_host;
@@ -90,6 +91,9 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    # Allow us to use Wireguard within our containers
+    boot.kernelModules = ["wireguard"];
+
     security.apparmor.enable = true;
 
     networking.useNetworkd = lib.mkForce true;
@@ -124,9 +128,10 @@ in {
         Type = "oneshot";
         RemainAfterExit = true;
         ExecStart = pkgs.writeShellScript "incus-configure" ''
-          ${pkgs.incus}/bin/incus config set core.https_address ":${toString cfg.serverPort}"
-          ${pkgs.incus}/bin/incus config set core.storage_buckets_address ":${toString cfg.serverBucketPort}"
-          ${pkgs.incus}/bin/incus config set core.metrics_address "${cfg.serverAddress}:${toString cfg.serverMetricsPort}"
+          ${pkgs.incus}/bin/incus config set core.https_address=":${toString cfg.serverPort}"
+          ${pkgs.incus}/bin/incus config set core.storage_buckets_address=":${toString cfg.serverBucketPort}"
+          ${pkgs.incus}/bin/incus config set core.metrics_address=":${toString cfg.serverMetricsPort}"
+          ${pkgs.incus}/bin/incus config set cluster.offline_threshold=60
         '';
       };
     };
@@ -141,6 +146,10 @@ in {
       (lib.mkIf (cfg.virtualIP.enable && cfg.virtualIP.interface != cfg.external_interfaces) {
         "${cfg.virtualIP.interface}".allowedTCPPorts = [cfg.serverPort cfg.serverBucketPort cfg.serverMetricsPort];
       })
+      {
+        # TODO: configure this somewhere so this doesn't race-condition with the net-infra bridge setup
+        "net-infra".allowedTCPPorts = [cfg.serverMetricsPort];
+      }
     ];
 
     networking.firewall.extraInputRules = ''
@@ -156,7 +165,6 @@ in {
         virtualIps = [
           (lib.filterAttrs (n: v: v != null) {
             addr = cfg.virtualIP.address;
-            # brd = cfg.virtualIP.brd;
           })
         ];
       };

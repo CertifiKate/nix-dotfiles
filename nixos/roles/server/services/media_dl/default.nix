@@ -55,8 +55,9 @@ in {
         };
         prowlarr = {
           host = "prowlarr";
-          dest = "http://192.168.10.51:9696";
+          dest = "http://media-02.srv:9696";
           rules = [
+            1
             {
               subject = [
                 "group:media_admin"
@@ -81,7 +82,7 @@ in {
         };
         qbittorrent = {
           host = "torrent";
-          dest = "http://192.168.10.51:8080";
+          dest = "http://media-02.srv:8080";
           rules = [
             {
               subject = [
@@ -177,6 +178,12 @@ in {
         openFirewall = true;
       };
 
+      services.prowlarr = {
+        enable = true;
+        dataDir = "${prowlarr_project_dir}/data";
+        openFirewall = true;
+      };
+
       services.seerr = {
         enable = true;
         configDir = "${seerr_project_dir}/data";
@@ -194,6 +201,15 @@ in {
         torrentingPort = torrent_vpn_port;
         openFirewall = true;
       };
+      # Ensure qbittorrent can access config and data directories with the correct permissions
+      systemd.services.qbittorrent.serviceConfig = {
+        PrivateUsers = lib.mkForce false;
+        ReadWritePaths = lib.mkForce [
+          "/services/qbittorrent"
+          "/data"
+          "/data/Downloads"
+        ];
+      };
 
       vpnNamespaces.${torrent_vpn_namespace} = {
         enable = true;
@@ -207,29 +223,20 @@ in {
             to = torrent_web_ui_port;
             protocol = "tcp";
           }
+          {
+            from = torrent_vpn_port;
+            to = torrent_vpn_port;
+            protocol = "tcp";
+          }
+          {
+            from = torrent_vpn_port;
+            to = torrent_vpn_port;
+            protocol = "udp";
+          }
         ];
       };
 
       networking.firewall.allowedTCPPorts = [torrent_web_ui_port];
-
-      systemd.services.qbittorrent-bridge = {
-        description = "Bridge Host Port 8080 to vpn-confinement namespace";
-        after = ["${torrent_vpn_namespace}.service" "qbittorrent.service"];
-        requires = ["${torrent_vpn_namespace}.service"];
-        wantedBy = ["multi-user.target"];
-
-        serviceConfig = {
-          # This listens on the HOST's 0.0.0.0:8080
-          # and executes a command inside the namespace to talk to qBittorrent's local port
-          ExecStart = ''
-            ${pkgs.socat}/bin/socat \
-              TCP-LISTEN:${toString torrent_web_ui_port},fork,reuseaddr \
-              EXEC:"${pkgs.iproute2}/bin/ip netns exec ${torrent_vpn_namespace} ${pkgs.socat}/bin/socat - TCP:192.168.15.1:${toString torrent_web_ui_port}"
-          '';
-          Restart = "always";
-          User = "root"; # Required to enter the namespace
-        };
-      };
 
       systemd.services.qbittorrent.vpnConfinement = {
         enable = true;

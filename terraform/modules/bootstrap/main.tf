@@ -43,7 +43,11 @@ resource "incus_storage_pool" "zfs_pool_incus_03" {
 
 # Cluster specific storage pool (ZFS)
 resource "incus_storage_pool" "zfs_pool" {
-  depends_on = [ incus_storage_pool.zfs_pool_incus_01, incus_storage_pool.zfs_pool_incus_02, incus_storage_pool.zfs_pool_incus_03 ]
+  depends_on = [
+    incus_storage_pool.zfs_pool_incus_01,
+    incus_storage_pool.zfs_pool_incus_02,
+    incus_storage_pool.zfs_pool_incus_03,
+  ]
   name   = "zfs-pool-01"
   driver = "zfs"
   lifecycle {
@@ -52,102 +56,148 @@ resource "incus_storage_pool" "zfs_pool" {
 }
 
 
-# Set up the base level networks for the cluster
 resource "incus_network" "net_vlan10_incus01" {
-  name = "net-vlan10"
+  name   = "net-vlan10"
   target = "incus-01"
-  type = "macvlan"
-  config = {
-    "parent" = "vlan10"
-  }
-}
-
-resource "incus_network" "net_vlan99_incus01" {
-  name = "net-vlan99"
-  target = "incus-01"
-  type = "macvlan"
-  config = {
-    "parent" = "vlan99"
-  }
+  type   = "macvlan"
+  config = { "parent" = "vlan10" }
 }
 
 resource "incus_network" "net_vlan10_incus02" {
-  name = "net-vlan10"
+  name   = "net-vlan10"
   target = "incus-02"
-  type = "macvlan"
-  config = {
-    "parent" = "vlan10"
-  }
-}
-
-resource "incus_network" "net_vlan99_incus02" {
-  name = "net-vlan99"
-  target = "incus-02"
-  type = "macvlan"
-  config = {
-    "parent" = "vlan99"
-  }
+  type   = "macvlan"
+  config = { "parent" = "vlan10" }
 }
 
 resource "incus_network" "net_vlan10_incus03" {
-  name = "net-vlan10"
+  name   = "net-vlan10"
   target = "incus-03"
+  type   = "macvlan"
+  config = { "parent" = "vlan10" }
+}
+
+resource "incus_network" "net_vlan10" {
+  depends_on = [
+    incus_network.net_vlan10_incus01,
+    incus_network.net_vlan10_incus02,
+    incus_network.net_vlan10_incus03,
+  ]
   type = "macvlan"
-  config = {
-    "parent" = "vlan10"
-  }
+  name = "net-vlan10"
+}
+
+resource "incus_network" "net_vlan99_incus01" {
+  name   = "net-vlan99"
+  target = "incus-01"
+  type   = "macvlan"
+  config = { "parent" = "vlan99" }
+}
+
+resource "incus_network" "net_vlan99_incus02" {
+  name   = "net-vlan99"
+  target = "incus-02"
+  type   = "macvlan"
+  config = { "parent" = "vlan99" }
 }
 
 resource "incus_network" "net_vlan99_incus03" {
-  name = "net-vlan99"
+  name   = "net-vlan99"
   target = "incus-03"
-  type = "macvlan"
-  config = {
-    "parent" = "vlan99"
-  }
-}
-
-
-resource "incus_network" "net_vlan10" {
-  depends_on = [ incus_network.net_vlan10_incus01, incus_network.net_vlan10_incus02, incus_network.net_vlan10_incus03 ]
-  type = "macvlan"
-  name = "net-vlan10"
+  type   = "macvlan"
+  config = { "parent" = "vlan99" }
 }
 
 resource "incus_network" "net_vlan99" {
-  depends_on = [ incus_network.net_vlan99_incus01, incus_network.net_vlan99_incus02, incus_network.net_vlan99_incus03 ]
+  depends_on = [
+    incus_network.net_vlan99_incus01,
+    incus_network.net_vlan99_incus02,
+    incus_network.net_vlan99_incus03,
+  ]
   type = "macvlan"
   name = "net-vlan99"
+}
+
+resource "incus_network" "net_infra_incus01" {
+  name   = "net-infra"
+  target = "incus-01"
+  type   = "bridge"
+}
+
+resource "incus_network" "net_infra_incus02" {
+  name   = "net-infra"
+  target = "incus-02"
+  type   = "bridge"
+}
+
+resource "incus_network" "net_infra_incus03" {
+  name   = "net-infra"
+  target = "incus-03"
+  type   = "bridge"
+}
+
+resource "incus_network" "net_infra" {
+  depends_on = [
+    incus_network.net_infra_incus01,
+    incus_network.net_infra_incus02,
+    incus_network.net_infra_incus03,
+  ]
+  name = "net-infra"
+  type = "bridge"
+  config = {
+    "ipv4.nat"           = "false"
+    "ipv4.address"       = "10.10.0.254/24"
+    "ipv4.dhcp"          = "true"
+    "ipv4.dhcp.expiry"   = "1h"
+    "dns.domain"         = "infra-internal"
+  }
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 
 resource "incus_profile" "net_server" {
-  name    = "net-server"
+  depends_on = [incus_network.net_vlan10]
+  name       = "net-server"
   device {
     name = "eth0"
     type = "nic"
     properties = {
-      network = "${incus_network.net_vlan10.name}"
+      network = incus_network.net_vlan10.name
     }
   }
 }
-
 
 resource "incus_profile" "net_dmz" {
-  name    = "net-dmz"
+  depends_on = [incus_network.net_vlan99]
+  name       = "net-dmz"
   device {
     name = "eth0"
     type = "nic"
     properties = {
-      network = "${incus_network.net_vlan99.name}"
+      network = incus_network.net_vlan99.name
     }
   }
 }
 
+
+resource "incus_profile" "net_infra" {
+  depends_on = [incus_network.net_infra]
+  name       = "net-infra"
+  device {
+    name = "eth1"
+    type = "nic"
+    properties = {
+      network = incus_network.net_infra.name
+    }
+  }
+}
 
 # Default profile with root disk on ZFS pool
 resource "incus_profile" "default" {
-  name = "default"
+  depends_on = [incus_storage_pool.zfs_pool]
+  name       = "default"
   device {
     name = "root"
     type = "disk"
@@ -157,14 +207,14 @@ resource "incus_profile" "default" {
       size = "4GiB"
     }
   }
-  # Everything should have delete protection!
   config = {
     "security.protection.delete" = "true"
   }
 }
 
 resource "incus_profile" "disk_small" {
-  name = "disk-small"
+  depends_on = [incus_storage_pool.zfs_pool]
+  name       = "disk-small"
   device {
     name = "root"
     type = "disk"
@@ -177,7 +227,8 @@ resource "incus_profile" "disk_small" {
 }
 
 resource "incus_profile" "disk_medium" {
-  name = "disk-medium"
+  depends_on = [incus_storage_pool.zfs_pool]
+  name       = "disk-medium"
   device {
     name = "root"
     type = "disk"
@@ -188,8 +239,10 @@ resource "incus_profile" "disk_medium" {
     }
   }
 }
+
 resource "incus_profile" "disk_large" {
-  name = "disk-large"
+  depends_on = [incus_storage_pool.zfs_pool]
+  name       = "disk-large"
   device {
     name = "root"
     type = "disk"
@@ -242,7 +295,6 @@ resource "incus_profile" "comp_xlarge" {
   }
 }
 
-# Setup an S3 bucket for storing Terraform State
 resource "incus_storage_bucket" "s3_terraform_state" {
   name = "terraform-state"
   pool = incus_storage_pool.zfs_pool.name
@@ -263,12 +315,10 @@ resource "null_resource" "incus_remote" {
   }
 }
 
-
 resource "null_resource" "golden_image_vm" {
   triggers = {
     image_version = var.nixos_golden_image_vers
   }
-
   provisioner "local-exec" {
     interpreter = ["/usr/bin/env", "bash"]
     command     = "${path.module}/scripts/push-golden-vm.sh"
@@ -280,13 +330,10 @@ resource "null_resource" "golden_image_vm" {
 }
 
 resource "null_resource" "golden_image_lxc" {
-  # Just stops it running in parallel!
   depends_on = [null_resource.golden_image_vm]
-
   triggers = {
     image_version = var.nixos_golden_image_vers
   }
-
   provisioner "local-exec" {
     interpreter = ["/usr/bin/env", "bash"]
     command     = "${path.module}/scripts/push-golden-lxc.sh"
@@ -308,6 +355,7 @@ resource "null_resource" "bootstrap_complete" {
     # Networks
     incus_network.net_vlan10,
     incus_network.net_vlan99,
+    incus_network.net_infra,
 
     # Profiles
     incus_profile.default,
@@ -321,6 +369,7 @@ resource "null_resource" "bootstrap_complete" {
     incus_profile.comp_xlarge,
     incus_profile.net_server,
     incus_profile.net_dmz,
+    incus_profile.net_infra,
 
     # Golden images
     null_resource.golden_image_vm,

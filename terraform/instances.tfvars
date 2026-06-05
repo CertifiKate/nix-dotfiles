@@ -70,17 +70,59 @@ instances = {
   }
 
   "media-02" = {
-    description = "Media downloader and support stack"
+    description = "Media organiser and orchestrator for Sonarr, Radarr, and Lidarr"
     profiles = ["net-server", "comp-medium", "disk-medium"]
     type     = "container"
     image     = "cluster:nixos/custom/golden/lxc"
-    target = "incus-03" // Until we move media to NAS storage VM we're just bind mounting
+    target = "incus-03"
     device = {
       data_dir = {
         type = "disk"
         source = "/mnt/storage/Media"
         path = "/data"
       }
+    }
+    // We need this for wireguard. TODO: Move this to it's own discrete container to avoid giving all media servers elevated privileges
+    config = {
+      "security.privileged"   = "true"
+      "security.nesting"      = "true"
+      "linux.kernel_modules"  = "wireguard"
+    }
+  }
+
+  "stat-01" = {
+    description         = "Metrics relay for incus-01 — scrapes local Incus, pushes to monitor-01"
+    profiles            = ["net-server", "comp-xsmall", "net-infra"]
+    type                = "container"
+    image               = "cluster:nixos/custom/golden/lxc"
+    target              = "incus-01"
+    skip_default_profile = true
+    config = {
+      "cluster.evacuate" = "stop"
+    }
+  }
+
+  "stat-02" = {
+    description          = "Metrics relay for incus-02 — scrapes local Incus, pushes to monitor-01"
+    profiles             = ["net-server", "comp-xsmall", "net-infra"]
+    type                 = "container"
+    image                = "cluster:nixos/custom/golden/lxc"
+    target               = "incus-02"
+    skip_default_profile = true
+    config = {
+      "cluster.evacuate" = "stop"
+    }
+  }
+
+  "stat-03" = {
+    description          = "Metrics relay for incus-03 — scrapes local Incus, pushes to monitor-01"
+    profiles             = ["net-server", "comp-xsmall", "net-infra"]
+    type                 = "container"
+    image                = "cluster:nixos/custom/golden/lxc"
+    target               = "incus-03"
+    skip_default_profile = true
+    config = {
+      "cluster.evacuate" = "stop"
     }
   }
 
@@ -97,6 +139,4 @@ instances = {
     type     = "virtual-machine"
     image     = "cluster:nixos/custom/golden/vm"
   }
-
-
 }

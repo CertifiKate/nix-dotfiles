@@ -133,6 +133,9 @@
       build-01 = mkServerNixOSConfig ./hosts/server/build-01 "lxc";
       build-02 = mkServerNixOSConfig ./hosts/server/build-02 "lxc";
       monitor-01 = mkServerNixOSConfig ./hosts/server/monitor-01 "lxc";
+      stat-01 = mkServerNixOSConfig ./hosts/server/stat-01 "lxc";
+      stat-02 = mkServerNixOSConfig ./hosts/server/stat-02 "lxc";
+      stat-03 = mkServerNixOSConfig ./hosts/server/stat-03 "lxc";
       media-01 = mkServerNixOSConfig ./hosts/server/media-01 "lxc";
       media-02 = mkServerNixOSConfig ./hosts/server/media-02 "lxc";
       prox-01 = mkServerNixOSConfig ./hosts/server/prox-01 "lxc";
@@ -205,6 +208,15 @@
         tags = ["srv" "build"];
       };
       "monitor-01.srv" = mkColmenaAttr configs.monitor-01 {
+        tags = ["srv" "monitor"];
+      };
+      "stat-01.srv" = mkColmenaAttr configs.stat-01 {
+        tags = ["srv" "monitor"];
+      };
+      "stat-02.srv" = mkColmenaAttr configs.stat-02 {
+        tags = ["srv" "monitor"];
+      };
+      "stat-03.srv" = mkColmenaAttr configs.stat-03 {
         tags = ["srv" "monitor"];
       };
       "media-01.srv" = mkColmenaAttr configs.media-01 {

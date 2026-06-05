@@ -27,9 +27,10 @@ resource "incus_instance" "instances" {
   # TODO: Handle location for groups? based on capabilities?
   target = each.value.target
 
-  profiles = concat([
-    "default",
-  ], each.value.profiles)
+  profiles = concat(
+    each.value.skip_default_profile ? [] : ["default"],
+    each.value.profiles
+  )
 
   # Pass in our custom config, but also pass through the cloud init to set hostnames
   config = merge(each.value.config, {

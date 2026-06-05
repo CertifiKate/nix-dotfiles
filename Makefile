@@ -12,3 +12,6 @@ deploy:
 
 deploy-flake:
 	nixos-rebuild switch --sudo --flake  .#${target} --target-host deploy_user@${target-host}
+
+deploy-incus:
+	colmena apply --on @incus -p 1
