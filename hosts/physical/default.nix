@@ -48,6 +48,9 @@
     lm_sensors
   ];
 
+  programs.nix-ld.enable = true;
+
+
   # Enable our boot loading animation
   boot = {
     plymouth = {

@@ -5,7 +5,6 @@
   ...
 }: {
   # Set up system-specific configuration
-
   # Overwrite the path used for our shorthand aliases/functions
   environment.variables = {
     NIX_FLAKE_PATH = lib.mkForce "/home/${vars.user}/source/nix-dotfiles";
@@ -26,9 +25,17 @@
     enable = true;
   };
 
-  # Fix ethernet not being detected
-  # boot.initrd.kernelModules = ["8821cu"];
-  # boot.extraModulePackages = [config.boot.kernelPackages.rtl8821cu];
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
+  hardware.enableRedistributableFirmware = true;
+
+  boot.initrd.kernelModules = ["r8169"];
+
+  # Disable autosuspend on btusb; load WiFi driver before Bluetooth to fix MT7922 init order
+  boot.extraModprobeConfig = ''
+    options btusb enable_autosuspend=0
+    softdep btusb pre: mt7921e
+  '';
 
   # ==== Power Management ====
   # Set by default in Gnome
@@ -52,4 +59,10 @@
     HibernateDelaySec = "1h";
   };
   networking.firewall.checkReversePath = false;
+
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+  };
+  services.blueman.enable = true;
 }

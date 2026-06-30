@@ -20,6 +20,7 @@
 
   # Sets up HTPC to auto run steam big picture and auto login
   CertifiKate.roles.physical.desktop.gaming.autoStartSteam = true;
+  CertifiKate.roles.physical.desktop.gaming.remotePlayClient = true;
 
   networking.hostName = "htpc";
 }

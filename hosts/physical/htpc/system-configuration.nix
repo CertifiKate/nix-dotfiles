@@ -22,8 +22,9 @@
 
   # Wake on LAN
   networking = {
-    # Should only need wired connections
-    networkmanager.enable = lib.mkForce false;
+    networkmanager = {
+      enable = true;
+    };
     interfaces.eth0.wakeOnLan.enable = true;
     firewall = {
       allowedUDPPorts = [9];
@@ -43,14 +44,36 @@
     "i915.enable_fbc=1"
   ];
 
+  hardware.cpu.intel.updateMicrocode = true;
+
+  environment.variables = {
+    LIBVA_DRIVER_NAME = "iHD";
+    VDPAU_DRIVER = "va_gl";
+  };
+
+  services.thermald.enable = true;
+  powerManagement = {
+    enable = true;
+    cpuFreqGovernor = "performance";
+  };
+
   hardware.enableRedistributableFirmware = true;
+  hardware.enableAllFirmware = true;
+
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
     extraPackages = with pkgs; [
+      intel-vaapi-driver
+      libva-vdpau-driver
+      libvdpau-va-gl
       intel-media-driver
       intel-compute-runtime
       vpl-gpu-rt
+    ];
+    extraPackages32 = with pkgs; [
+      intel-vaapi-driver
+      intel-media-driver
     ];
   };
 
@@ -63,6 +86,5 @@
     pulse.enable = true;
   };
 
-  # User needs these groups for /dev/dri access
   users.users.${vars.user}.extraGroups = ["video" "render" "input"];
 }

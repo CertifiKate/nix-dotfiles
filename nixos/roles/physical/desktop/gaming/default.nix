@@ -44,6 +44,9 @@ in {
       };
       steam = {
         enable = true;
+        extraPackages = with pkgs; [
+          hidapi
+        ];
         gamescopeSession = {
           enable = true;
           args = ["--adaptive-sync" "--rt"];

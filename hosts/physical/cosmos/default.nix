@@ -14,6 +14,7 @@
 
   home-manager = {
     users.${vars.user}.imports = [
+      ./home.nix
       ../../../home-manager/common
       ../../../home-manager/roles/desktop/gnome
     ];

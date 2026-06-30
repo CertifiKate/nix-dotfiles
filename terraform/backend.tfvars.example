@@ -1,0 +1,3 @@
+endpoints = { s3 = "https://<cluster-address>:8443" }
+access_key = "<key-name-from-incus>"
+secret_key  = "<secret-from-incus>"

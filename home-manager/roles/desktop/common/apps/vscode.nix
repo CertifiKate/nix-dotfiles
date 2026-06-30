@@ -13,6 +13,7 @@
 
   programs.vscode = {
     enable = true;
+    mutableExtensionsDir = true;
     profiles.default = {
       extensions = with pkgs.vscode-extensions; [
         kamadorueda.alejandra
@@ -24,7 +25,6 @@
         ms-dotnettools.vscode-dotnet-runtime
         ms-vscode-remote.remote-containers
         ms-azuretools.vscode-docker
-        github.copilot-chat
       ];
       userSettings = {
         "git.autofetch" = true;
@@ -35,7 +35,5 @@
       };
       enableUpdateCheck = false;
     };
-
-    mutableExtensionsDir = true;
   };
 }
