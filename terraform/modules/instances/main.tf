@@ -17,9 +17,10 @@ resource "incus_instance" "instances" {
 
   for_each = var.instances
 
-  name  = each.key
-  image = each.value.image
-  type  = each.value.type
+  name    = each.key
+  project = "default"
+  image   = each.value.image
+  type    = each.value.type
   description = each.value.description
   # TODO: Only on creation!
   running = true
@@ -42,6 +43,10 @@ resource "incus_instance" "instances" {
     EOT
   })
 
+  lifecycle {
+    ignore_changes = [image, project]
+  }
+
   dynamic "device" {
     for_each = each.value.device
     content {
@@ -57,7 +62,7 @@ locals {
 }
 
 resource "null_resource" "sops_key" {
-  for_each = var.instances
+  for_each = { for k, v in var.instances : k => v if !v.skip_sops_key }
 
   depends_on = [
     incus_instance.instances,

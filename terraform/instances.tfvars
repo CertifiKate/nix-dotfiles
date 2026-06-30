@@ -50,7 +50,7 @@ instances = {
 
   "media-01" = {
     description = "Media server for Jellyfin"
-    profiles = ["net-server", "comp-medium", "disk-medium"]
+    profiles = ["net-server", "comp-medium", "disk-large"]
     type     = "container"
     image     = "cluster:nixos/custom/golden/lxc"
     target = "incus-03" // TODO: handle dynamic groups, currently bugged if we @has_gpu
@@ -96,7 +96,6 @@ instances = {
     type                = "container"
     image               = "cluster:nixos/custom/golden/lxc"
     target              = "incus-01"
-    skip_default_profile = true
     config = {
       "cluster.evacuate" = "stop"
     }
@@ -108,7 +107,6 @@ instances = {
     type                 = "container"
     image                = "cluster:nixos/custom/golden/lxc"
     target               = "incus-02"
-    skip_default_profile = true
     config = {
       "cluster.evacuate" = "stop"
     }
@@ -120,7 +118,6 @@ instances = {
     type                 = "container"
     image                = "cluster:nixos/custom/golden/lxc"
     target               = "incus-03"
-    skip_default_profile = true
     config = {
       "cluster.evacuate" = "stop"
     }
@@ -138,5 +135,28 @@ instances = {
     profiles = ["net-server", "comp-small", "disk-medium"]
     type     = "virtual-machine"
     image     = "cluster:nixos/custom/golden/vm"
+  }
+
+  "home-assistant" = {
+    description         = "Home Assistant smart home controller"
+    profiles            = ["net-server", "comp-medium", "disk-xlarge"]
+    type                = "virtual-machine"
+    image               = "cluster:nixos/custom/golden/vm"
+    target              = "incus-02"
+    skip_default_profile = true
+    skip_sops_key        = true
+    device = {
+      root = {
+        type = "disk"
+        path = "/"
+        pool = "pool-01"
+        size = "40GiB"
+      }
+      zigbee = {
+        type    = "usb"
+        vendorid  = "1a86"
+        productid = "55d4"
+      }
+    }
   }
 }

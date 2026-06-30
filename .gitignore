@@ -16,6 +16,7 @@ devenv.local.yaml
 # Terraform state files
 # Incus allows for refreshing the state file, so we can ignore it in git
 terraform.tfvars
+terraform/backend.tfvars
 .terraform/
 *.tfstate*
 .terraform.lock.hcl

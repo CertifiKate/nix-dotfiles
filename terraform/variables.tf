@@ -20,6 +20,11 @@ variable "cluster_address" {
   type = string
 }
 
+variable "cluster_s3_endpoint" {
+  description = "The S3 endpoint for the cluster's object storage. Used for Terraform state storage and backup server remote export"
+  type = string
+}
+
 variable "nixos_golden_image_vers" {
   type = number
   default = 1
@@ -32,10 +37,12 @@ variable "instances" {
     type = string
 
     image = string
-    description = optional(string, null)
-    config = optional(map(string), {})
-    target = optional(string, null)
-    device = optional(map(map(string)), {})
+    description          = optional(string, null)
+    config               = optional(map(string), {})
+    target               = optional(string, null)
+    device               = optional(map(map(string)), {})
+    skip_default_profile = optional(bool, false)
+    skip_sops_key        = optional(bool, false)
   }))
 
   validation {

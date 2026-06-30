@@ -1,8 +1,9 @@
-{modulesPath, ...}: let
+{...}: let
   server_name = "incus-02";
-  external_interface = "enp1s0";
-  server_address = "192.168.0.7";
-  gateway_address = "192.168.0.1";
+  cluster_internal_interface = "enp2s0";
+  cluster_uplink_interface = "enp1s0";
+  internal_address = "192.168.11.12";
+  internal_gateway = "192.168.11.1";
 in {
   imports = [
     ./hardware-configuration.nix
@@ -14,28 +15,32 @@ in {
   CertifiKate.roles.server.incus_host = {
     enable = true;
     serverName = server_name;
-    serverAddress = server_address;
-    external_interfaces = external_interface;
+    serverAddress = internal_address;
+    clusterInternalInterface = cluster_internal_interface;
+    clusterUplinkInterface = cluster_uplink_interface;
     virtualIP = {
       enable = true;
-      address = "192.168.0.200";
-      interface = external_interface;
+      address = "192.168.11.200";
+      interface = cluster_internal_interface;
       priority = 102;
     };
   };
 
   networking.interfaces = {
-    "${external_interface}" = {
+    "${cluster_uplink_interface}" = {
+      useDHCP = false;
+    };
+    "${cluster_internal_interface}" = {
       ipv4.addresses = [
         {
-          address = server_address;
+          address = internal_address;
           prefixLength = 24;
         }
       ];
     };
   };
   networking.defaultGateway = {
-    address = gateway_address;
-    interface = external_interface;
+    address = internal_gateway;
+    interface = cluster_internal_interface;
   };
 }

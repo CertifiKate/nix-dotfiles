@@ -18,18 +18,17 @@ provider "incus" {
     address = var.cluster_address
   }
 
-  # Individual nodes
   remote {
-    name = "incus-01"
-    address  = "https://incus-01.infra:8443"
+    name    = "incus-01"
+    address = var.cluster_address
   }
   remote {
-    name = "incus-02"
-    address  = "https://incus-02.infra:8443"
+    name    = "incus-02"
+    address = var.cluster_address
   }
   remote {
-    name = "incus-03"
-    address  = "https://incus-03.infra:8443"
+    name    = "incus-03"
+    address = var.cluster_address
   }
 
 }

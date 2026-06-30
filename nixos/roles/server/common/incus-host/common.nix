@@ -43,7 +43,14 @@ in {
         default = [];
         description = "List of groups to assign the server to for cluster organization";
       };
-      external_interfaces = lib.mkOption {type = lib.types.str;};
+      clusterInternalInterface = lib.mkOption {
+        type = lib.types.str;
+        description = "Network interface to use for cluster internal communication (Server MGMT VLAN)";
+      };
+      clusterUplinkInterface = lib.mkOption {
+        type = lib.types.str;
+        description = "Network interface to use for cluster uplink communication (Server VLAN)";
+      };
 
       virtualIP = lib.mkOption {
         type = lib.types.submodule {
@@ -102,11 +109,11 @@ in {
       vlans = {
         vlan10 = {
           id = 10;
-          interface = cfg.external_interfaces;
+          interface = cfg.clusterUplinkInterface;
         };
         vlan99 = {
           id = 99;
-          interface = cfg.external_interfaces;
+          interface = cfg.clusterUplinkInterface;
         };
       };
     };
@@ -128,6 +135,9 @@ in {
         Type = "oneshot";
         RemainAfterExit = true;
         ExecStart = pkgs.writeShellScript "incus-configure" ''
+          until ${pkgs.incus}/bin/incus info > /dev/null 2>&1; do
+            sleep 5
+          done
           ${pkgs.incus}/bin/incus config set core.https_address=":${toString cfg.serverPort}"
           ${pkgs.incus}/bin/incus config set core.storage_buckets_address=":${toString cfg.serverBucketPort}"
           ${pkgs.incus}/bin/incus config set core.metrics_address=":${toString cfg.serverMetricsPort}"
@@ -139,11 +149,12 @@ in {
     networking.nftables.enable = true;
 
     networking.firewall.interfaces = lib.mkMerge [
+      # Allow accessing the Incus server ports on the cluster internal interface
       {
-        "${cfg.external_interfaces}".allowedTCPPorts = [cfg.serverPort cfg.serverBucketPort cfg.serverMetricsPort];
+        "${cfg.clusterInternalInterface}".allowedTCPPorts = [cfg.serverPort cfg.serverBucketPort cfg.serverMetricsPort];
       }
       # Also allow on the virtual IP interface if it's different than the external interface (for floating IP setup)
-      (lib.mkIf (cfg.virtualIP.enable && cfg.virtualIP.interface != cfg.external_interfaces) {
+      (lib.mkIf (cfg.virtualIP.enable && cfg.virtualIP.interface != cfg.clusterInternalInterface) {
         "${cfg.virtualIP.interface}".allowedTCPPorts = [cfg.serverPort cfg.serverBucketPort cfg.serverMetricsPort];
       })
       {

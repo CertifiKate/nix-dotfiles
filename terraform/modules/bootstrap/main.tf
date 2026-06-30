@@ -14,8 +14,8 @@ terraform {
 
 # === Storage pools
 # Node specific storage pool (ZFS)
-resource "incus_storage_pool" "zfs_pool_incus_01" {
-  name   = "zfs-pool-01"
+resource "incus_storage_pool" "pool_incus_01" {
+  name   = "pool-01"
   driver = "zfs"
   config = {
     size = "100GiB"
@@ -23,8 +23,8 @@ resource "incus_storage_pool" "zfs_pool_incus_01" {
   target = "incus-01"
 }
 
-resource "incus_storage_pool" "zfs_pool_incus_02" {
-  name   = "zfs-pool-01"
+resource "incus_storage_pool" "pool_incus_02" {
+  name   = "pool-01"
   driver = "zfs"
   config = {
     size = "100GiB"
@@ -32,8 +32,8 @@ resource "incus_storage_pool" "zfs_pool_incus_02" {
   target = "incus-02"
 }
 
-resource "incus_storage_pool" "zfs_pool_incus_03" {
-  name   = "zfs-pool-01"
+resource "incus_storage_pool" "pool_incus_03" {
+  name   = "pool-01"
   driver = "zfs"
   config = {
     size = "100GiB"
@@ -42,13 +42,13 @@ resource "incus_storage_pool" "zfs_pool_incus_03" {
 }
 
 # Cluster specific storage pool (ZFS)
-resource "incus_storage_pool" "zfs_pool" {
+resource "incus_storage_pool" "pool" {
   depends_on = [
-    incus_storage_pool.zfs_pool_incus_01,
-    incus_storage_pool.zfs_pool_incus_02,
-    incus_storage_pool.zfs_pool_incus_03,
+    incus_storage_pool.pool_incus_01,
+    incus_storage_pool.pool_incus_02,
+    incus_storage_pool.pool_incus_03,
   ]
-  name   = "zfs-pool-01"
+  name   = "pool-01"
   driver = "zfs"
   lifecycle {
     prevent_destroy = true
@@ -196,14 +196,14 @@ resource "incus_profile" "net_infra" {
 
 # Default profile with root disk on ZFS pool
 resource "incus_profile" "default" {
-  depends_on = [incus_storage_pool.zfs_pool]
+  depends_on = [incus_storage_pool.pool]
   name       = "default"
   device {
     name = "root"
     type = "disk"
     properties = {
       path = "/"
-      pool = incus_storage_pool.zfs_pool.name
+      pool = incus_storage_pool.pool.name
       size = "4GiB"
     }
   }
@@ -213,47 +213,60 @@ resource "incus_profile" "default" {
 }
 
 resource "incus_profile" "disk_small" {
-  depends_on = [incus_storage_pool.zfs_pool]
+  depends_on = [incus_storage_pool.pool]
   name       = "disk-small"
   device {
     name = "root"
     type = "disk"
     properties = {
       path = "/"
-      pool = incus_storage_pool.zfs_pool.name
+      pool = incus_storage_pool.pool.name
       size = "2GiB"
     }
   }
 }
 
 resource "incus_profile" "disk_medium" {
-  depends_on = [incus_storage_pool.zfs_pool]
+  depends_on = [incus_storage_pool.pool]
   name       = "disk-medium"
   device {
     name = "root"
     type = "disk"
     properties = {
       path = "/"
-      pool = incus_storage_pool.zfs_pool.name
+      pool = incus_storage_pool.pool.name
       size = "8GiB"
     }
   }
 }
 
 resource "incus_profile" "disk_large" {
-  depends_on = [incus_storage_pool.zfs_pool]
+  depends_on = [incus_storage_pool.pool]
   name       = "disk-large"
   device {
     name = "root"
     type = "disk"
     properties = {
       path = "/"
-      pool = incus_storage_pool.zfs_pool.name
-      size = "32GiB"
+      pool = incus_storage_pool.pool.name
+      size = "16GiB"
     }
   }
 }
 
+resource "incus_profile" "disk_xlarge" {
+  depends_on = [incus_storage_pool.pool]
+  name       = "disk-xlarge"
+  device {
+    name = "root"
+    type = "disk"
+    properties = {
+      path = "/"
+      pool = incus_storage_pool.pool.name
+      size = "32GiB"
+    }
+  }
+}
 # Compute profiles
 resource "incus_profile" "comp_xsmall" {
   name = "comp-xsmall"
@@ -296,13 +309,13 @@ resource "incus_profile" "comp_xlarge" {
 }
 
 resource "incus_storage_bucket" "s3_terraform_state" {
-  name = "terraform-state"
-  pool = incus_storage_pool.zfs_pool.name
+  name = "terraform"
+  pool = incus_storage_pool.pool.name
 }
 
 resource "incus_storage_bucket_key" "s3_terraform_state_object" {
   name = "terraform.tfstate"
-  pool = incus_storage_pool.zfs_pool.name
+  pool = incus_storage_pool.pool.name
   role = "admin"
   storage_bucket = incus_storage_bucket.s3_terraform_state.name
 }
@@ -348,7 +361,7 @@ resource "null_resource" "golden_image_lxc" {
 resource "null_resource" "bootstrap_complete" {
   depends_on = [
     # Storage
-    incus_storage_pool.zfs_pool,
+    incus_storage_pool.pool,
     incus_storage_bucket.s3_terraform_state,
     incus_storage_bucket_key.s3_terraform_state_object,
 

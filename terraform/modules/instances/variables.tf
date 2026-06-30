@@ -13,6 +13,7 @@ variable "instances" {
     image       = string
     target               = optional(string)
     skip_default_profile = optional(bool, false)
+    skip_sops_key        = optional(bool, false)
     config               = optional(map(string))
     device               = optional(map(any))
   }))

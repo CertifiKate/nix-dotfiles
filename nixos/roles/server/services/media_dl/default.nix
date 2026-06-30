@@ -57,7 +57,6 @@ in {
           host = "prowlarr";
           dest = "http://media-02.srv:9696";
           rules = [
-            1
             {
               subject = [
                 "group:media_admin"
@@ -107,7 +106,7 @@ in {
           ];
         };
         seerr = {
-          host = "jellyseerr";
+          host = "jellyseer";
           dest = "http://media-02.srv:5055";
           rules = [
             {
