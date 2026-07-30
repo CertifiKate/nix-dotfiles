@@ -39,6 +39,12 @@ in {
               policy = "one_factor";
             }
           ];
+          dashboard = {
+            name = "Sonarr";
+            description = "TV show download management";
+            icon = "sh-sonarr";
+            group = "Media Downloads";
+          };
         };
         radarr = {
           host = "radarr";
@@ -52,6 +58,12 @@ in {
               policy = "one_factor";
             }
           ];
+          dashboard = {
+            name = "Radarr";
+            description = "Movie download management";
+            icon = "sh-radarr";
+            group = "Media Downloads";
+          };
         };
         prowlarr = {
           host = "prowlarr";
@@ -65,6 +77,12 @@ in {
               policy = "one_factor";
             }
           ];
+          dashboard = {
+            name = "Prowlarr";
+            description = "Indexer management";
+            icon = "sh-prowlarr";
+            group = "Media Downloads";
+          };
         };
         lidarr = {
           host = "lidarr";
@@ -78,6 +96,12 @@ in {
               policy = "one_factor";
             }
           ];
+          dashboard = {
+            name = "Lidarr";
+            description = "Music download management";
+            icon = "sh-lidarr";
+            group = "Media Downloads";
+          };
         };
         qbittorrent = {
           host = "torrent";
@@ -91,6 +115,12 @@ in {
               policy = "one_factor";
             }
           ];
+          dashboard = {
+            name = "qBittorrent";
+            description = "Torrent client";
+            icon = "sh-qbittorrent";
+            group = "Media Downloads";
+          };
         };
         cleanuparr = {
           host = "cleanuparr";
@@ -104,6 +134,12 @@ in {
               policy = "one_factor";
             }
           ];
+          dashboard = {
+            name = "Cleanuparr";
+            description = "Automated media library cleanup";
+            icon = "sh-cleanuparr";
+            group = "Media Downloads";
+          };
         };
         seerr = {
           host = "jellyseer";
@@ -116,6 +152,12 @@ in {
               policy = "one_factor";
             }
           ];
+          dashboard = {
+            name = "Jellyseerr";
+            description = "Request movies and TV shows";
+            icon = "sh-jellyseerr";
+            group = "Media";
+          };
         };
         library = {
           host = "library";
@@ -125,6 +167,12 @@ in {
               policy = "bypass";
             }
           ];
+          dashboard = {
+            name = "Calibre Web";
+            description = "Browse and read ebooks";
+            icon = "sh-calibre-web";
+            group = "Media";
+          };
         };
       };
     }

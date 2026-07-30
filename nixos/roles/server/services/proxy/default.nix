@@ -52,7 +52,11 @@ in {
           # Transform simplified route definitions into full traefik routers
           mkRouter = name: cfg: {
             service = "${name}";
-            rule = "Host(`${cfg.host}.${project_tld}`)";
+            rule = "Host(`${
+              if cfg.host == ""
+              then ""
+              else "${cfg.host}."
+            }${project_tld}`)";
             priority = "128";
             entryPoints = "webHttps";
             middlewares = [

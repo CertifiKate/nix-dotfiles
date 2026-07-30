@@ -31,6 +31,12 @@ in {
               policy = "bypass";
             }
           ];
+          dashboard = {
+            name = "Authelia";
+            description = "Manage logins and access";
+            icon = "sh-authelia";
+            group = "Settings";
+          };
         };
         ldap = {
           host = "ldap";
@@ -41,6 +47,12 @@ in {
               policy = "one_factor";
             }
           ];
+          dashboard = {
+            name = "LLDAP";
+            description = "Manage users and groups";
+            icon = "sh-lldap";
+            group = "Settings";
+          };
         };
       };
     }
@@ -116,8 +128,11 @@ in {
         groups.lldap = {};
       };
 
-      # This was super fun to find buried in the service config after two hours debugging.
+      # ProtectSystem=strict makes the filesystem read-only except StateDirectory paths.
+      # Both services use /services/lldap and /services/authelia which aren't covered,
+      # so we disable it for both.
       systemd.services."authelia-main".serviceConfig.ProtectSystem = lib.mkForce false;
+      systemd.services."lldap".serviceConfig.ProtectSystem = lib.mkForce false;
 
       services.authelia.instances.main = {
         user = "authelia";
@@ -187,6 +202,10 @@ in {
                   "^/api/"
                 ];
               }
+              {
+                domain = "${project_tld}";
+                policy = "one_factor";
+              }
             ];
 
             # Transform route rules by injecting domain field
@@ -202,7 +221,15 @@ in {
                       rule:
                         if rule ? domain
                         then rule # Keep the explicit domain set in the rule!
-                        else rule // {domain = "${cfg.host}.${project_tld}";}
+                        else
+                          rule
+                          // {
+                            domain = "${
+                              if cfg.host == ""
+                              then ""
+                              else "${cfg.host}."
+                            }${project_tld}";
+                          }
                     )
                     cfg.rules
               )
@@ -231,8 +258,10 @@ in {
           LLDAP_LDAP_USER_PASS_FILE = config.sops.secrets."ldap_user_pass".path;
         };
       };
-      # Override the service so it uses our state dir
+      # Override the service to use our state dir and disable DynamicUser so the
+      # static lldap user (defined above) owns the files consistently across restarts
       systemd.services."lldap".serviceConfig.WorkingDirectory = lib.mkForce "${ldap_dir}";
+      systemd.services."lldap".serviceConfig.DynamicUser = lib.mkForce false;
 
       systemd.services."authelia-main".after = ["lldap.service"];
     })

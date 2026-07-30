@@ -29,14 +29,14 @@ instances = {
 
   "prox-01" = {
     description = "Proxy server for Traefik"
-    profiles = ["net-server", "comp-small", "disk-small"]
+    profiles = ["net-server", "comp-small", "role-core"]
     type     = "container"
     image     = "cluster:nixos/custom/golden/lxc"
   }
 
   "auth-01" = {
     description = "Authentication server with Authelia"
-    profiles = ["net-server", "comp-small", "disk-small"]
+    profiles = ["net-server", "comp-small", "role-core"]
     type     = "container"
     image     = "cluster:nixos/custom/golden/lxc"
   }

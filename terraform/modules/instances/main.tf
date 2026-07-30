@@ -22,7 +22,6 @@ resource "incus_instance" "instances" {
   image   = each.value.image
   type    = each.value.type
   description = each.value.description
-  # TODO: Only on creation!
   running = true
 
   # TODO: Handle location for groups? based on capabilities?
@@ -44,7 +43,7 @@ resource "incus_instance" "instances" {
   })
 
   lifecycle {
-    ignore_changes = [image, project]
+    ignore_changes = [image, project, running]
   }
 
   dynamic "device" {
@@ -69,8 +68,8 @@ resource "null_resource" "sops_key" {
   ]
 
   triggers = {
-    # Re-deploy when instance chances (which has new mac address)
-    mac_address = incus_instance.instances[each.key].mac_address
+    # Re-deploy when instance gets a new non-null MAC (null = stopped, not a real change)
+    mac_address = coalesce(incus_instance.instances[each.key].mac_address, "offline")
   }
   
 

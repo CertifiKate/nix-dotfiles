@@ -44,10 +44,10 @@
     opencl.enable = true;
   };
   services.lact.enable = true;
-  boot.kernelParams = [
-    "video=DP-1:3440x1440@100"
-    "video=HDMI-A-1:1920x1080@74.97"
-  ];
+
+  services.logind.settings.Login = {
+    "HandlePowerKey" = "suspend";
+  };
 
   # Bootloader
   boot.loader.systemd-boot.enable = true;

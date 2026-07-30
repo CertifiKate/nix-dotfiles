@@ -20,6 +20,12 @@ in {
             policy = "bypass";
           }
         ];
+        dashboard = {
+          name = "Jellyfin";
+          description = "Watch TV and movies";
+          icon = "sh-jellyfin";
+          group = "Media";
+        };
       };
     }
 

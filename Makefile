@@ -10,6 +10,9 @@ rebuild-test:
 deploy:
 	colmena apply --on ${target}
 
+deploy-srv:
+	colmena apply --on @srv -p 5
+
 deploy-flake:
 	nixos-rebuild switch --sudo --flake  .#${target} --target-host deploy_user@${target-host}
 

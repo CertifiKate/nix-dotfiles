@@ -24,6 +24,12 @@ in {
             policy = "one_factor";
           }
         ];
+        dashboard = {
+          name = "Grafana";
+          description = "Infrastructure monitoring and dashboards";
+          icon = "sh-grafana";
+          group = "Settings";
+        };
       };
     }
 

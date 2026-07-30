@@ -51,6 +51,30 @@
             default = [];
             description = "Authorization rules for this route";
           };
+          dashboard = lib.mkOption {
+            default = null;
+            description = "Optional homepage-dashboard entry for this route";
+            type = lib.types.nullOr (lib.types.submodule {
+              options = {
+                name = lib.mkOption {
+                  type = lib.types.str;
+                  description = "Display name shown on the dashboard";
+                };
+                description = lib.mkOption {
+                  type = lib.types.str;
+                  description = "Short description shown under the name";
+                };
+                icon = lib.mkOption {
+                  type = lib.types.str;
+                  description = "Icon identifier (e.g., 'sh-sonarr' for selfh.st icons)";
+                };
+                group = lib.mkOption {
+                  type = lib.types.str;
+                  description = "Dashboard group/category this service belongs to";
+                };
+              };
+            });
+          };
         };
       });
       default = {};
