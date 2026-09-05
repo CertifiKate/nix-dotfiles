@@ -161,7 +161,7 @@ in {
         };
         library = {
           host = "library";
-          dest = "http://192.168.10.51:8083";
+          dest = "http://media-02.srv:8083";
           rules = [
             {
               policy = "bypass";

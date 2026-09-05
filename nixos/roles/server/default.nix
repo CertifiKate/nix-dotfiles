@@ -9,11 +9,12 @@
     ./services/budget
     ./services/cloudflared
     ./services/jellyfin
-    ./services/metrics_relay
-    ./services/monitoring
+    ./services/library
     ./services/mdns-repeater
     ./services/media_dl
+    ./services/metrics_relay
     ./services/minecraft
+    ./services/monitoring
     ./services/nix-builder
     ./services/proxy
   ];

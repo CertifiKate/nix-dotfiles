@@ -7,6 +7,7 @@
     budget.enable = lib.mkEnableOption "Budget management service (Actual Budget)";
     cloudflared.enable = lib.mkEnableOption "Cloudflared tunnel client";
     jellyfin.enable = lib.mkEnableOption "Jellyfin media server";
+    library.enable = lib.mkEnableOption "Library services (Calibre-web, etc)";
     mdns_repeater.enable = lib.mkEnableOption "mDNS repeater service for local network discovery";
     media_dl.enable = lib.mkEnableOption "Media download services (Sonarr, Radarr, etc)";
     minecraft.enable = lib.mkEnableOption "Minecraft server";

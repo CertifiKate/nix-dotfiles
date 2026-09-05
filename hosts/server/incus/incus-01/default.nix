@@ -19,6 +19,13 @@ in {
     clusterInternalInterface = cluster_internal_interface;
     clusterUplinkInterface = cluster_uplink_interface;
     serverGroups = ["has_zigbee"];
+    zfsReplication = {
+      enable = true;
+      targets = [
+        "syncoid@192.168.11.12:zpool/incus-replica"
+        "syncoid@192.168.11.13:zpool/incus-replica"
+      ];
+    };
     virtualIP = {
       enable = true;
       address = "192.168.11.200";

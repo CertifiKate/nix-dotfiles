@@ -50,7 +50,7 @@ instances = {
 
   "media-01" = {
     description = "Media server for Jellyfin"
-    profiles = ["net-server", "comp-medium", "disk-large"]
+    profiles = ["net-server", "comp-medium", "disk-large", "role-core"]
     type     = "container"
     image     = "cluster:nixos/custom/golden/lxc"
     target = "incus-03" // TODO: handle dynamic groups, currently bugged if we @has_gpu
@@ -71,7 +71,7 @@ instances = {
 
   "media-02" = {
     description = "Media organiser and orchestrator for Sonarr, Radarr, and Lidarr"
-    profiles = ["net-server", "comp-medium", "disk-medium"]
+    profiles = ["net-server", "comp-medium", "disk-large"]
     type     = "container"
     image     = "cluster:nixos/custom/golden/lxc"
     target = "incus-03"
@@ -125,32 +125,32 @@ instances = {
 
   "util-01" = {
     description = "Utility server for miscellaneous other services"
-    profiles = ["net-server", "comp-small", "disk-small"]
+    profiles = ["net-server", "comp-small"]
     type     = "container"
     image     = "cluster:nixos/custom/golden/lxc"
   }
 
   "backup-01" = {
     description = "Backup server for storing snapshots and backups and exporting remotely"
-    profiles = ["net-server", "comp-small", "disk-medium"]
+    profiles = ["net-server", "comp-small", "disk-medium", "role-core"]
     type     = "virtual-machine"
     image     = "cluster:nixos/custom/golden/vm"
   }
 
-  "home-assistant" = {
+  "home-01" = {
     description         = "Home Assistant smart home controller"
-    profiles            = ["net-server", "comp-medium", "disk-xlarge"]
+    profiles            = ["net-server", "disk-large", "comp-large", "role-core"]
     type                = "virtual-machine"
-    image               = "cluster:nixos/custom/golden/vm"
-    target              = "incus-02"
+    image               = "cluster:haos/18.1"
+    target              = "incus-01"
     skip_default_profile = true
     skip_sops_key        = true
     device = {
       root = {
         type = "disk"
         path = "/"
-        pool = "pool-01"
-        size = "40GiB"
+        pool = "host-pool-01"
+        size = "32GiB"
       }
       zigbee = {
         type    = "usb"

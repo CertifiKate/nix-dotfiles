@@ -18,6 +18,13 @@ in {
     serverAddress = internal_address;
     clusterInternalInterface = cluster_internal_interface;
     clusterUplinkInterface = cluster_uplink_interface;
+    zfsReplication = {
+      enable = true;
+      targets = [
+        "syncoid@192.168.11.11:zpool/incus-replica"
+        "syncoid@192.168.11.13:zpool/incus-replica"
+      ];
+    };
     virtualIP = {
       enable = true;
       address = "192.168.11.200";

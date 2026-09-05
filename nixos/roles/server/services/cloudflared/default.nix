@@ -68,6 +68,42 @@ in {
           };
         };
       };
+
+      # Setup DDNS service using Cloudflare
+      sops.secrets."cloudflare_dyndns_token" = {
+        sopsFile = "${secretsPath}/secrets/dyndns.yaml";
+        path = "/run/credentials/cloudflare_dyndns_token/apiToken";
+        owner = "cloudflare-dyndns";
+      };
+
+      services.cloudflare-dyndns = {
+        enable = true;
+        ipv4 = true;
+        ipv6 = false;
+        domains = [
+          "vpn.${project_tld}"
+        ];
+        apiTokenFile = config.sops.secrets."cloudflare_dyndns_token".path;
+      };
+
+      # LoadCredential is unsupported in LXC; point CREDENTIALS_DIRECTORY at the
+      # directory containing the sops secret so the start script resolves apiToken.
+      # Yes this is gross
+      users.users.cloudflare-dyndns = {
+        isSystemUser = true;
+        group = "cloudflare-dyndns";
+      };
+      users.groups.cloudflare-dyndns = {};
+
+      systemd.services.cloudflare-dyndns = {
+        serviceConfig = {
+          DynamicUser = lib.mkForce false;
+          User = "cloudflare-dyndns";
+          Group = "cloudflare-dyndns";
+          LoadCredential = lib.mkForce [];
+          Environment = "CREDENTIALS_DIRECTORY=${dirOf config.sops.secrets."cloudflare_dyndns_token".path}";
+        };
+      };
     })
   ];
 }
