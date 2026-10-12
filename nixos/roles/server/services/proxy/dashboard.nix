@@ -49,6 +49,7 @@ in {
       openFirewall = false;
       listenPort = 8082;
       services = homepageServices;
+      allowedHosts = "${project_tld}";
       widgets = [
         {
           search = {

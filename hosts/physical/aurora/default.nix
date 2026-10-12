@@ -12,6 +12,7 @@
     inputs.nixos-hardware.nixosModules.lenovo-thinkpad-e14-amd
 
     ../../../nixos/roles/physical/desktop/gnome
+    ../../../nixos/roles/physical/desktop/gaming
     ../../../nixos/roles/physical/desktop/cosmic
     ../../../nixos/roles/server/common/options.nix
   ];

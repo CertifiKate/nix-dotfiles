@@ -42,6 +42,7 @@ in {
     devenv
     lazygit
     ranger
+    nix-tree
   ];
 
   programs.zsh = {

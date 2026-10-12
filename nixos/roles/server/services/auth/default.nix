@@ -138,13 +138,16 @@ in {
         user = "authelia";
         group = "authelia";
         enable = true;
+        secrets.manual = true;
 
-        secrets = {
-          jwtSecretFile = config.sops.secrets."authelia_jwt_secret".path;
-          storageEncryptionKeyFile = config.sops.secrets."authelia_storage_key".path;
-        };
-
+        # NOTE: Not using `secrets.*` here (jwtSecretFile/storageEncryptionKeyFile) because that
+        # relies on systemd's LoadCredential=, which the LXC container runtime forces to be
+        # cleared (see /run/systemd/system/service.d/zzz-lxc-service.conf on the host), leaving
+        # Authelia trying to read a credential that was never populated. Pass the paths directly
+        # via environment variables instead, same as the other secrets below.
         environmentVariables = {
+          AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE = config.sops.secrets."authelia_jwt_secret".path;
+          AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE = config.sops.secrets."authelia_storage_key".path;
           AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD_FILE = config.sops.secrets."authelia_ldap_password".path;
           AUTHELIA_NOTIFIER_SMTP_PASSWORD_FILE = config.sops.secrets."smtp_app_password".path;
         };

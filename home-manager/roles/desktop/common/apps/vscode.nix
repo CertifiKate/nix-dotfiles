@@ -4,8 +4,6 @@
   system,
   ...
 }: {
-  nixpkgs.overlays = [inputs.nix-vscode-extensions.overlays.default];
-
   home.packages = with pkgs; [
     nixd
     # alejandra
