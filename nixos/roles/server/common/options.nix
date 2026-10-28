@@ -13,6 +13,7 @@
     minecraft.enable = lib.mkEnableOption "Minecraft server";
     nix_builder.enable = lib.mkEnableOption "Nix builder services";
     proxy.enable = lib.mkEnableOption "Reverse proxy services (Traefik)";
+    remote_desktop.enable = lib.mkEnableOption "Graphical desktop over RDP (XFCE + xrdp)";
     monitoring.enable = lib.mkEnableOption "Monitoring services (Prometheus, Grafana, etc)";
     metrics_relay = {
       enable = lib.mkEnableOption "Metrics relay — scrapes local Incus node and pushes to monitor-01";

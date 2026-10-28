@@ -8,6 +8,8 @@
 }: let
   cfg = config.CertifiKate.roles.server.incus_host;
 in {
+  imports = [./replication.nix];
+
   options = {
     CertifiKate.roles.server.incus_host = {
       enable = lib.mkOption {

@@ -1,5 +1,4 @@
 {
-  pkgs,
   inputs,
   vars,
   ...
@@ -7,13 +6,9 @@
   secretsPath = toString inputs.nix-secrets;
 in {
   imports = [
+    ../base
     ./remote-build.nix
   ];
-
-  home = {
-    username = "${vars.user}";
-    homeDirectory = "/home/${vars.user}";
-  };
 
   sops = {
     defaultSopsFile = "${secretsPath}/secrets/home-manager.yaml";
@@ -31,35 +26,4 @@ in {
       "build-02.srv"
     ];
   };
-
-  programs.direnv = {
-    enable = true;
-    enableZshIntegration = true;
-    nix-direnv.enable = true;
-  };
-
-  home.packages = with pkgs; [
-    devenv
-    lazygit
-    ranger
-    nix-tree
-  ];
-
-  programs.zsh = {
-    enable = true;
-    history.append = true;
-    enableCompletion = true;
-    autosuggestion.enable = true;
-    syntaxHighlighting.enable = true;
-    oh-my-zsh = {
-      enable = true;
-      theme = "bira";
-      plugins = [
-        "direnv"
-        "sudo"
-      ];
-    };
-  };
-
-  home.stateVersion = "24.05";
 }

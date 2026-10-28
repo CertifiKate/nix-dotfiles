@@ -17,5 +17,6 @@
     ./services/monitoring
     ./services/nix-builder
     ./services/proxy
+    ./services/remote-desktop
   ];
 }

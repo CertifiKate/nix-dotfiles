@@ -82,7 +82,7 @@
         path = path;
         extraModules = [
           ./hosts/server
-          ./nixos/roles/server/common/${serverType}
+          ./nixos/roles/server/common/instance/${serverType}
           ./nixos/common
         ];
       };
@@ -143,6 +143,7 @@
       # VMs
       backup-01 = mkServerNixOSConfig ./hosts/server/backup-01 "vm";
       mine-01 = mkServerNixOSConfig ./hosts/server/mine-01 "vm";
+      mgmt-01 = mkServerNixOSConfig ./hosts/server/mgmt-01 "vm";
 
       # === Images ===
       # Golden images to be pushed to Incus
@@ -230,6 +231,9 @@
       };
       "util-01.srv" = mkColmenaAttr configs.util-01 {
         tags = ["srv" "util"];
+      };
+      "mgmt-01.srv" = mkColmenaAttr configs.mgmt-01 {
+        tags = ["srv" "mgmt"];
       };
       # "backup-01.srv" = mkColmenaAttr configs.backup-01 {
       #   tags = ["srv" "core" "backup"];

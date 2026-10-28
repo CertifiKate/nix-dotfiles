@@ -130,6 +130,13 @@ instances = {
     image     = "cluster:nixos/custom/golden/vm"
   }
 
+  "mgmt-01" = {
+    description = "Management host: SSH/RDP thin client for remote server management"
+    profiles = ["net-server", "comp-medium", "disk-large"]
+    type     = "virtual-machine"
+    image     = "cluster:nixos/custom/golden/vm"
+  }
+
   "home-01" = {
     description         = "Home Assistant smart home controller"
     profiles            = ["net-server", "disk-large", "comp-large", "role-core"]

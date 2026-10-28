@@ -277,7 +277,9 @@ resource "incus_profile" "disk_xlarge" {
 resource "incus_profile" "role_core" {
   name = "role-core"
   config = {
-    "snapshots.expiry" = "30d"
+    "snapshots.schedule" = "@daily"
+    "snapshots.expiry"   = "30d"
+    "snapshots.pattern"  = "snap-{{ creation_date|date:'2006-01-02' }}"
   }
 }
 

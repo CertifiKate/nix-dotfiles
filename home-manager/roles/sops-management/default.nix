@@ -1,17 +1,6 @@
-{
-  inputs,
-  pkgs,
-  vars,
-  ...
-}: let
-  secretsPath = toString inputs.nix-secrets;
-in {
-  # The administration key (not the home-manager key)
-  sops.secrets."${vars.user}_sops_admin_key" = {
-    sopsFile = "${secretsPath}/secrets/home-manager.yaml";
-    path = "/home/${vars.user}/.config/sops/age/keys.txt";
-  };
-
+{pkgs, ...}: {
+  # The administration key itself is placed by nixos/modules/sops-admin.nix, so it stays out of
+  # anything the shared home-manager key can decrypt
   home.packages = with pkgs; [
     sops
     age
