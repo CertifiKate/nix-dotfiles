@@ -213,7 +213,8 @@ resource "incus_profile" "default" {
     "security.protection.delete" = "true"
     "snapshots.schedule"         = "@daily"
     "snapshots.expiry"           = "7d"
-    "snapshots.pattern"          = "snap%Y%m%d"
+    "snapshots.pattern"          = "snap-{{ creation_date|date:'2006-01-02' }}"
+    "migration.stateful"         = "true"
   }
 }
 
@@ -276,9 +277,7 @@ resource "incus_profile" "disk_xlarge" {
 resource "incus_profile" "role_core" {
   name = "role-core"
   config = {
-    "snapshots.schedule" = "@daily"
-    "snapshots.expiry"   = "30d"
-    "snapshots.pattern"  = "snap%Y%m%d"
+    "snapshots.expiry" = "30d"
   }
 }
 

@@ -29,21 +29,14 @@ instances = {
 
   "prox-01" = {
     description = "Proxy server for Traefik"
-    profiles = ["net-server", "comp-small", "role-core"]
+    profiles = ["net-server", "comp-small", "role-core", "disk-medium"]
     type     = "container"
     image     = "cluster:nixos/custom/golden/lxc"
   }
 
   "auth-01" = {
     description = "Authentication server with Authelia"
-    profiles = ["net-server", "comp-small", "role-core"]
-    type     = "container"
-    image     = "cluster:nixos/custom/golden/lxc"
-  }
-
-  "gate-01" = {
-    description = "Gateway server for Cloudflare Tunnel and Wireguard"
-    profiles = ["net-server", "comp-xsmall", "disk-small"]
+    profiles = ["net-server", "comp-small", "role-core", "disk-medium"]
     type     = "container"
     image     = "cluster:nixos/custom/golden/lxc"
   }
@@ -156,6 +149,21 @@ instances = {
         type    = "usb"
         vendorid  = "1a86"
         productid = "55d4"
+      }
+    }
+  }
+  "home-02" = {
+    description         = "Home Assistant smart home controller"
+    profiles            = ["net-server", "disk-large", "comp-large", "role-core"]
+    type                = "virtual-machine"
+    image               = "cluster:haos/18.1"
+    skip_sops_key        = true
+    device = {
+      root = {
+        type = "disk"
+        path = "/"
+        pool = "host-pool-01"
+        size = "32GiB"
       }
     }
   }
