@@ -324,9 +324,12 @@ resource "incus_profile" "comp_xlarge" {
   }
 }
 
+# Buckets on a local pool only exist on one member and incus won't proxy S3 requests between members,
+# so pin it to the member that currently holds the cluster VIP
 resource "incus_storage_bucket" "s3_terraform_state" {
-  name = "terraform"
-  pool = incus_storage_pool.host_pool.name
+  name   = "terraform"
+  pool   = incus_storage_pool.host_pool.name
+  target = "incus-03"
 }
 
 resource "incus_storage_bucket_key" "s3_terraform_state_object" {
@@ -334,6 +337,11 @@ resource "incus_storage_bucket_key" "s3_terraform_state_object" {
   pool = incus_storage_pool.host_pool.name
   role = "admin"
   storage_bucket = incus_storage_bucket.s3_terraform_state.name
+
+  # Key lives inside the bucket, so recreate it whenever the bucket moves
+  lifecycle {
+    replace_triggered_by = [incus_storage_bucket.s3_terraform_state]
+  }
 }
 
 resource "null_resource" "incus_remote" {
