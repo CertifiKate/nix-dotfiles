@@ -1,0 +1,55 @@
+{config, ...}: let
+  inherit (config.meta) user;
+  inherit (config.flake.modules) nixos;
+in {
+  configurations.nixos.cosmos.module = {lib, ...}: {
+    # Set up system-specific configuration
+    imports = [
+      nixos."modules/users/deploy-user"
+    ];
+
+    # It's just easier to do my deployments from my laptop, so gimme access!
+    nix.settings.trusted-users = [
+      "deploy_user"
+    ];
+
+    # Overwrite the path used for our shorthand aliases/functions
+    environment.variables = {
+      NIX_FLAKE_PATH = lib.mkForce "/home/${user}/source/nix-dotfiles";
+    };
+
+    services.openssh = {
+      enable = true;
+      settings.PasswordAuthentication = false;
+      settings.KbdInteractiveAuthentication = false;
+      settings.PermitRootLogin = "no";
+    };
+
+    # Wake on LAN
+    # Let our HTPC wake it up for remote streaming
+    networking = {
+      interfaces.wlp6s0.wakeOnLan.enable = true;
+      firewall = {
+        allowedUDPPorts = [9];
+      };
+    };
+
+    # Drivers for AMD
+    hardware.graphics = {
+      enable = true;
+      enable32Bit = true;
+    };
+    hardware.amdgpu = {
+      opencl.enable = true;
+    };
+    services.lact.enable = true;
+
+    services.logind.settings.Login = {
+      "HandlePowerKey" = "suspend";
+    };
+
+    # Bootloader
+    boot.loader.systemd-boot.enable = true;
+    boot.loader.efi.canTouchEfiVariables = true;
+  };
+}

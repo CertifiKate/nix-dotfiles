@@ -1,27 +1,19 @@
-{
-  vars,
-  inputs,
-  ...
-}: {
-  imports = [
-    ./hardware-configuration.nix
-    ./system-configuration.nix
-    ../default.nix
+# === Desktop ===
+{config, ...}: let
+  inherit (config.flake.modules) nixos;
+in {
+  configurations.nixos.cosmos.module = {
+    imports = [
+      ./_hardware-configuration.nix
+      nixos."modules/profiles/physical"
 
-    ../../../nixos/roles/physical/desktop/gnome
-    ../../../nixos/roles/physical/desktop/gaming
-  ];
-
-  home-manager = {
-    users.${vars.user}.imports = [
-      ./home.nix
-      ../../../home-manager/common
-      ../../../home-manager/roles/desktop/gnome
+      nixos."roles/physical/desktop/gnome"
+      nixos."roles/physical/desktop/gaming"
     ];
+
+    # Most of the time I'm using this machine as a gaming desktop, so auto start in steam big picture
+    CertifiKate.gaming.autoStartSteam = true;
+
+    networking.hostName = "cosmos";
   };
-
-  # Most of the time I'm using this machine as a gaming desktop, so auto start in steam big picture
-  CertifiKate.roles.physical.desktop.gaming.autoStartSteam = true;
-
-  networking.hostName = "cosmos";
 }
