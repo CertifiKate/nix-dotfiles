@@ -6,7 +6,7 @@
   config,
   ...
 }: let
-  inherit (config.meta) secretsPath user;
+  inherit (config.meta) secretsPath user remoteBuilders;
 in {
   flake.modules.homeManager."modules/personal/deploy-host" = {
     lib,
@@ -33,19 +33,23 @@ in {
     };
 
     home.packages = [
-      inputs.colmena.packages.${pkgs.system}.colmena
+      inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena
     ];
 
-    programs.ssh.matchBlocks = {
+    # Separate blocks from the personal ones in ./ssh-client.nix (OpenSSH adds IdentityFile from
+    # every matching block in order). Placed after them, and before the build hosts, so keys are
+    # still tried in the same order
+    programs.ssh.settings = {
       # Add the deploy key to all .srv hosts, which should be the ones we use colmena to manage
-      # mkAfter so personal keys (see ./ssh-client.nix) are still tried first
-      "*.srv" = lib.hm.dag.entryBefore ["*"] {
-        identityFile = lib.mkAfter [
+      deploy-srv = lib.hm.dag.entryBetween (["*"] ++ remoteBuilders) ["*.srv"] {
+        header = "Host *.srv";
+        IdentityFile = [
           "/home/${user}/.ssh/id_ed25519_deploy"
         ];
       };
-      "*.infra" = lib.hm.dag.entryBefore ["*"] {
-        identityFile = lib.mkAfter [
+      deploy-infra = lib.hm.dag.entryBetween (["*"] ++ remoteBuilders) ["*.infra"] {
+        header = "Host *.infra";
+        IdentityFile = [
           "/home/${user}/.ssh/id_ed25519_deploy"
         ];
       };

@@ -73,9 +73,9 @@ in {
     mkRemoteBuilderMatchBlock = hostname: {
       name = hostname;
       value = lib.hm.dag.entryBefore ["*"] {
-        hostname = hostname;
-        user = "nix-builder";
-        identityFile = [
+        HostName = hostname;
+        User = "nix-builder";
+        IdentityFile = [
           "/home/${user}/.ssh/id_ed25519_remote_build"
         ];
       };
@@ -88,7 +88,7 @@ in {
         sopsFile = "${secretsPath}/secrets/shared.yaml";
         path = "/home/${user}/.ssh/id_ed25519_remote_build";
       };
-      programs.ssh.matchBlocks = lib.listToAttrs (
+      programs.ssh.settings = lib.listToAttrs (
         map mkRemoteBuilderMatchBlock cfg.buildHosts
       );
     };

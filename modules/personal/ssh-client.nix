@@ -30,34 +30,34 @@ in {
     programs.ssh = {
       enable = true;
       enableDefaultConfig = false;
-      matchBlocks = {
+      settings = {
         "github.com" = lib.hm.dag.entryBefore ["*"] {
-          user = "git";
-          identityFile = [
+          User = "git";
+          IdentityFile = [
             "/home/${user}/.ssh/id_ed25519_github"
           ];
         };
         "*.srv" = lib.hm.dag.entryBefore ["*"] {
-          identityFile = [
+          IdentityFile = [
             "/home/${user}/.ssh/id_ed25519_${user}"
           ];
         };
         "*.dmz" = lib.hm.dag.entryBefore ["*"] {
-          identityFile = [
+          IdentityFile = [
             "/home/${user}/.ssh/id_ed25519_sk_rk_yubikey5c"
             "/home/${user}/.ssh/id_ed25519_sk_rk_yubikey5"
           ];
         };
         "*.infra" = lib.hm.dag.entryBefore ["*"] {
-          identityFile = [
+          IdentityFile = [
             "/home/${user}/.ssh/id_ed25519_sk_rk_yubikey5c"
             "/home/${user}/.ssh/id_ed25519_sk_rk_yubikey5"
           ];
         };
         "*" = {
-          addKeysToAgent = "yes";
-          forwardAgent = true;
-          identityFile = [
+          AddKeysToAgent = "yes";
+          ForwardAgent = true;
+          IdentityFile = [
             "/home/${user}/.ssh/id_ed25519_${user}"
             "/home/${user}/.ssh/id_ed25519_sk_rk_yubikey5c"
             "/home/${user}/.ssh/id_ed25519_sk_rk_yubikey5"

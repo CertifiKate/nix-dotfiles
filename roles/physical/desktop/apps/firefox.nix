@@ -4,6 +4,7 @@ in {
   flake.modules.homeManager."roles/physical/desktop/apps" = {pkgs, ...}: {
     programs.firefox = {
       enable = true;
+      configPath = ".mozilla/firefox";
       policies = {
         ExtensionSettings = {
           # Bitwarden
