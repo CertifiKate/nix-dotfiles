@@ -21,11 +21,11 @@
     data_dir = "${project_dir}/data";
     config_dir = "${project_dir}/config";
   in {
-    CertifiKate.backup = {
-      paths = [
-        "${project_dir}"
-      ];
-    };
+    CertifiKate.persist.directories = [
+      "${project_dir}"
+    ];
+    # No point backing up cache, but also no point regenerating it each boot
+    CertifiKate.persist.localDirectories = ["/var/cache/jellyfin"];
 
     # 1. enable vaapi on OS-level
     nixpkgs.config.packageOverrides = pkgs: {

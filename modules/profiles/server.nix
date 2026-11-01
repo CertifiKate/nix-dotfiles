@@ -13,6 +13,7 @@ in {
 
       # All servers should have the backup client, but the actual paths are defined in the service modules
       nixos."modules/backup/client"
+      nixos."modules/persist"
     ];
 
     nix.settings.trusted-users = [

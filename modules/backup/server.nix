@@ -34,7 +34,7 @@ in {
       # TODO: Scope this by host?
       openssh.authorizedKeys.keys = [
         # Setup rrsync restricted authorized key
-        "command=\"${pkgs.rrsync}/bin/rrsync -wo ${backup_dump_path}\",restrict ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPIutECanUS5l5Z5FeAzgH6vxijosLGkQlcwcd7JWhez backup_write_only"
+        "command=\"${pkgs.rrsync}/bin/rrsync -no-lock -wo ${backup_dump_path}\",restrict ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPIutECanUS5l5Z5FeAzgH6vxijosLGkQlcwcd7JWhez backup_write_only"
       ];
     };
 

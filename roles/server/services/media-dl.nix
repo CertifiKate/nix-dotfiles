@@ -162,12 +162,9 @@ in {
       inputs.vpn-confinement.nixosModules.default
     ];
 
-    # Setup backup service
-    CertifiKate.backup = {
-      paths = [
-        "${base_project_dir}"
-      ];
-    };
+    CertifiKate.persist.directories = [
+      "${base_project_dir}"
+    ];
 
     # Add Wireguard config
     sops.secrets."wg_config" = {

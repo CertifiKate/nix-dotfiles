@@ -14,6 +14,8 @@ variable "instances" {
     target               = optional(string)
     skip_default_profile = optional(bool, false)
     skip_sops_key        = optional(bool, false)
+    impermanent          = optional(bool, false)
+    skip_snapshots       = optional(bool, false)
     config               = optional(map(string))
     device               = optional(map(any))
   }))

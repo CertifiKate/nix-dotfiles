@@ -54,13 +54,10 @@ in {
     authelia_config_dir = "${authelia_dir}/config";
     authelia_data_dir = "${authelia_dir}/data";
   in {
-    # Setup backup service
-    CertifiKate.backup = {
-      paths = [
-        "${project_dir}"
-        "/var/lib/lldap"
-      ];
-    };
+    CertifiKate.persist.directories = [
+      "${project_dir}"
+      "/var/lib/lldap"
+    ];
 
     environment.systemPackages = with pkgs; [
       authelia

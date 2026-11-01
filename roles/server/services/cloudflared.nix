@@ -2,23 +2,12 @@
   inherit (config.meta) secretsPath private;
 in {
   flake.modules.nixos."roles/server/services/cloudflared" = {
-    pkgs,
     config,
     lib,
     ...
   }: let
     project_tld = "${private.project_tld}";
     serviceName = "cloudflared-tunnel-default-tunnel";
-    credDir = "/run/credentials/${serviceName}.service";
-    setupCreds = pkgs.writeShellScript "cloudflared-setup-creds" ''
-      install -d -m 0700 -o cloudflared -g cloudflared ${credDir}
-      install -m 0400 -o cloudflared -g cloudflared \
-        ${config.sops.secrets."cloudflared_tunnel_cert".path} \
-        ${credDir}/credentials.json
-      install -m 0400 -o cloudflared -g cloudflared \
-        ${config.sops.secrets."cloudflared_tunnel_creation_cert".path} \
-        ${credDir}/cert.pem
-    '';
   in {
     users.users.cloudflared = {
       isSystemUser = true;
@@ -41,7 +30,6 @@ in {
         DynamicUser = lib.mkForce false;
         User = "cloudflared";
         Group = "cloudflared";
-        ExecStartPre = lib.mkBefore ["+${setupCreds}"];
       };
     };
 

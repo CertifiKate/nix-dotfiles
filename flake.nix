@@ -12,6 +12,11 @@
     import-tree.url = "github:vic/import-tree";
 
     sops-nix.url = "github:Mic92/sops-nix";
+    impermanence = {
+      url = "github:nix-community/impermanence";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
 
     nix-colors.url = "github:Misterio77/nix-colors";
 

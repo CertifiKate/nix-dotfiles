@@ -17,12 +17,9 @@ in {
       traefik
     ];
 
-    # Setup backup service
-    CertifiKate.backup = {
-      paths = [
-        "${project_dir}"
-      ];
-    };
+    CertifiKate.persist.directories = [
+      "${project_dir}"
+    ];
 
     sops.secrets."proxy_traefik_env" = {
       owner = "traefik";

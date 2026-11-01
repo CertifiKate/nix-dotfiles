@@ -14,6 +14,8 @@ terraform {
 
 # === Storage pools
 # Node specific storage pool on host ZFS pool
+# Reading a pool with a target also returns the cluster level keys, so these have to be ignored here
+# or every plan tries to remove them
 resource "incus_storage_pool" "host_pool_incus_01" {
   name   = "host-pool-01"
   driver = "zfs"
@@ -21,6 +23,10 @@ resource "incus_storage_pool" "host_pool_incus_01" {
     source = "zpool/incus"
   }
   target = "incus-01"
+
+  lifecycle {
+    ignore_changes = [config["volume.zfs.use_refquota"]]
+  }
 }
 
 resource "incus_storage_pool" "host_pool_incus_02" {
@@ -30,6 +36,10 @@ resource "incus_storage_pool" "host_pool_incus_02" {
     source = "zpool/incus"
   }
   target = "incus-02"
+
+  lifecycle {
+    ignore_changes = [config["volume.zfs.use_refquota"]]
+  }
 }
 
 resource "incus_storage_pool" "host_pool_incus_03" {
@@ -39,6 +49,10 @@ resource "incus_storage_pool" "host_pool_incus_03" {
     source = "zpool/incus"
   }
   target = "incus-03"
+
+  lifecycle {
+    ignore_changes = [config["volume.zfs.use_refquota"]]
+  }
 }
 
 # Cluster specific storage pool on host ZFS pool
@@ -51,6 +65,9 @@ resource "incus_storage_pool" "host_pool" {
   name   = "host-pool-01"
   driver = "zfs"
 
+  config = {
+    "volume.zfs.use_refquota" = "true" # ensures snapshots are NOT counted against the instance quota, only its actual disk usage
+  }
 
   lifecycle {
     prevent_destroy = true

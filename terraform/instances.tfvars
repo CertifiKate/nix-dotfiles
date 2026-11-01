@@ -2,9 +2,10 @@
 instances = {
   "monitor-01" = {
     description = "Central monitoring server for Prometheus and Grafana"
-    profiles = ["net-server", "comp-small"]
+    profiles = ["net-server", "comp-small", "net-infra"]
     type     = "container"
     image     = "cluster:nixos/custom/golden/lxc"
+    impermanent         = true
   }
 
   "build-01" = {
@@ -12,6 +13,8 @@ instances = {
     profiles = ["net-server", "comp-large", "disk-medium"]
     type     = "container"
     image     = "cluster:nixos/custom/golden/lxc"
+    impermanent         = true
+    skip_snapshots = true
     config = {
       "security.nesting" = "true"
     }
@@ -22,6 +25,8 @@ instances = {
     profiles = ["net-server", "comp-large", "disk-medium"]
     type     = "container"
     image     = "cluster:nixos/custom/golden/lxc"
+    impermanent         = true
+    skip_snapshots = true
     config = {
       "security.nesting" = "true"
     }
@@ -32,6 +37,10 @@ instances = {
     profiles = ["net-server", "comp-small", "role-core", "disk-medium"]
     type     = "container"
     image     = "cluster:nixos/custom/golden/lxc"
+    impermanent         = true
+    config = {
+      "security.nesting" = "true"
+    }
   }
 
   "auth-01" = {
@@ -39,6 +48,7 @@ instances = {
     profiles = ["net-server", "comp-small", "role-core", "disk-medium"]
     type     = "container"
     image     = "cluster:nixos/custom/golden/lxc"
+    impermanent         = true
   }
 
   "media-01" = {
@@ -47,6 +57,7 @@ instances = {
     type     = "container"
     image     = "cluster:nixos/custom/golden/lxc"
     target = "incus-03" // TODO: handle dynamic groups, currently bugged if we @has_gpu
+    impermanent         = true
     device = {
       data_dir = {
         type = "disk"
@@ -68,6 +79,7 @@ instances = {
     type     = "container"
     image     = "cluster:nixos/custom/golden/lxc"
     target = "incus-03"
+    impermanent         = true
     device = {
       data_dir = {
         type = "disk"
@@ -89,6 +101,7 @@ instances = {
     type                = "container"
     image               = "cluster:nixos/custom/golden/lxc"
     target              = "incus-01"
+    impermanent         = true
     config = {
       "cluster.evacuate" = "stop"
     }
@@ -100,6 +113,7 @@ instances = {
     type                 = "container"
     image                = "cluster:nixos/custom/golden/lxc"
     target               = "incus-02"
+    impermanent         = true
     config = {
       "cluster.evacuate" = "stop"
     }
@@ -111,6 +125,7 @@ instances = {
     type                 = "container"
     image                = "cluster:nixos/custom/golden/lxc"
     target               = "incus-03"
+    impermanent         = true
     config = {
       "cluster.evacuate" = "stop"
     }
@@ -121,11 +136,15 @@ instances = {
     profiles = ["net-server", "comp-small"]
     type     = "container"
     image     = "cluster:nixos/custom/golden/lxc"
+    impermanent         = true
+    config = {
+      "security.nesting" = "true"
+    }
   }
 
   "backup-01" = {
     description = "Backup server for storing snapshots and backups and exporting remotely"
-    profiles = ["net-server", "comp-small", "disk-medium", "role-core"]
+    profiles = ["net-server", "comp-medium", "disk-large", "role-core"]
     type     = "virtual-machine"
     image     = "cluster:nixos/custom/golden/vm"
   }
@@ -159,6 +178,7 @@ instances = {
       }
     }
   }
+
   "home-02" = {
     description         = "Home Assistant smart home controller"
     profiles            = ["net-server", "disk-large", "comp-large", "role-core"]

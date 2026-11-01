@@ -33,7 +33,7 @@ resource "incus_instance" "instances" {
   )
 
   # Pass in our custom config, but also pass through the cloud init to set hostnames
-  config = merge(each.value.config, {
+  config = merge(each.value.config, each.value.skip_snapshots ? { "snapshots.schedule" = "@never" } : {}, {
     "cloud-init.user-data" = <<-EOT
       #cloud-config
       hostname: ${each.key}
@@ -70,6 +70,8 @@ resource "null_resource" "sops_key" {
   triggers = {
     # Re-deploy when instance gets a new non-null MAC (null = stopped, not a real change)
     mac_address = coalesce(incus_instance.instances[each.key].mac_address, "offline")
+    # Re-deploy if the key moves
+    key_path = "${each.value.impermanent ? "/persist/identity" : "/etc"}/sops-age.txt"
   }
   
 
@@ -78,7 +80,7 @@ resource "null_resource" "sops_key" {
       TMPFILE=$(mktemp)
       trap "rm -f $TMPFILE" EXIT
       echo '${local.host_keys[each.key]}' > $TMPFILE
-      incus file push $TMPFILE cluster:${each.key}/etc/sops-age.txt --mode 0600
+      incus file push --create-dirs $TMPFILE cluster:${each.key}${self.triggers.key_path} --mode 0600
     EOT
   }
 }

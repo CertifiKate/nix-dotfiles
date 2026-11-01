@@ -1,4 +1,6 @@
-{
+{config, ...}: let
+  inherit (config.meta) versions;
+in {
   homelab.routes.library = {
     host = "library";
     dest = "http://media-02.srv:8083";
@@ -27,7 +29,7 @@
     virtualisation.oci-containers.containers = {
       calibre-web = {
         autoStart = true;
-        image = "lscr.io/linuxserver/calibre-web:latest";
+        image = "lscr.io/linuxserver/calibre-web:${versions.calibre-web}";
         ports = ["8083:8083"];
         volumes = [
           "${calibre_dir}/data:/config"

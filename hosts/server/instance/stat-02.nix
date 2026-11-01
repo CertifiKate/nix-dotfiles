@@ -8,6 +8,7 @@ in {
       imports = [
         nixos."modules/profiles/server"
         nixos."roles/server/instance/lxc"
+        nixos."roles/server/instance/impermanence"
         nixos."roles/server/services/metrics-relay"
       ];
 

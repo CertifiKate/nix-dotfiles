@@ -21,6 +21,12 @@ in {
   flake.modules.nixos."roles/server/services/monitoring" = {config, ...}: let
     project_tld = "${private.project_tld}";
   in {
+    CertifiKate.persist = {
+      directories = ["/var/lib/grafana"];
+      # Metrics are too big and change too often to be worth backing up
+      localDirectories = ["/var/lib/prometheus2"];
+    };
+
     systemd.tmpfiles.rules = [
       "d /etc/prometheus/tls 0750 prometheus prometheus -"
     ];

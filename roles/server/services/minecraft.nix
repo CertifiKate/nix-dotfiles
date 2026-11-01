@@ -17,11 +17,9 @@ in {
 
     nixpkgs.overlays = [inputs.nix-minecraft.overlay];
 
-    CertifiKate.backup = {
-      paths = [
-        minecraft_dir
-      ];
-    };
+    CertifiKate.persist.directories = [
+      minecraft_dir
+    ];
 
     # Setup DDNS service using Cloudflare
     sops.secrets."cloudflare_dyndns_token" = {

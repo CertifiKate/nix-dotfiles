@@ -3,7 +3,9 @@
     lib,
     pkgs,
     ...
-  }: {
+  }: let
+    build_dir = "/build_outputs";
+  in {
     users.users."nix-builder" = {
       isNormalUser = true;
       createHome = true;
@@ -19,7 +21,13 @@
     nix.settings = {
       trusted-users = ["nix-builder"];
       allowed-users = ["nix-builder"];
+      build-dir = build_dir;
     };
+
+    CertifiKate.persist.localDirectories = [build_dir];
+
+    # Wipe build directory on boot so we don't fill up disk
+    systemd.tmpfiles.rules = ["D! ${build_dir} 0755 root root -"];
 
     # Disable remote building (bc this should be doing remote building!!)
     CertifiKate.remoteBuilders.enable = lib.mkForce false;

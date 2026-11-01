@@ -48,22 +48,23 @@ in {
         ];
       };
 
+      # Only for recovering from a node going down, day to day restores use Incus snapshots
       services.sanoid = {
         enable = true;
         datasets.${cfg.sourcePool} = {
           recursive = true;
           autosnap = true;
           autoprune = true;
-          hourly = 4;
-          daily = 7;
+          hourly = 1;
+          daily = 0;
           monthly = 0;
         };
         datasets."zpool/incus-replica" = {
           recursive = true;
           autosnap = false;
           autoprune = true;
-          hourly = 4;
-          daily = 7;
+          hourly = 1;
+          daily = 0;
           monthly = 0;
         };
       };
