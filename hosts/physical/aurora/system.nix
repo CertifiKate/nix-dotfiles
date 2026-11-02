@@ -22,6 +22,9 @@ in {
     # Bootloader
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
+    boot.loader.timeout = 1;
+
+    systemd.services.NetworkManager-wait-online.enable = false;
 
     # Enable fingerprint
     services.fprintd = {
@@ -45,6 +48,18 @@ in {
     services.power-profiles-daemon.enable = false;
     services.tlp = {
       enable = true;
+      settings = {
+        PLATFORM_PROFILE_ON_AC = "performance";
+        PLATFORM_PROFILE_ON_BAT = "low-power";
+        CPU_ENERGY_PERF_POLICY_ON_AC = "balance_performance";
+        CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+        CPU_BOOST_ON_AC = 1;
+        CPU_BOOST_ON_BAT = 0;
+        PCIE_ASPM_ON_BAT = "powersupersave";
+        # Adaptive backlight - auto-adjusts backlight and contrast
+        AMDGPU_ABM_LEVEL_ON_BAT = 3;
+        WIFI_PWR_ON_BAT = "on";
+      };
     };
 
     # Setup hibernation
@@ -59,7 +74,10 @@ in {
       "resume_offset=13154304"
     ];
     systemd.sleep.settings.Sleep = {
-      HibernateDelaySec = "30min";
+      HibernateDelaySec = "15min";
+      # "platform" (S4) leaves the lid armed as a wake source and the firmware
+      # powers straight back on; plain power-off only wakes on the power button
+      HibernateMode = "shutdown";
     };
 
     # Shrink the hibernation image as far as possible. With the default (2/5 of RAM)

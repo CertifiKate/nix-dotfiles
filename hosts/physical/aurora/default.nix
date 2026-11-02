@@ -1,9 +1,5 @@
 # === Laptop ===
-{
-  inputs,
-  config,
-  ...
-}: let
+{config, ...}: let
   inherit (config.meta) user;
   inherit (config.flake.modules) nixos homeManager;
 in {
@@ -11,8 +7,6 @@ in {
     imports = [
       ./_hardware-configuration.nix
       nixos."modules/profiles/physical"
-
-      inputs.nixos-hardware.nixosModules.lenovo-thinkpad-e14-amd
 
       nixos."roles/physical/desktop/gnome"
       nixos."roles/physical/desktop/gaming"
