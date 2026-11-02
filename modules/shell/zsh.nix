@@ -56,4 +56,22 @@
     # Set this as default shell. What other user is going to complain? It's just me
     users.defaultUserShell = pkgs.zsh;
   };
+
+  flake.modules.homeManager."modules/shell/zsh" = {
+    programs.zsh = {
+      enable = true;
+      history.append = true;
+      enableCompletion = true;
+      autosuggestion.enable = true;
+      syntaxHighlighting.enable = true;
+      oh-my-zsh = {
+        enable = true;
+        theme = "bira";
+        plugins = [
+          "direnv"
+          "sudo"
+        ];
+      };
+    };
+  };
 }

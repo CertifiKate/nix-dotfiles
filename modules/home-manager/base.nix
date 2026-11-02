@@ -4,17 +4,17 @@
 #
 {config, ...}: let
   inherit (config.meta) user;
+  inherit (config.flake.modules) homeManager;
 in {
   flake.modules.homeManager."modules/home-manager/base" = {pkgs, ...}: {
+    imports = [
+      homeManager."modules/shell/direnv"
+      homeManager."modules/shell/zsh"
+    ];
+
     home = {
       username = "${user}";
       homeDirectory = "/home/${user}";
-    };
-
-    programs.direnv = {
-      enable = true;
-      enableZshIntegration = true;
-      nix-direnv.enable = true;
     };
 
     home.packages = with pkgs; [
@@ -23,22 +23,6 @@ in {
       ranger
       nix-tree
     ];
-
-    programs.zsh = {
-      enable = true;
-      history.append = true;
-      enableCompletion = true;
-      autosuggestion.enable = true;
-      syntaxHighlighting.enable = true;
-      oh-my-zsh = {
-        enable = true;
-        theme = "bira";
-        plugins = [
-          "direnv"
-          "sudo"
-        ];
-      };
-    };
 
     home.stateVersion = "24.05";
   };
