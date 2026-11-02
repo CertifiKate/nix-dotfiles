@@ -131,6 +131,14 @@ instances = {
     }
   }
 
+  "coder-01" = {
+    description = "Coder server for dev workspaces, which run in the coder project"
+    profiles = ["net-server", "comp-small", "disk-medium", "net-infra"]
+    type     = "container"
+    image     = "cluster:nixos/custom/golden/lxc"
+    impermanent         = true
+  }
+
   "util-01" = {
     description = "Utility server for miscellaneous other services"
     profiles = ["net-server", "comp-small"]
@@ -149,12 +157,12 @@ instances = {
     image     = "cluster:nixos/custom/golden/vm"
   }
 
-  "mgmt-01" = {
-    description = "Management host: SSH/RDP thin client for remote server management"
-    profiles = ["net-server", "comp-medium", "disk-large"]
-    type     = "virtual-machine"
-    image     = "cluster:nixos/custom/golden/vm"
-  }
+  # "mgmt-01" = {
+  #   description = "Management host: SSH/RDP thin client for remote server management"
+  #   profiles = ["net-server", "comp-medium", "disk-large"]
+  #   type     = "virtual-machine"
+  #   image     = "cluster:nixos/custom/golden/vm"
+  # }
 
   "home-01" = {
     description         = "Home Assistant smart home controller"
