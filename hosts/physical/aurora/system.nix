@@ -2,6 +2,7 @@
   inherit (config.meta) user;
 in {
   configurations.nixos.aurora.module = {
+    config,
     lib,
     pkgs,
     ...
@@ -58,7 +59,22 @@ in {
       "resume_offset=13154304"
     ];
     systemd.sleep.settings.Sleep = {
-      HibernateDelaySec = "1h";
+      HibernateDelaySec = "30min";
+    };
+
+    # Shrink the hibernation image as far as possible. With the default (2/5 of RAM)
+    # amdgpu evicting VRAM during freeze leaves too little free RAM to build the image
+    # ("Error -12 creating image").
+    systemd.tmpfiles.rules = [
+      "w /sys/power/image_size - - - - 0"
+    ];
+
+    systemd.services.systemd-suspend.serviceConfig.ExecStart = [
+      ""
+      "${config.systemd.package}/lib/systemd/systemd-sleep suspend-then-hibernate"
+    ];
+    services.logind.settings.Login = {
+      HandleLidSwitch = "suspend-then-hibernate";
     };
     networking.firewall.checkReversePath = false;
 
