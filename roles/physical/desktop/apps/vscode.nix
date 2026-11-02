@@ -19,6 +19,7 @@
           ms-dotnettools.vscode-dotnet-runtime
           ms-vscode-remote.remote-containers
           ms-azuretools.vscode-docker
+          coder.coder-remote
         ];
         userSettings = {
           "git.autofetch" = true;
