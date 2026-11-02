@@ -22,6 +22,11 @@ in {
       lazygit
       ranger
       nix-tree
+      btop
+      dig
+      tree
+      traceroute
+      gnumake
     ];
 
     home.stateVersion = "24.05";

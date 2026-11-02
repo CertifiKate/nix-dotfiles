@@ -23,7 +23,6 @@ in {
       homeDirectory = lib.mkForce (builtins.getEnv "HOME");
 
       packages = with pkgs; [
-        dnsutils
         iproute2
         iputils
         wget
