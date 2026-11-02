@@ -24,6 +24,7 @@ in {
       users.${user} = {
         imports = [
           homeManager."modules/personal"
+          homeManager."modules/personal/ssh-client"
           homeManager."modules/personal/ansible-controller"
           homeManager."modules/personal/deploy-host"
           homeManager."modules/personal/rdp-client"

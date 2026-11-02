@@ -1,7 +1,7 @@
 {config, ...}: let
   inherit (config.meta) secretsPath user;
 in {
-  flake.modules.homeManager."modules/personal" = {lib, ...}: {
+  flake.modules.homeManager."modules/personal/ssh-client" = {lib, ...}: {
     # Add all of our private keys
 
     # For low-security stuff, logging into lxc/vms, etc.

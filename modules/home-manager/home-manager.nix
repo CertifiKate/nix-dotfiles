@@ -24,10 +24,7 @@ in {
       useGlobalPkgs = true;
       useUserPackages = true;
       # Common imports for home-manager
-      users.${user}.imports = [
-        homeManager."modules/home-manager/common"
-        inputs.sops-nix.homeManagerModules.sops
-      ];
+      users.${user}.imports = [homeManager."modules/home-manager/common"];
     };
   };
 }
