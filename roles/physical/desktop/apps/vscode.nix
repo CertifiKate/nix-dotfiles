@@ -1,5 +1,15 @@
-{
-  flake.modules.homeManager."roles/physical/desktop/apps" = {pkgs, ...}: {
+{inputs, ...}: {
+  flake.modules.homeManager."roles/physical/desktop/apps" = {
+    config,
+    lib,
+    pkgs,
+    ...
+  }: {
+    # The Coder extension rewrites ~/.ssh/config to add its include, replacing the symlink.
+    # Include it ourselves and overwrite rather than back up, so activation never gets stuck
+    programs.ssh.includes = ["~/.local/share/coder.coder-remote/ssh/*.conf"];
+    home.file = lib.mkIf config.programs.ssh.enable {".ssh/config".force = true;};
+
     home.packages = with pkgs; [
       nixd
       # alejandra
@@ -13,12 +23,9 @@
           kamadorueda.alejandra
           jnoortheen.nix-ide
           ms-vscode-remote.remote-ssh
-          streetsidesoftware.code-spell-checker
-          ms-dotnettools.csharp
-          ms-dotnettools.csdevkit
-          ms-dotnettools.vscode-dotnet-runtime
           ms-vscode-remote.remote-containers
-          ms-azuretools.vscode-docker
+          coder.coder-remote
+          inputs.nix-vscode-extensions.extensions.${pkgs.stdenv.hostPlatform.system}.vscode-marketplace.datakurre.devenv
         ];
         userSettings = {
           "git.autofetch" = true;
@@ -26,6 +33,15 @@
           "terminal.integrated.defaultProfile.linux" = "zsh";
           "nix.enableLanguageServer" = true;
           "nix.serverPath" = "nixd";
+          "claudeCode.preferredLocation" = "panel";
+          "chat.disableAIFeatures" = true;
+          "telemetry.telemetryLevel" = "off";
+          "workbench.enableExperiments" = false;
+          "workbench.startupEditor" = "none";
+          "workbench.tips.enabled" = false;
+          "workbench.welcomePage.walkthroughs.openOnInstall" = false;
+          "extensions.autoUpdate" = false;
+          "extensions.autoCheckUpdates" = false;
         };
         enableUpdateCheck = false;
       };

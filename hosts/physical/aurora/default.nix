@@ -12,7 +12,10 @@ in {
       nixos."roles/physical/desktop/gaming"
       nixos."roles/physical/desktop/cosmic"
       nixos."modules/secrets/sops-admin"
+      nixos."modules/network/wireguard"
     ];
+
+    CertifiKate.wireguard.interfaces = ["Home"];
 
     home-manager = {
       users.${user} = {

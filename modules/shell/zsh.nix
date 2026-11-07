@@ -68,7 +68,6 @@
         enable = true;
         theme = "bira";
         plugins = [
-          "direnv"
           "sudo"
         ];
       };

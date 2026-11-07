@@ -51,6 +51,32 @@ in {
 
     programs.nix-ld.enable = true;
 
+    # Auto upgrade from latest pushed flake versions
+    system.autoUpgrade = {
+      enable = true;
+      flake = "github:CertifiKate/nix-dotfiles";
+      operation = "boot";
+      dates = "hourly";
+      randomizedDelaySec = "10min";
+      persistent = true;
+    };
+
+    # Only auto upgrade when we can see the build machines
+    systemd.services.nixos-upgrade.serviceConfig.ExecCondition = pkgs.writeShellScript "on-home-network" ''
+      ${pkgs.iputils}/bin/ping -c1 -W2 build-01.srv >/dev/null
+    '';
+
+    # Read-only deploy key so root can fetch the private nix-secrets input
+    sops.secrets."nix_secrets_ro_deploy_key".path = "/root/.ssh/id_ed25519_nix_secrets";
+    programs.ssh = {
+      knownHosts."github.com".publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl";
+      extraConfig = ''
+        Match host github.com localuser root
+          IdentityFile /root/.ssh/id_ed25519_nix_secrets
+          IdentitiesOnly yes
+      '';
+    };
+
     # Enable our boot loading animation
     boot = {
       plymouth = {

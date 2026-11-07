@@ -8,7 +8,7 @@
 in {
   flake.modules.homeManager."modules/home-manager/base" = {pkgs, ...}: {
     imports = [
-      homeManager."modules/shell/direnv"
+      homeManager."modules/shell/devenv"
       homeManager."modules/shell/zsh"
     ];
 
@@ -18,7 +18,6 @@ in {
     };
 
     home.packages = with pkgs; [
-      devenv
       lazygit
       ranger
       nix-tree
