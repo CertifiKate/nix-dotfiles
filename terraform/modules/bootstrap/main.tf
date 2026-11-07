@@ -175,7 +175,6 @@ resource "incus_network" "net_infra" {
   }
 }
 
-
 resource "incus_profile" "net_server" {
   depends_on = [incus_network.net_vlan10]
   name       = "net-server"
@@ -341,6 +340,98 @@ resource "incus_profile" "comp_xlarge" {
   }
 }
 
+# Coder dev workspaces. These are the parts Coder can't manage itself, as its certificate is limited
+# to the project. The rest is in the template, in roles/server/services/coder
+
+# Kept out of zpool/incus, as sanoid snapshots and replicates everything under that
+resource "incus_storage_pool" "coder_ws_pool_incus_01" {
+  name   = "coder-ws-pool-01"
+  driver = "zfs"
+  config = {
+    source = "zpool/coder-ws"
+  }
+  target = "incus-01"
+
+  lifecycle {
+    ignore_changes = [config["volume.zfs.use_refquota"]]
+  }
+}
+
+resource "incus_storage_pool" "coder_ws_pool_incus_02" {
+  name   = "coder-ws-pool-01"
+  driver = "zfs"
+  config = {
+    source = "zpool/coder-ws"
+  }
+  target = "incus-02"
+
+  lifecycle {
+    ignore_changes = [config["volume.zfs.use_refquota"]]
+  }
+}
+
+resource "incus_storage_pool" "coder_ws_pool_incus_03" {
+  name   = "coder-ws-pool-01"
+  driver = "zfs"
+  config = {
+    source = "zpool/coder-ws"
+  }
+  target = "incus-03"
+
+  lifecycle {
+    ignore_changes = [config["volume.zfs.use_refquota"]]
+  }
+}
+
+resource "incus_storage_pool" "coder_ws_pool" {
+  depends_on = [
+    incus_storage_pool.coder_ws_pool_incus_01,
+    incus_storage_pool.coder_ws_pool_incus_02,
+    incus_storage_pool.coder_ws_pool_incus_03,
+  ]
+  name   = "coder-ws-pool-01"
+  driver = "zfs"
+
+  config = {
+    "volume.zfs.use_refquota" = "true"
+  }
+}
+
+resource "incus_project" "coder" {
+  name = "coder"
+
+  config = {
+    "features.images"          = "true"
+    "features.profiles"        = "true"
+    "features.storage.volumes" = "true"
+
+    "restricted"                      = "true"
+    "restricted.storage-pools.access" = incus_storage_pool.coder_ws_pool.name
+    "restricted.cluster.target"       = "allow" # Containers have to go on the same node as their volumes
+
+    # Unmanaged, as macvlan private mode can't be used with a managed network. The access list still applies
+    "restricted.devices.nic"     = "allow"
+    "restricted.networks.access" = "vlan98"
+
+    # Lets the devcontainers Coder template run Docker. Still unprivileged
+    "restricted.containers.nesting"      = "allow"
+    "restricted.containers.interception" = "allow"
+
+    "limits.instances" = "8"
+    "limits.cpu"       = "16"
+    "limits.memory"    = "32GiB"
+  }
+}
+
+# What coder-01 connects with. `make cert` in roles/server/services/coder creates this
+resource "incus_certificate" "coder" {
+  name        = "coder-provisioner"
+  description = "Coder provisioner, limited to the coder project"
+  certificate = file("${path.module}/../../../../nix-secrets/coder-client.crt")
+  restricted  = true
+  projects    = [incus_project.coder.name]
+}
+
 # Buckets on a local pool only exist on one member and incus won't proxy S3 requests between members,
 # so pin it to the member that currently holds the cluster VIP
 resource "incus_storage_bucket" "s3_terraform_state" {
@@ -425,6 +516,11 @@ resource "null_resource" "bootstrap_complete" {
     incus_profile.net_dmz,
     incus_profile.net_infra,
     incus_profile.role_core,
+
+    # Coder
+    incus_storage_pool.coder_ws_pool,
+    incus_project.coder,
+    incus_certificate.coder,
 
     # Golden images
     null_resource.golden_image_vm,

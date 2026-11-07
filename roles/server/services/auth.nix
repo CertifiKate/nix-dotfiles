@@ -98,6 +98,18 @@ in {
       owner = "authelia";
       sopsFile = "${secretsPath}/secrets/shared.yaml";
     };
+    sops.secrets."authelia_oidc_hmac_secret" = {
+      owner = "authelia";
+      sopsFile = "${secretsPath}/secrets/authentication.yaml";
+    };
+    sops.secrets."authelia_oidc_jwks_key" = {
+      owner = "authelia";
+      sopsFile = "${secretsPath}/secrets/authentication.yaml";
+    };
+    sops.secrets."authelia_coder_client_digest" = {
+      owner = "authelia";
+      sopsFile = "${secretsPath}/secrets/authentication.yaml";
+    };
 
     sops.secrets."ldap_jwt_secret" = {
       owner = "lldap";
@@ -143,7 +155,38 @@ in {
         AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE = config.sops.secrets."authelia_storage_key".path;
         AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD_FILE = config.sops.secrets."authelia_ldap_password".path;
         AUTHELIA_NOTIFIER_SMTP_PASSWORD_FILE = config.sops.secrets."smtp_app_password".path;
+        AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET_FILE = config.sops.secrets."authelia_oidc_hmac_secret".path;
+        X_AUTHELIA_CONFIG_FILTERS = "template";
       };
+
+      settingsFiles = [
+        (pkgs.writeText "authelia-oidc.yml" ''
+          identity_providers:
+            oidc:
+              jwks:
+                - key_id: main
+                  key: {{ secret "${config.sops.secrets."authelia_oidc_jwks_key".path}" | mindent 10 "|" | msquote }}
+              authorization_policies:
+                dev:
+                  default_policy: deny
+                  rules:
+                    - policy: one_factor
+                      subject:
+                        - group:admin
+                        - group:dev
+              clients:
+                - client_id: coder
+                  client_name: Coder
+                  client_secret: {{ secret "${config.sops.secrets."authelia_coder_client_digest".path}" | msquote }}
+                  authorization_policy: dev
+                  consent_mode: implicit
+                  redirect_uris:
+                    - https://coder.${project_tld}/api/v2/users/oidc/callback
+                  scopes: [openid, profile, email, groups]
+                  token_endpoint_auth_method: client_secret_basic
+        '')
+      ];
+
       settings = {
         theme = "dark";
 

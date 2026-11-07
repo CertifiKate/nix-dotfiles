@@ -9,6 +9,7 @@
     pkgs.git
     pkgs.terraform
     pkgs.incus
+    pkgs.jq
     pkgs.minio-client # S3 (incus storage buckets)
   ];
 

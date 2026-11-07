@@ -111,6 +111,10 @@
             id = 99;
             interface = cfg.clusterUplinkInterface;
           };
+          vlan98 = {
+            id = 98;
+            interface = cfg.clusterUplinkInterface;
+          };
         };
       };
 
@@ -155,7 +159,7 @@
         })
         {
           # TODO: configure this somewhere so this doesn't race-condition with the net-infra bridge setup
-          "net-infra".allowedTCPPorts = [cfg.serverMetricsPort];
+          "net-infra".allowedTCPPorts = [cfg.serverPort cfg.serverMetricsPort];
         }
       ];
 
