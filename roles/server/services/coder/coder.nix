@@ -23,14 +23,31 @@ in {
   flake.modules.nixos."roles/server/services/coder" = {
     config,
     lib,
+    pkgs,
     ...
   }: let
     project_dir = "/var/lib/coder";
     incus_dir = "${project_dir}/incus";
     token_file = "${project_dir}/template-token";
 
-    # Each folder is a template, named after the folder
-    templates = lib.attrNames (lib.filterAttrs (_: type: type == "directory") (builtins.readDir ./templates));
+    templates = {
+      lightweight = {
+        display_name = "Lightweight";
+        description = "Starts in seconds, with no root. A fresh container each start, with only your home kept. No Docker";
+        icon = "/icon/debian.svg";
+      };
+      devcontainers = {
+        display_name = "Dev Containers";
+        description = "Docker and sudo, and starts the repo's devcontainer.json. The whole machine is kept between stops";
+        icon = "/icon/docker.svg";
+      };
+    };
+
+    # Templates link to the shared templates/common.tf. Coder only uploads the folder, so resolve them
+    templateDir = name:
+      pkgs.runCommand "coder-template-${name}" {} ''
+        cp -rL ${./templates}/${name} $out
+      '';
   in {
     CertifiKate.persist.directories = [
       project_dir
@@ -40,6 +57,9 @@ in {
 
     networking.firewall.allowedTCPPorts = [3000];
 
+    # Make the coder package available for general configuration
+    environment.systemPackages = [config.services.coder.package];
+
     sops.secrets."coder_client_key" = {
       sopsFile = "${secretsPath}/secrets/coder.yaml";
       path = "${incus_dir}/client.key";
@@ -47,9 +67,17 @@ in {
     };
 
     sops.secrets."coder_oidc_client_secret".sopsFile = "${secretsPath}/secrets/coder.yaml";
+
+    sops.secrets."coder_github_client_id".sopsFile = "${secretsPath}/secrets/coder.yaml";
+    sops.secrets."coder_github_client_secret".sopsFile = "${secretsPath}/secrets/coder.yaml";
+
     sops.templates."coder.env" = {
       owner = "coder";
-      content = "CODER_OIDC_CLIENT_SECRET=${config.sops.placeholder."coder_oidc_client_secret"}\n";
+      content = ''
+        CODER_OIDC_CLIENT_SECRET=${config.sops.placeholder."coder_oidc_client_secret"}
+        CODER_EXTERNAL_AUTH_0_CLIENT_ID=${config.sops.placeholder."coder_github_client_id"}
+        CODER_EXTERNAL_AUTH_0_CLIENT_SECRET=${config.sops.placeholder."coder_github_client_secret"}
+      '';
     };
 
     systemd.tmpfiles.rules = [
@@ -68,7 +96,9 @@ in {
         CODER_OIDC_SCOPES = "openid,profile,email,groups";
         CODER_OIDC_SIGN_IN_TEXT = "Authelia";
         CODER_OAUTH2_GITHUB_DEFAULT_PROVIDER_ENABLE = "false";
-
+        CODER_EXTERNAL_AUTH_0_ID = "github";
+        CODER_EXTERNAL_AUTH_0_TYPE = "github";
+        CODER_EXTERNAL_AUTH_0_DISPLAY_NAME = "GitHub";
         CODER_TELEMETRY_ENABLE = "false";
         CODER_BLOCK_DIRECT = "true";
         CODER_MAX_ADMIN_TOKEN_LIFETIME = "87600h"; # Bit gross, but allows us to push templates to Coder without having to refresh the token every 24h
@@ -94,12 +124,15 @@ in {
         Restart = "on-failure";
         RestartSec = 10;
       };
-      script =
-        lib.concatMapStrings (name: ''
-          coder templates push ${name} --directory ${./templates}/${name} --yes
-          coder templates edit ${name} --default-ttl 2h --yes
+      script = lib.concatStrings (lib.mapAttrsToList (name: t: ''
+          coder templates push ${name} --directory ${templateDir name} --yes
+          coder templates edit ${name} --yes \
+            --display-name ${lib.escapeShellArg t.display_name} \
+            --description ${lib.escapeShellArg t.description} \
+            --icon ${lib.escapeShellArg t.icon} \
+            --default-ttl 2h
         '')
-        templates;
+        templates);
     };
   };
 }

@@ -413,10 +413,13 @@ resource "incus_project" "coder" {
     "restricted.devices.nic"     = "allow"
     "restricted.networks.access" = "vlan98"
 
+    # Lets the devcontainers Coder template run Docker. Still unprivileged
+    "restricted.containers.nesting"      = "allow"
+    "restricted.containers.interception" = "allow"
+
     "limits.instances" = "8"
     "limits.cpu"       = "16"
     "limits.memory"    = "32GiB"
-    "limits.disk"      = "100GiB"
   }
 }
 

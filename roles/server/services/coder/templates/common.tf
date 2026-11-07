@@ -1,7 +1,5 @@
-# Debian container with no root access, set up from a dotfiles repo. See docs/coder-workspaces.md
-#
-# Coder runs this for each workspace and keeps its state, using a certificate limited to the coder
-# project. Containers are replaced on every start. Only the volumes are kept, until the workspace is deleted
+# A template adds its incus_instance "workspace", using local.config and local.devices, and sets
+# local.image and local.address
 terraform {
   required_providers {
     coder = {
@@ -18,7 +16,6 @@ terraform {
 locals {
   project = "coder"
   pool    = "coder-ws-pool-01"
-  image   = "docker:library/buildpack-deps:trixie-scm"
 
   nodes = sort([for name, member in data.incus_cluster.this.members : name if member.status == "Online"])
   node  = element(local.nodes, parseint(substr(data.coder_workspace.me.id, 0, 7), 16))
@@ -29,6 +26,7 @@ locals {
   user  = local.owner
   uid   = 1000
   home  = "/home/${local.user}"
+  path  = "${local.home}/.local/bin:/usr/local/bin:/usr/bin:/bin"
 
   # Incus limits names to 63 characters. The volumes stay on the id, as a workspace can be renamed
   workspace = lower(data.coder_workspace.me.name)
@@ -41,13 +39,6 @@ locals {
     large  = { cpu = "6", memory = "12GiB" }
   }[data.coder_parameter.size.value]
 
-  # The image has no such user, and nothing in the container could add one. The provider can only
-  # push files once the container is running, which is why the entrypoint has to wait for this
-  passwd = <<-EOT
-    root:x:0:0:root:/root:/bin/bash
-    ${local.user}:x:${local.uid}:${local.uid}::${local.home}:${local.shell}
-  EOT
-
   # Dotfiles pick the login shell by linking it here. Without that, or a dotfiles repo at all, it stays
   # as bash, as a missing login shell would stop terminals from opening
   shell        = "/usr/local/bin/workspace-shell"
@@ -59,13 +50,39 @@ locals {
     exec /bin/bash "$@"
   EOT
 
-  entrypoint = join("; ", [
-    "until grep -q ^${local.user}: /etc/passwd && [ -x ${local.shell} ]",
-    "do sleep 1",
-    "done",
-    "echo \"$CODER_INIT_SCRIPT\" | base64 -d > /tmp/coder-init.sh",
-    "exec setpriv --no-new-privs sh /tmp/coder-init.sh",
-  ])
+  # Merged into each template's instance config. Each template passes the agent's token its own way
+  config = {
+    "limits.cpu"           = local.size.cpu
+    "limits.memory"        = local.size.memory
+    "cluster.evacuate"     = "stop"
+    "user.coder.owner"     = local.owner
+    "user.coder.workspace" = local.workspace
+    "user.coder.template"  = data.coder_workspace.me.template_name
+  }
+
+  # Every device but the root disk, whose size is up to the template
+  devices = [
+    {
+      name = "home"
+      type = "disk"
+      properties = {
+        path   = local.home
+        pool   = local.pool
+        source = incus_storage_volume.home.name
+      }
+    },
+
+    # Private stops workspaces on the same node from reaching each other. The router covers other nodes
+    {
+      name = "eth0"
+      type = "nic"
+      properties = {
+        nictype = "macvlan"
+        parent  = local.parent
+        mode    = "private"
+      }
+    },
+  ]
 }
 
 provider "coder" {}
@@ -86,20 +103,41 @@ provider "incus" {
     protocol = "oci"
     public   = true
   }
+
+  remote {
+    name     = "images"
+    address  = "https://images.linuxcontainers.org"
+    protocol = "simplestreams"
+    public   = true
+  }
 }
 
 data "coder_workspace" "me" {}
 data "coder_workspace_owner" "me" {}
 data "incus_cluster" "this" {}
 
+data "coder_external_auth" "github" {
+  id       = "github"
+  optional = true
+}
+
+# For gh and anything else that reads it. Empty until GitHub is linked, and picked up on the next start
+resource "coder_env" "gh_token" {
+  count    = data.coder_workspace.me.start_count
+  agent_id = coder_agent.main[0].id
+  name     = "GH_TOKEN"
+  value    = data.coder_external_auth.github.access_token
+}
+
 data "coder_parameter" "size" {
   name         = "size"
   display_name = "Size"
-  description  = "CPU and memory. This can be changed later, and applies on the next start"
+  description  = "CPU and memory. Can be changed later, and applies on the next restart"
   icon         = "/emojis/1f4cf.png"
   order        = 1
   default      = "small"
   mutable      = true
+  form_type    = "radio"
 
   option {
     name        = "Small"
@@ -121,27 +159,44 @@ data "coder_parameter" "size" {
 data "coder_parameter" "repo" {
   name         = "repo"
   display_name = "Repository"
-  description  = "Git URL to clone into your home directory on first start. Leave empty for none"
+  description  = "Git URL to clone into your home directory, which VS Code then opens. Optional"
   icon         = "/icon/git.svg"
   order        = 2
   default      = ""
   mutable      = true
+
+  validation {
+    regex = "^$|^(https://|ssh://|git@)\\S+$"
+    error = "Use an https://, ssh:// or git@ URL"
+  }
 }
 
 data "coder_parameter" "use_dotfiles" {
   name         = "use_dotfiles"
   display_name = "Use dotfiles"
-  description  = "Run a dotfiles repository on start. Without it you get a plain Debian shell"
+  description  = "Run a dotfiles repository on every start. Without it you get a plain Debian shell"
   icon         = "/icon/dotfiles.svg"
   order        = 3
   type         = "bool"
   default      = "true"
   mutable      = true
+  form_type    = "switch"
 }
 
 resource "coder_agent" "main" {
-  os   = "linux"
-  arch = "amd64"
+  count = data.coder_workspace.me.start_count
+  os    = "linux"
+  arch  = "amd64"
+
+  # VS Code is the module below, as the built-in button can't open the repo
+  display_apps {
+    vscode          = false
+    vscode_insiders = false
+    web_terminal    = true
+    ssh_helper      = true
+
+    port_forwarding_helper = true
+  }
 
   metadata {
     display_name = "CPU"
@@ -160,9 +215,17 @@ resource "coder_agent" "main" {
   }
 
   metadata {
-    display_name = "Disk"
+    display_name = "Home disk"
     key          = "disk"
     script       = "coder stat disk --path ${local.home}"
+    interval     = 60
+    timeout      = 1
+  }
+
+  metadata {
+    display_name = "Root disk"
+    key          = "root_disk"
+    script       = "coder stat disk --path /"
     interval     = 60
     timeout      = 1
   }
@@ -170,7 +233,7 @@ resource "coder_agent" "main" {
 
 resource "coder_metadata" "workspace" {
   count       = data.coder_workspace.me.start_count
-  resource_id = coder_agent.main.id
+  resource_id = coder_agent.main[0].id
 
   item {
     key   = "Container"
@@ -178,7 +241,7 @@ resource "coder_metadata" "workspace" {
   }
   item {
     key   = "Address"
-    value = incus_instance.workspace[0].ipv4_address
+    value = local.address
   }
 }
 
@@ -186,16 +249,37 @@ module "git_clone" {
   count    = data.coder_workspace.me.start_count
   source   = "registry.coder.com/coder/git-clone/coder"
   version  = "2.0.5"
-  agent_id = coder_agent.main.id
+  agent_id = coder_agent.main[0].id
   url      = data.coder_parameter.repo.value
   base_dir = local.home
+}
+
+module "vscode" {
+  count    = data.coder_workspace.me.start_count
+  source   = "registry.coder.com/coder/vscode-desktop/coder"
+  version  = "1.3.0"
+  agent_id = coder_agent.main[0].id
+  folder   = data.coder_parameter.repo.value != "" ? module.git_clone[0].repo_dir : local.home
+}
+
+# VS Code in the browser, for machines without it installed
+module "code_server" {
+  count     = data.coder_workspace.me.start_count
+  source    = "registry.coder.com/coder/code-server/coder"
+  version   = "1.6.0"
+  agent_id  = coder_agent.main[0].id
+  folder    = data.coder_parameter.repo.value != "" ? module.git_clone[0].repo_dir : local.home
+  subdomain = false
+
+  # Rather than /tmp, which is wiped (or RAM) each start, so that it isn't downloaded again every time
+  install_prefix = "${local.home}/.cache/code-server"
 }
 
 module "dotfiles" {
   count                 = tobool(data.coder_parameter.use_dotfiles.value) ? data.coder_workspace.me.start_count : 0
   source                = "registry.coder.com/coder/dotfiles/coder"
   version               = "1.4.2"
-  agent_id              = coder_agent.main.id
+  agent_id              = coder_agent.main[0].id
   default_dotfiles_uri  = "https://github.com/CertifiKate/nix-dotfiles"
   coder_parameter_order = 4
 }
@@ -218,93 +302,5 @@ resource "incus_storage_volume" "home" {
 
   lifecycle {
     ignore_changes = all
-  }
-}
-
-resource "incus_instance" "workspace" {
-  count       = data.coder_workspace.me.start_count
-  name        = local.name
-  description = "Coder: ${local.owner}/${local.workspace}"
-  project     = local.project
-  type        = "container"
-  image       = local.image
-  profiles    = []
-  target      = incus_storage_volume.home.location
-
-  config = {
-    "limits.cpu"           = local.size.cpu
-    "limits.memory"        = local.size.memory
-    "cluster.evacuate"     = "stop"
-    "user.coder.owner"     = local.owner
-    "user.coder.workspace" = local.workspace
-    "user.coder.template"  = data.coder_workspace.me.template_name
-    "oci.uid"              = local.uid
-    "oci.gid"              = local.uid
-    "oci.entrypoint"       = "sh -c '${local.entrypoint}'"
-
-    "environment.CODER_AGENT_TOKEN" = coder_agent.main.token
-    "environment.CODER_INIT_SCRIPT" = base64encode(coder_agent.main.init_script)
-    "environment.USER"              = local.user
-    "environment.HOME"              = local.home
-    "environment.PATH"              = "${local.home}/.local/bin:/usr/local/bin:/usr/bin:/bin"
-  }
-
-  file {
-    content     = local.passwd
-    target_path = "/etc/passwd"
-    mode        = "0644"
-  }
-
-  file {
-    content     = local.shell_script
-    target_path = local.shell
-    mode        = "0755"
-  }
-
-  device {
-    name = "root"
-    type = "disk"
-    properties = {
-      path = "/"
-      pool = local.pool
-      size = "2GiB"
-    }
-  }
-
-  device {
-    name = "home"
-    type = "disk"
-    properties = {
-      path   = local.home
-      pool   = local.pool
-      source = incus_storage_volume.home.name
-    }
-  }
-
-  # Nix only works from /nix, so that's a view of ~/.nix. It's empty and unused for anything not using Nix
-  device {
-    name = "nix"
-    type = "disk"
-    properties = {
-      path   = "/nix"
-      pool   = local.pool
-      source = "${incus_storage_volume.home.name}/.nix"
-
-      # Created on first use, and owned by the user so that a single-user Nix install can write to it
-      "initial.uid"  = local.uid
-      "initial.gid"  = local.uid
-      "initial.mode" = "0755"
-    }
-  }
-
-  # Private stops workspaces on the same node from reaching each other. The router covers other nodes
-  device {
-    name = "eth0"
-    type = "nic"
-    properties = {
-      nictype = "macvlan"
-      parent  = local.parent
-      mode    = "private"
-    }
   }
 }
