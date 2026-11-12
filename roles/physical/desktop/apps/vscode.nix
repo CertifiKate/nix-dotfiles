@@ -42,6 +42,8 @@
           "workbench.welcomePage.walkthroughs.openOnInstall" = false;
           "extensions.autoUpdate" = false;
           "extensions.autoCheckUpdates" = false;
+          "diffEditor.renderSideBySide" = true;
+          "diffEditor.useInlineViewWhenSpaceIsLimited" = false;
         };
         enableUpdateCheck = false;
       };

@@ -16,5 +16,11 @@ deploy-srv:
 deploy-flake:
 	nixos-rebuild switch --sudo --flake  .#${target} --target-host deploy_user@${target-host}
 
+iso:
+	nix build .#installer-iso
+
+install:
+	nix run .#${host}-install -- ${target-host}
+
 deploy-incus:
 	colmena apply --on @incus -p 1
