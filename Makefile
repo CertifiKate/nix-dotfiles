@@ -1,10 +1,10 @@
 _: rebuild-test
 
 rebuild:
-	sudo nixos-rebuild switch
+	sudo nixos-rebuild switch --flake .
 
 rebuild-test:
-	sudo nixos-rebuild test
+	sudo nixos-rebuild test --flake .
 	@echo "Ran rebuild without switch, make sure to run switch if needed!"
 
 deploy:

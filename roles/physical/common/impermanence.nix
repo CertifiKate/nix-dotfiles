@@ -63,7 +63,13 @@ in {
           group = "users";
           mode = "0700";
         }
-      ];
+      ]
+      ++ lib.optional config.services.displayManager.cosmic-greeter.enable {
+        directory = "/var/lib/cosmic-greeter";
+        user = "cosmic-greeter";
+        group = "cosmic-greeter";
+        mode = "0750";
+      };
     };
 
     sops.age.keyFile = lib.mkForce "${identity}/sops-age.txt";

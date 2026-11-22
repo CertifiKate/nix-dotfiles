@@ -2,12 +2,16 @@
   inherit (config.meta) user;
   inherit (config.flake.modules) homeManager;
 in {
-  flake.modules.nixos."roles/physical/desktop/gnome" = {pkgs, ...}: {
+  flake.modules.nixos."roles/physical/desktop/gnome" = {
+    lib,
+    pkgs,
+    ...
+  }: {
     # Enable the X11 windowing system.
     services.xserver.enable = true;
 
     # Enable the GNOME Desktop Environment.
-    services.displayManager.gdm.enable = true;
+    services.displayManager.gdm.enable = lib.mkDefault true;
     services.desktopManager.gnome.enable = true;
 
     # Remove unwanted packages

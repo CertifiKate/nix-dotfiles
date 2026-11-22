@@ -45,6 +45,8 @@ in {
             nmcli connection delete id ${name} || true
             nmcli connection import type wireguard file ${config.sops.secrets."wireguard/${name}".path}
             nmcli connection modify id ${name} connection.autoconnect no
+            # Imported profiles autoconnect before the modify lands, so drop that first activation
+            nmcli connection down id ${name} || true
           '';
         })
       interfaces);

@@ -15,7 +15,6 @@ in {
     wallpaper = "monet.jpg";
   in {
     imports = [
-      nix-colors.homeManagerModules.default
       homeManager."roles/physical/desktop/apps"
       # ./colours
     ];

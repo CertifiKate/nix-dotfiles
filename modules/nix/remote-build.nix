@@ -2,7 +2,7 @@
 # Offload nix builds to the build-xx servers, for both the system (nixos) and the user (home-manager)
 #
 {config, ...}: let
-  inherit (config.meta) secretsPath user remoteBuilders;
+  inherit (config.meta) secretsPath user remoteBuilders remoteBuilderHostKeys;
 
   options = lib: {
     enable = lib.mkOption {
@@ -60,6 +60,8 @@ in {
         lib.concatMapStrings
         (host: mkRemoteBuilderSSHConfig {hostname = host;})
         cfg.buildHosts;
+      # Root's known_hosts doesn't survive impermanence (and was never accepted anyway), so trust them declaratively
+      programs.ssh.knownHosts = lib.genAttrs cfg.buildHosts (host: {publicKey = remoteBuilderHostKeys.${host};});
     };
   };
 

@@ -42,5 +42,13 @@
       ];
       description = "Hostnames used as remote nix builders";
     };
+    remoteBuilderHostKeys = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = {
+        "build-01.srv" = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBjZ1ujOVaTjtmzMMu5gQgGBZkI/sJesBxq9qTR+TaEe";
+        "build-02.srv" = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFlmWfRjRY26GHy44vCLdjj5QLPqHLf2Ai7txEfPi679";
+      };
+      description = "SSH host keys of the remote builders, as the nix daemon connects as root with no persistent known_hosts";
+    };
   };
 }
