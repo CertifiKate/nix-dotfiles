@@ -28,6 +28,17 @@
           default = null;
           description = "Colmena deployment settings. Hosts without this aren't deployed by colmena";
         };
+        installer = lib.mkOption {
+          type = lib.types.nullOr (lib.types.submodule {
+            options.disk = lib.mkOption {
+              type = lib.types.str;
+              default = "/dev/nvme0n1";
+              description = "Disk the installer wipes and installs to";
+            };
+          });
+          default = null;
+          description = "Installer ISO settings, building `<name>-iso` (see ../flake/installer.nix)";
+        };
       };
     });
     default = {};

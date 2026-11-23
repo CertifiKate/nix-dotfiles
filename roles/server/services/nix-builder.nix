@@ -22,6 +22,18 @@
       trusted-users = ["nix-builder"];
       allowed-users = ["nix-builder"];
       build-dir = build_dir;
+
+      # Collect garbage mid-build once free space drops below 1G, until 3G is free. One big
+      # build (ie. an ISO) can fill the disk long before the timer comes round
+      min-free = 1024 * 1024 * 1024;
+      max-free = 3 * 1024 * 1024 * 1024;
+    };
+
+    # Everything here is a cache, so there's no need for old generations either
+    nix.gc = lib.mkOverride 40 {
+      automatic = true;
+      dates = "hourly";
+      options = "-d";
     };
 
     CertifiKate.persist.localDirectories = [build_dir];
